@@ -177,6 +177,7 @@ tbody tr:hover{background:var(--s2);}
   <div class="hright">
     <div class="live"><div class="ldot"></div>MONITORANDO</div>
     <span class="fipe-status" id="fipe-global-status"></span>
+    <button class="btn btn-accent btn-sm" onclick="abrirModalImportar()">📥 Importar</button>
     <button class="btn btn-green btn-sm" onclick="abrirModalLeilao()">+ Leilão</button>
     <button class="btn btn-ghost btn-sm" onclick="showPage('analise')">📊 Análise</button>
   </div>
@@ -282,6 +283,73 @@ tbody tr:hover{background:var(--s2);}
     <h2 id="hist-modal-title">HISTÓRICO</h2>
     <div style="color:var(--muted);font-size:12px;" id="hist-modal-sub"></div>
     <div class="hist-list" id="hist-modal-list"></div>
+  </div>
+</div>
+
+<!-- MODAL IMPORTAR MOTOS -->
+<div class="modal-overlay" id="modal-importar" onclick="if(event.target===this)fecharModalImportar()">
+  <div class="modal-box" style="width:680px;max-width:98vw;">
+    <button class="hist-close" onclick="fecharModalImportar()">✕</button>
+    <h2>📥 IMPORTAR MOTOS</h2>
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:flex-end;">
+      <div class="form-group" style="flex:1;min-width:180px;margin:0;">
+        <label class="form-label">Leilão de destino</label>
+        <select class="form-select" id="imp-leilao-id"></select>
+      </div>
+      <div class="form-group" style="flex:1;min-width:140px;margin:0;">
+        <label class="form-label">Plataforma</label>
+        <select class="form-select" id="imp-plataforma" onchange="atualizarDicaImport()">
+          <option value="freitas">Freitas Leiloeiro</option>
+          <option value="sodre">Sodré Santoro</option>
+          <option value="superbid">Superbid</option>
+          <option value="vip">VIP Leilões</option>
+          <option value="copart">Copart (CSV)</option>
+        </select>
+      </div>
+    </div>
+    <div id="imp-dica" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;"></div>
+    <div id="imp-area-texto">
+      <label class="form-label">Cole o texto copiado do site aqui</label>
+      <textarea id="imp-texto" style="width:100%;height:200px;font-family:monospace;font-size:11px;padding:10px;border:1px solid var(--border);border-radius:8px;resize:vertical;background:var(--s2);color:var(--text);margin-bottom:12px;" placeholder="Ctrl+A → Ctrl+C no site → Ctrl+V aqui..."></textarea>
+    </div>
+    <div id="imp-area-csv" style="display:none;">
+      <label class="form-label">Selecione o arquivo CSV exportado do Copart</label>
+      <div id="imp-csv-dropzone" style="border:2px dashed var(--border);border-radius:10px;padding:32px;text-align:center;cursor:pointer;background:var(--s2);margin-bottom:12px;transition:border-color .2s;"
+        onclick="document.getElementById('imp-csv-file').click()"
+        ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+        ondragleave="this.style.borderColor='var(--border)'"
+        ondrop="handleCsvDrop(event)">
+        <div style="font-size:32px;margin-bottom:8px;">📂</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);">Clique para selecionar ou arraste os CSVs aqui</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Pode selecionar múltiplos arquivos .csv (uma página por arquivo)</div>
+        <div id="imp-csv-nome" style="font-size:11px;color:var(--accent);margin-top:8px;font-weight:600;line-height:1.8;"></div>
+      </div>
+      <input type="file" id="imp-csv-file" accept=".csv,.txt" style="display:none" multiple onchange="handleCsvFile(event)">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;">
+      <div id="imp-preview-info" style="font-size:12px;color:var(--muted);"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="fecharModalImportar()">Cancelar</button>
+        <button class="btn btn-ghost" onclick="previewImport()">🔍 Preview</button>
+        <button class="btn btn-accent" id="imp-btn-salvar" onclick="executarImport()" disabled>💾 Importar para Supabase</button>
+      </div>
+    </div>
+    <!-- Preview tabela -->
+    <div id="imp-preview-area" style="display:none;margin-top:16px;max-height:280px;overflow-y:auto;border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text);">Preview das motos encontradas:</div>
+      <table style="width:100%;font-size:11px;border-collapse:collapse;" id="imp-preview-table">
+        <thead><tr style="background:var(--s3);">
+          <th style="padding:4px 8px;text-align:left;border:1px solid var(--border);">Lote</th>
+          <th style="padding:4px 8px;text-align:left;border:1px solid var(--border);">Marca</th>
+          <th style="padding:4px 8px;text-align:left;border:1px solid var(--border);">Modelo</th>
+          <th style="padding:4px 8px;text-align:left;border:1px solid var(--border);">Ano</th>
+          <th style="padding:4px 8px;text-align:left;border:1px solid var(--border);">Cor</th>
+          <th style="padding:4px 8px;text-align:right;border:1px solid var(--border);">Lance</th>
+          <th style="padding:4px 8px;text-align:left;border:1px solid var(--border);">Cond.</th>
+        </tr></thead>
+        <tbody id="imp-preview-tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -753,6 +821,424 @@ async function buscarFipe(m) {
 }
 
 function saveFipeCache() { try { localStorage.setItem('fipeCache', JSON.stringify(fipeCache)); } catch(e){} }
+
+
+// ===================== IMPORTAR MOTOS =====================
+
+const DICAS_IMPORT = {
+  freitas: '1. Acesse freitasleiloeiro.com.br → filtre por Motos
+2. Ctrl+A → Ctrl+C na página toda
+3. Cole aqui (Ctrl+V)
+✓ Detecta: lote, marca, modelo, ano, cor, lance, condição',
+  sodre:   '1. Acesse sodresantoro.com.br → filtre por Motos
+2. Role até o final para carregar todos os lotes
+3. Ctrl+A → Ctrl+C → Cole aqui
+✓ Detecta: lote, modelo, ano, lance, condição, pátio',
+  superbid:'1. Acesse superbid.net → filtre por Motocicletas
+2. Clique em "Exibir lista" (ícone ☰ no canto direito)
+3. Role até carregar todos → Ctrl+A → Ctrl+C → Cole aqui
+✓ Detecta: lote, modelo, ano, lance, pátio',
+  vip:     '1. Acesse vipleiloes.com.br → filtre por Motos
+2. Role até o final para carregar todos os lotes
+3. Ctrl+A → Ctrl+C → Cole aqui
+✓ Detecta: lote, marca, modelo, ano, lance, pátio',
+  copart:  '1. Acesse copart.com.br → filtre por Motos
+2. Clique em "Exportar" no topo da tabela
+3. Abra o CSV exportado → Ctrl+A → Ctrl+C → Cole aqui
+✓ Detecta: todos os campos (melhor cobertura)',
+};
+
+let _motosParaImportar = [];
+
+function abrirModalImportar() {
+  // Popular select de leilões
+  const sel = document.getElementById('imp-leilao-id');
+  sel.innerHTML = LEILOES.filter(l => !l.encerrado).map(l =>
+    `<option value="${l.id}">${l.nome} — ${l.dia}/${l.mes}</option>`
+  ).join('');
+  atualizarDicaImport();
+  _motosParaImportar = [];
+  document.getElementById('imp-preview-area').style.display = 'none';
+  document.getElementById('imp-btn-salvar').disabled = true;
+  document.getElementById('imp-preview-info').textContent = '';
+  document.getElementById('imp-texto').value = '';
+  _csvTexto = '';
+  _csvArquivos = [];
+  document.getElementById('imp-csv-nome').textContent = '';
+  document.getElementById('imp-csv-file').value = '';
+  document.getElementById('modal-importar').classList.add('open');
+  atualizarDicaImport();
+}
+
+function fecharModalImportar() {
+  document.getElementById('modal-importar').classList.remove('open');
+}
+
+function atualizarDicaImport() {
+  const plat = document.getElementById('imp-plataforma').value;
+  document.getElementById('imp-dica').textContent = DICAS_IMPORT[plat] || '';
+  const isCopart = plat === 'copart';
+  document.getElementById('imp-area-texto').style.display = isCopart ? 'none' : 'block';
+  document.getElementById('imp-area-csv').style.display = isCopart ? 'block' : 'none';
+  // Limpar estado ao trocar
+  document.getElementById('imp-csv-nome').textContent = '';
+  document.getElementById('imp-csv-dropzone').style.borderColor = 'var(--border)';
+  _csvTexto = '';
+}
+
+let _csvTexto = '';
+let _csvArquivos = []; // lista de {nome, texto} para múltiplos CSVs
+
+function handleCsvFile(event) {
+  const files = Array.from(event.target.files);
+  if(!files.length) return;
+  lerCsvFiles(files);
+}
+
+function handleCsvDrop(event) {
+  event.preventDefault();
+  document.getElementById('imp-csv-dropzone').style.borderColor = 'var(--border)';
+  const files = Array.from(event.dataTransfer.files).filter(f => f.name.match(/\.(csv|txt)$/i));
+  if(!files.length) return;
+  lerCsvFiles(files);
+}
+
+function lerCsvFiles(files) {
+  _csvArquivos = [];
+  let lidos = 0;
+  const nomeEl = document.getElementById('imp-csv-nome');
+  nomeEl.textContent = '⏳ Lendo arquivos...';
+
+  files.forEach((file, idx) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      _csvArquivos[idx] = { nome: file.name, texto: e.target.result, size: file.size };
+      lidos++;
+      if(lidos === files.length) {
+        // Todos lidos — montar texto combinado e mostrar nomes
+        _csvTexto = combinarCsvs(_csvArquivos);
+        nomeEl.innerHTML = _csvArquivos
+          .map(a => `✅ ${a.nome} <span style="color:var(--muted)">(${(a.size/1024).toFixed(1)} KB)</span>`)
+          .join('<br>');
+        document.getElementById('imp-csv-dropzone').style.borderColor = 'var(--green)';
+        previewImport();
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+  });
+}
+
+function combinarCsvs(arquivos) {
+  if(!arquivos.length) return '';
+  // Pegar header do primeiro arquivo
+  const primeiro = arquivos[0].texto.replace(/
+/g,'').split('
+');
+  const header = primeiro[0];
+  let linhas = [header];
+  const seenLotes = new Set();
+
+  arquivos.forEach(arq => {
+    const ls = arq.texto.replace(/
+/g,'').split('
+');
+    // Detectar coluna de lote/código para deduplicar
+    const headers = ls[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g,''));
+    const iCodigo = headers.findIndex(h => h.includes('código') || h.includes('codigo') || h === 'code');
+    const iLote = headers.findIndex(h => h.includes('lote'));
+    const iDedup = iCodigo >= 0 ? iCodigo : iLote;
+
+    // Pular header (linha 0), adicionar demais
+    for(let i = 1; i < ls.length; i++) {
+      const l = ls[i].trim();
+      if(!l) continue;
+      // Deduplicar por código/lote se possível
+      if(iDedup >= 0) {
+        const cols = l.split(',');
+        const key = cols[iDedup]?.replace(/"/g,'').trim();
+        if(key && seenLotes.has(key)) continue;
+        if(key) seenLotes.add(key);
+      }
+      linhas.push(l);
+    }
+  });
+
+  return linhas.join('
+');
+}
+
+// ---- PARSERS ----
+function parseFreitas(texto) {
+  const linhas = texto.replace(/
+/g,'').split('
+').map(l => l.trim());
+  const motos = [];
+  for(let i = 0; i < linhas.length; i++) {
+    const l = linhas[i];
+    if(l.includes('PLACA:') && l.includes('/')) {
+      const lote = i>=4 ? linhas[i-4] : '';
+      const lanceRaw = linhas[i+1] || '';
+      const tipo1 = linhas[i+3] || '';
+      const tipo2 = linhas[i+4] || '';
+      try {
+        const marca = l.substring(0, l.indexOf('/')).replace(/I\//,'').trim();
+        const modelo = l.substring(l.indexOf('/')+1, l.indexOf(',')).trim();
+        const pos1 = l.indexOf(',');
+        const ano = l.substring(pos1+2, pos1+7).trim();
+        const cor = l.substring(l.lastIndexOf(',')+2).trim();
+        const lance = parseInt(lanceRaw.replace('R$ ','').replace(/\./g,'').replace(',','.')) || 0;
+        const condicao = (tipo2.includes('SINISTRO')||tipo2.includes('SUCATA')) ? 'sinistro' : 'financiada';
+        const financeira = tipo1.includes('SEGURADORA') ? 'Seguradora' : 'Financeira';
+        if(marca && modelo) motos.push({lote,marca:toTitle(marca),modelo:toTitle(modelo),ano,cor:toTitle(cor),condicao,lance,financeira});
+      } catch(e){}
+    }
+  }
+  return motos;
+}
+
+function parseSodre(texto) {
+  const linhas = texto.replace(/
+/g,'').split('
+').map(l => l.trim());
+  const motos = [];
+  for(let i = 0; i < linhas.length; i++) {
+    const l = linhas[i];
+    if(/^Leil[aã]o\s+\d+\s*-\s*\d+/.test(l)) {
+      const lote = l.split('-').pop().trim().replace(/^0+/,'') || l.split('-').pop().trim();
+      const desc = linhas[i+2] || '';
+      const banco = linhas[i+3] || '';
+      let lance = 0, condicao = 'sinistro', patio = '';
+      for(let j = i+4; j < Math.min(i+20, linhas.length); j++) {
+        if(/^\d[\d.]+$/.test(linhas[j])) { lance = parseInt(linhas[j].replace(/\./g,'')); break; }
+      }
+      for(let j = i+4; j < Math.min(i+20, linhas.length); j++) {
+        if(linhas[j].toLowerCase().includes('sem sinistro') || linhas[j].toLowerCase().includes('financiamento')) { condicao='financiada'; break; }
+      }
+      for(let j = i+4; j < Math.min(i+20, linhas.length); j++) {
+        if(linhas[j].includes(' / ') && linhas[j].length < 40) { patio = toTitle(linhas[j]); break; }
+      }
+      const anoM = desc.match(/(\d{2}\/\d{2})/);
+      if(desc && anoM) {
+        const partes = desc.split(' ');
+        const marca = toTitle(partes[0]);
+        const ano = anoM[1];
+        const semAno = desc.substring(0, desc.lastIndexOf(anoM[1])).trim();
+        const modelo = toTitle(semAno.split(' ').slice(1).join(' '));
+        if(marca && modelo) motos.push({lote,marca,modelo,ano,cor:'',condicao,lance,financeira:toTitle(banco),patio});
+      }
+    }
+  }
+  return motos;
+}
+
+function parseSuperbid(texto) {
+  const linhas = texto.replace(/
+/g,'').split('
+').map(l => l.trim());
+  const motos = [];
+  const seen = new Set();
+  for(let i = 0; i < linhas.length; i++) {
+    const l = linhas[i];
+    if(/^Lote\s+\d+/.test(l)) {
+      const lote = l.match(/Lote\s+(\S+)/)[1];
+      const desc = linhas[i+2] || '';
+      const local = linhas[i+4] || '';
+      if(!desc || !desc.includes(',')) continue;
+      const key = lote + desc.substring(0,20);
+      if(seen.has(key)) continue;
+      seen.add(key);
+      try {
+        const partes = desc.split(',');
+        const modeloCompleto = partes[0].trim();
+        const anoRaw = partes[1]?.trim() || '';
+        const anoM = anoRaw.match(/(\d{4})\/(\d{4})/);
+        const ano = anoM ? `${anoM[1].slice(-2)}/${anoM[2].slice(-2)}` : anoRaw;
+        const palavras = modeloCompleto.split(' ');
+        const marca = toTitle(palavras[0]);
+        const modelo = toTitle(palavras.slice(1).join(' '));
+        const patio = (local.includes('-') && local.length < 30) ? toTitle(local) : '';
+        let lance = 0;
+        for(let j = i+8; j < Math.min(i+15, linhas.length); j++) {
+          if(linhas[j].includes('R$')) { lance = parseInt(linhas[j].replace('R$','').replace(/\./g,'').replace(',','.').trim()) || 0; break; }
+        }
+        if(marca && modelo) motos.push({lote,marca,modelo,ano,cor:'',condicao:'sinistro',lance,financeira:'Seguradora',patio});
+      } catch(e){}
+    }
+  }
+  return motos;
+}
+
+function parseVip(texto) {
+  const linhas = texto.replace(/
+/g,'').split('
+').map(l => l.trim());
+  const motos = [];
+  for(let i = 0; i < linhas.length; i++) {
+    const l = linhas[i];
+    if(l.startsWith('Lote:') && l.includes('Local:')) {
+      const loteM = l.match(/Lote:\s*(\S+)/);
+      const localM = l.match(/Local:\s*(\S+)/);
+      const lote = loteM ? loteM[1] : '';
+      const local = localM ? localM[1] : '';
+      const marcaLinha = i>=8 ? linhas[i-8] : '';
+      const modeloAnoLinha = i>=7 ? linhas[i-7] : '';
+      const lanceInicialLinha = i>=1 ? linhas[i-1] : '';
+      if(!marcaLinha.includes(' - ')) continue;
+      const marca = toTitle(marcaLinha.split(' - ')[0].trim());
+      const anoM = modeloAnoLinha.match(/(\d{4})\/(\d{4})/);
+      const ano = anoM ? `${anoM[1].slice(-2)}/${anoM[2].slice(-2)}` : '';
+      const modeloSemAno = modeloAnoLinha.replace(/ - \d{4}\/\d{4}.*/, '').trim();
+      const modelo = toTitle(modeloSemAno);
+      let lance = 0;
+      if(lanceInicialLinha.includes('R$')) {
+        lance = parseInt(lanceInicialLinha.replace('R$','').replace(/\./g,'').replace(',','.').trim()) || 0;
+      }
+      if(marca && modelo) motos.push({lote,marca,modelo,ano,cor:'',condicao:'sinistro',lance,financeira:'Seguradora',patio:local});
+    }
+  }
+  return motos;
+}
+
+function parseCopart(texto) {
+  // CSV com colunas: Código, Ano Modelo, Marca, Modelo, Documento, Condição, Valor FIPE, Pátio Veículo, Data Leilão, Pátio Leilão, Lote/Vaga, Lance Atual
+  const linhas = texto.replace(/
+/g,'').split('
+').map(l => l.trim()).filter(l => l);
+  const motos = [];
+  // Detectar header
+  let headerIdx = linhas.findIndex(l => l.includes('Marca') && l.includes('Modelo'));
+  if(headerIdx < 0) headerIdx = 0;
+  const sep = linhas[headerIdx]?.includes('	') ? '	' : ',';
+  const headers = linhas[headerIdx].split(sep).map(h => h.trim().toLowerCase());
+  const iMarca = headers.findIndex(h => h.includes('marca'));
+  const iModelo = headers.findIndex(h => h === 'modelo');
+  const iAno = headers.findIndex(h => h.includes('ano'));
+  const iCond = headers.findIndex(h => h.includes('condi'));
+  const iLance = headers.findIndex(h => h.includes('lance'));
+  const iPatio = headers.findIndex(h => h.includes('pátio') || h.includes('patio'));
+  const iLote = headers.findIndex(h => h.includes('lote'));
+  for(let i = headerIdx+1; i < linhas.length; i++) {
+    const cols = linhas[i].split(sep).map(c => c.trim().replace(/^"|"$/g,''));
+    if(cols.length < 4) continue;
+    const marca = toTitle(cols[iMarca] || '');
+    const modelo = toTitle(cols[iModelo] || '');
+    const anoRaw = cols[iAno] || '';
+    const anoM = String(anoRaw).match(/(\d{4})/);
+    const anoNum = anoM ? anoM[1].slice(-2) : '';
+    const ano = anoNum ? `${anoNum}/${anoNum}` : '';
+    const condRaw = (cols[iCond] || '').toUpperCase();
+    const condicao = (condRaw.includes('COLIS') || condRaw.includes('ROUBO') || condRaw.includes('FURTO')) ? 'sinistro' : 'financiada';
+    const lanceRaw = cols[iLance] || '0';
+    const lance = parseInt(String(lanceRaw).replace(/[R$\s.]/g,'').replace(',','.')) || 0;
+    const patio = toTitle(cols[iPatio] || '');
+    const loteRaw = cols[iLote] || '';
+    const lote = loteRaw.includes('/') ? loteRaw.split('/')[0] : loteRaw;
+    if(marca && modelo) motos.push({lote,marca,modelo,ano,cor:'',condicao,lance,financeira:'Financeira',patio});
+  }
+  return motos;
+}
+
+function toTitle(str) {
+  return str.toLowerCase().replace(/(?:^|\s)\w/g, c => c.toUpperCase()).trim();
+}
+
+function previewImport() {
+  const plat = document.getElementById('imp-plataforma').value;
+  const texto = plat === 'copart' ? _csvTexto : document.getElementById('imp-texto').value;
+  if(!texto.trim()) { showToast(plat === 'copart' ? 'Selecione o arquivo CSV primeiro!' : 'Cole o texto primeiro!', '⚠️'); return; }
+  
+  const parsers = {freitas: parseFreitas, sodre: parseSodre, superbid: parseSuperbid, vip: parseVip, copart: parseCopart};
+  _motosParaImportar = parsers[plat](texto);
+  
+  if(!_motosParaImportar.length) {
+    document.getElementById('imp-preview-info').textContent = '⚠️ Nenhuma moto encontrada. Verifique se selecionou a plataforma correta.';
+    document.getElementById('imp-preview-area').style.display = 'none';
+    document.getElementById('imp-btn-salvar').disabled = true;
+    return;
+  }
+  
+  // Popular tabela preview
+  const tbody = document.getElementById('imp-preview-tbody');
+  tbody.innerHTML = _motosParaImportar.map(m => `
+    <tr>
+      <td style="padding:3px 8px;border:1px solid var(--border);">${m.lote}</td>
+      <td style="padding:3px 8px;border:1px solid var(--border);">${m.marca}</td>
+      <td style="padding:3px 8px;border:1px solid var(--border);">${m.modelo}</td>
+      <td style="padding:3px 8px;border:1px solid var(--border);">${m.ano}</td>
+      <td style="padding:3px 8px;border:1px solid var(--border);">${m.cor||'—'}</td>
+      <td style="padding:3px 8px;border:1px solid var(--border);text-align:right;">${m.lance ? 'R$'+m.lance.toLocaleString('pt-BR') : '—'}</td>
+      <td style="padding:3px 8px;border:1px solid var(--border);">${m.condicao}</td>
+    </tr>`).join('');
+  
+  document.getElementById('imp-preview-area').style.display = 'block';
+  document.getElementById('imp-preview-info').textContent = `✅ ${_motosParaImportar.length} motos encontradas`;
+  document.getElementById('imp-btn-salvar').disabled = false;
+}
+
+async function executarImport() {
+  if(!_motosParaImportar.length) return;
+  const leilaoId = document.getElementById('imp-leilao-id').value;
+  if(!leilaoId) { showToast('Selecione o leilão de destino!', '⚠️'); return; }
+  
+  const btn = document.getElementById('imp-btn-salvar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Importando...';
+  
+  try {
+    // 1. Buscar IDs das motos sem arrematado para deletar
+    const { data: motosExist } = await supa
+      .from('motos')
+      .select('id')
+      .eq('leilao_id', leilaoId);
+    
+    const idsExist = (motosExist||[]).map(m => m.id);
+    
+    if(idsExist.length) {
+      // Verificar quais têm arrematado
+      const { data: comArr } = await supa
+        .from('arrematados')
+        .select('moto_id')
+        .in('moto_id', idsExist);
+      
+      const idsComArr = new Set((comArr||[]).map(a => a.moto_id));
+      const idsDeletar = idsExist.filter(id => !idsComArr.has(id));
+      
+      if(idsDeletar.length) {
+        await supa.from('motos').delete().in('id', idsDeletar);
+      }
+    }
+    
+    // 2. Inserir novas motos em lotes de 50
+    const novas = _motosParaImportar.map(m => ({
+      leilao_id: leilaoId,
+      lote: m.lote,
+      marca: m.marca,
+      modelo: m.modelo,
+      ano: m.ano,
+      cor: m.cor || null,
+      condicao: m.condicao,
+      lance_inicial: m.lance || null,
+      financeira: m.financeira || null,
+      patio: m.patio || null,
+    }));
+    
+    const BATCH = 50;
+    for(let i = 0; i < novas.length; i += BATCH) {
+      const { error } = await supa.from('motos').insert(novas.slice(i, i+BATCH));
+      if(error) throw error;
+    }
+    
+    // 3. Recarregar dados
+    await carregarDados();
+    fecharModalImportar();
+    showToast(`✅ ${novas.length} motos importadas para ${leilaoId}!`, '📥');
+    
+  } catch(err) {
+    showToast('Erro ao importar: ' + err.message, '❌');
+    btn.disabled = false;
+    btn.textContent = '💾 Importar para Supabase';
+  }
+}
 
 function limparCacheFipe() {
   if(!confirm('Limpar cache FIPE? Os valores serão rebuscados da API ao clicar em ⚡ Buscar FIPE.')) return;
