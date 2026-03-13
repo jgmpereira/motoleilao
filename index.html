@@ -1,0 +1,3025 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MotoLeilão — Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0f2f5;--s1:#ffffff;--s2:#f7f8fa;--s3:#eef0f3;--border:#dde1e7;--accent:#ff4d00;--a2:#e08c00;--text:#1a1d23;--muted:#8a92a0;--green:#1a9e5c;--red:#d32f2f;--blue:#1a6bbf;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 36px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(240,242,245,.97);backdrop-filter:blur(16px);z-index:200;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;background:var(--accent);clip-path:polygon(20% 0%,80% 0%,100% 20%,100% 80%,80% 100%,20% 100%,0% 80%,0% 20%);display:flex;align-items:center;justify-content:center;font-size:15px;}
+.logo h1{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--text);}
+.logo span{color:var(--accent);}
+.hright{display:flex;align-items:center;gap:12px;}
+.live{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--green);font-family:'DM Mono',monospace;letter-spacing:1px;}
+.ldot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:p 1.5s infinite;}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+.btn{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .2s;letter-spacing:.3px;}
+.btn-sm{padding:5px 11px;font-size:11px;}
+.btn-accent{background:var(--accent);color:#fff;}
+.btn-accent:hover{background:#e04000;}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#158a4f;}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:53px;z-index:100;}
+.tab{padding:13px 24px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;letter-spacing:.3px;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--border);}
+.stat{padding:16px 24px;border-right:1px solid var(--border);}
+.slabel{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.sval{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;}
+.sval.o{color:var(--accent)}.sval.y{color:var(--a2)}.sval.g{color:var(--green)}.sval.b{color:var(--blue)}
+.ssub{font-size:10px;color:var(--muted);margin-top:2px;}
+.page{display:none;}
+.page.active{display:block;}
+.leiloes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:20px 28px;}
+.leilao-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .25s;position:relative;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.leilao-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,77,0,.12);}
+.leilao-card.encerrado-card{opacity:.6;}
+.home-filters{display:flex;align-items:center;gap:10px;padding:12px 28px;border-bottom:1px solid var(--border);background:var(--s1);flex-wrap:wrap;}
+.hf-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.hf-select{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;min-width:140px;}
+.hf-select:focus{outline:none;border-color:var(--accent);}
+.hf-chip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--s2);color:var(--muted);transition:all .2s;white-space:nowrap;}
+.hf-chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.hf-divider{width:1px;height:20px;background:var(--border);margin:0 4px;}
+.hf-clear{font-size:11px;color:var(--accent);cursor:pointer;font-weight:600;padding:5px 8px;border-radius:5px;}
+.hf-clear:hover{background:rgba(255,77,0,.08);}
+/* Modal ficha moto */
+.modal-ficha{background:var(--s1);border-radius:14px;padding:28px;width:560px;max-width:98vw;position:relative;}
+.ficha-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.ficha-lote{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--accent);line-height:1;min-width:56px;text-align:center;}
+.ficha-title{flex:1;}
+.ficha-marca{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.ficha-modelo{font-size:20px;font-weight:700;color:var(--text);line-height:1.2;margin:2px 0 6px;}
+.ficha-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.ficha-item{background:var(--s2);border-radius:8px;padding:10px 14px;}
+.ficha-item-label{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.ficha-item-val{font-size:14px;font-weight:600;color:var(--text);}
+.ficha-fipe-bar{height:6px;border-radius:3px;background:var(--s3);overflow:hidden;margin-top:4px;}
+.ficha-fipe-fill{height:100%;border-radius:3px;transition:width .5s;}
+.lcard-header{padding:14px 16px 10px;}
+.lcard-date{display:flex;align-items:baseline;gap:5px;margin-bottom:6px;}
+.lcard-day{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;color:var(--accent);}
+.lcard-month{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.lcard-plat{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:rgba(0,0,0,.05);padding:1px 7px;border-radius:3px;display:inline-block;margin-bottom:4px;}
+.lcard-nome{font-size:13px;font-weight:600;color:var(--text);line-height:1.3;}
+.lcard-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.ltag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;letter-spacing:.3px;}
+.ltag-hora{background:rgba(180,100,0,.1);color:var(--a2);}
+.ltag-motos{background:rgba(26,158,92,.1);color:var(--green);}
+.ltag-local{background:rgba(26,107,191,.1);color:var(--blue);}
+.lcard-footer{padding:10px 16px;background:var(--s2);display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);}
+.lcstat{font-size:11px;color:var(--muted);}
+.lcstat strong{color:var(--text);}
+.lcard-btn{font-size:11px;font-weight:700;color:var(--accent);text-decoration:none;letter-spacing:.5px;}
+.encerrado-badge{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.12);color:var(--muted);font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;letter-spacing:1px;}
+.urgente-badge{position:absolute;top:10px;right:10px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;letter-spacing:1px;animation:glow 2s infinite;}
+@keyframes glow{0%,100%{box-shadow:0 0 0 rgba(255,77,0,0)}50%{box-shadow:0 0 8px rgba(255,77,0,.5)}}
+.proxima-badge{position:absolute;top:10px;right:10px;background:rgba(180,100,0,.1);color:var(--a2);border:1px solid rgba(180,100,0,.2);font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;letter-spacing:1px;}
+.hoje-badge{position:absolute;top:10px;right:10px;background:linear-gradient(135deg,#ff4d00,#ff9500);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:1px;animation:hoje-pulse 1.5s infinite;}
+@keyframes hoje-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,77,0,.6);transform:scale(1);}50%{box-shadow:0 0 0 8px rgba(255,77,0,0);transform:scale(1.05);}}
+.leilao-card.hoje-card{border-color:var(--accent);border-width:2px;box-shadow:0 0 0 3px rgba(255,77,0,.12),0 8px 28px rgba(255,77,0,.2);animation:card-glow 2.5s ease-in-out infinite;}
+@keyframes card-glow{0%,100%{box-shadow:0 0 0 3px rgba(255,77,0,.12),0 6px 24px rgba(255,77,0,.18);}50%{box-shadow:0 0 0 6px rgba(255,77,0,.06),0 12px 36px rgba(255,77,0,.3);}}
+.leilao-card.hoje-card .lcard-day{color:var(--accent);}
+.hoje-section-header{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:4px 0 6px;}
+.hoje-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex-shrink:0;animation:dot-blink 1s infinite;}
+@keyframes dot-blink{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(.65);}}
+.hoje-section-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2.5px;color:var(--accent);}
+.hoje-section-sub{font-size:11px;color:var(--muted);}
+.semana-section-header{grid-column:1/-1;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--muted);padding:14px 0 4px;border-top:1px solid var(--border);margin-top:2px;}
+.motos-header{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.back-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.back-btn:hover{border-color:var(--accent);color:var(--accent);}
+.motos-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;color:var(--text);}
+.motos-filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto;}
+.finput{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:6px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;}
+.finput:focus{border-color:var(--accent);}
+.ftab{padding:5px 11px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .2s;font-family:'DM Sans',sans-serif;}
+.ftab.active,.ftab:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+.motos-table-wrap{overflow-x:auto;}
+@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(12px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+.tr-selecionada{background:rgba(255,77,0,.07)!important;}
+.tr-selecionada td{border-color:rgba(255,77,0,.12);}
+table{width:100%;border-collapse:collapse;}
+thead th{text-align:left;padding:9px 10px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;}
+thead th:hover{color:var(--text);}
+tbody td{padding:9px 10px;border-bottom:1px solid var(--s3);font-size:12px;vertical-align:middle;}
+tbody tr:hover{background:var(--s2);}
+.td-lote{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.td-modelo strong{font-size:13px;}
+.td-ano{color:var(--muted);font-size:11px;}
+.cond-tag{font-size:10px;padding:2px 7px;border-radius:3px;font-weight:600;}
+.cond-fin{background:rgba(26,107,191,.1);color:var(--blue);}
+.cond-sin{background:rgba(180,100,0,.1);color:var(--a2);}
+.cond-suc{background:rgba(211,47,47,.1);color:var(--red);}
+.cond-lot{background:rgba(0,0,0,.06);color:var(--muted);}
+.porte-tag{font-size:10px;padding:2px 7px;border-radius:3px;font-weight:600;cursor:pointer;user-select:none;white-space:nowrap;transition:opacity .15s;}
+.porte-tag:hover{opacity:.75;}
+.porte-pequena{background:rgba(30,120,220,.1);color:#1a7bbf;}
+.porte-media{background:rgba(180,130,0,.12);color:#b07a00;}
+.porte-alta{background:rgba(211,47,47,.1);color:var(--red);}
+.porte-none{background:var(--s3);color:var(--muted);font-style:italic;}
+.td-lance{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);}
+.fipe-loading{color:var(--muted);font-style:italic;font-size:11px;}
+.fipe-ok{font-family:'DM Mono',monospace;font-size:12px;}
+.fipe-err{color:var(--muted);font-size:11px;}
+.pct-tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;}
+.pct-great{background:rgba(26,158,92,.12);color:var(--green);}
+.pct-good{background:rgba(26,107,191,.1);color:var(--blue);}
+.pct-ok{background:rgba(180,100,0,.1);color:var(--a2);}
+.pct-high{background:rgba(211,47,47,.1);color:var(--red);}
+.td-arrematado input{background:#fff;border:1px solid var(--border);border-radius:5px;padding:5px 8px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;width:110px;outline:none;transition:border-color .2s;}
+.td-arrematado input:focus{border-color:var(--green);}
+.td-arrematado input.saved{border-color:var(--green);background:rgba(26,158,92,.06);}
+.ind-great{color:var(--green);font-weight:700;}
+.ind-good{color:var(--blue);font-weight:700;}
+.ind-ok{color:var(--a2);font-weight:700;}
+.ind-pass{color:var(--muted);}
+.td-hist{cursor:pointer;color:var(--blue);font-size:11px;text-decoration:underline;}
+.fipe-status{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+.fipe-status.ok{color:var(--green);}
+.analise-layout{display:grid;grid-template-columns:1fr 340px;}
+.analise-main{border-right:1px solid var(--border);padding:24px 28px;}
+.analise-side{padding:24px 20px;}
+.atitle{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--muted);margin-bottom:16px;}
+.analise-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.acard{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.acard-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.acard-val{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;}
+.acard-sub{font-size:11px;color:var(--muted);}
+.hbar-item{margin-bottom:10px;}
+.hbar-head{display:flex;justify-content:space-between;margin-bottom:4px;font-size:12px;}
+.hbar-head span:first-child{color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;}
+.hbar-head span:last-child{color:var(--muted);font-family:'DM Mono',monospace;white-space:nowrap;}
+.hbar-track{background:var(--s2);border-radius:3px;height:8px;overflow:hidden;}
+.hbar-fill{height:100%;border-radius:3px;transition:width .5s;}
+.hist-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;align-items:center;justify-content:center;}
+.hist-modal.open{display:flex;}
+.hist-box{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:28px;width:540px;max-width:95vw;max-height:85vh;overflow-y:auto;}
+.hist-box h2{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px;}
+.hist-close{float:right;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;margin-top:-4px;}
+.hist-list{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+.hist-row{background:var(--s2);border-radius:7px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
+.hist-row-info{flex:1;}
+.hist-row-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--green);}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--s1);border:1px solid var(--accent);border-radius:10px;padding:11px 16px;font-size:13px;font-weight:500;z-index:400;transform:translateY(70px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:8px;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* Loading overlay */
+.loading-overlay{position:fixed;inset:0;background:rgba(240,242,245,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;gap:16px;}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);letter-spacing:1px;}
+
+/* Busca global */
+.global-search-wrap{padding:12px 28px;border-bottom:1px solid var(--border);background:var(--s1);}
+.global-search{width:100%;max-width:500px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
+.global-search:focus{border-color:var(--accent);}
+.search-results{position:absolute;background:var(--s1);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);max-height:320px;overflow-y:auto;z-index:150;width:500px;margin-top:4px;}
+.search-result-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--s2);display:flex;align-items:center;justify-content:space-between;}
+.search-result-item:hover{background:var(--s2);}
+.search-result-item:last-child{border-bottom:none;}
+
+/* Modal novo leilão / moto */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:28px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.modal-box h2{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:20px;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:block;}
+.form-input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
+.form-input:focus{border-color:var(--accent);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-select{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;cursor:pointer;}
+
+@media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr);}.analise-layout{grid-template-columns:1fr;}header{padding:12px 16px;}}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr);}.leiloes-grid{grid-template-columns:1fr;padding:12px;}.tab{padding:11px 14px;font-size:11px;}}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loading-text">CARREGANDO DADOS...</div>
+</div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🏍</div>
+    <h1>MOTO<span>LEILÃO</span></h1>
+  </div>
+  <div class="hright">
+    <div class="live"><div class="ldot"></div>MONITORANDO</div>
+    <span class="fipe-status" id="fipe-global-status"></span>
+    <button class="btn btn-accent btn-sm" onclick="abrirModalImportar()">📥 Importar</button>
+    <button class="btn btn-green btn-sm" onclick="abrirModalLeilao()">+ Leilão</button>
+    <button class="btn btn-ghost btn-sm" onclick="showPage('analise')">📊 Análise</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" id="tab-leiloes" onclick="showPage('leiloes',this)">📅 Leilões</button>
+  <button class="tab" id="tab-motos" style="display:none" onclick="">🏍 Motos do Leilão</button>
+  <button class="tab" id="tab-analise" onclick="showPage('analise',this)">📊 Análise FIPE</button>
+  <button class="tab" id="tab-historico" onclick="showPage('historico',this)">📋 Histórico</button>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="slabel">Leilões mapeados</div><div class="sval o" id="stat-leiloes">—</div><div class="ssub" id="stat-leiloes-sub">carregando...</div></div>
+  <div class="stat"><div class="slabel">Motos mapeadas</div><div class="sval y" id="stat-motos">—</div><div class="ssub" id="stat-motos-sub">carregando...</div></div>
+  <div class="stat"><div class="slabel">Arrematadas</div><div class="sval g" id="stat-arr">—</div><div class="ssub">registros com valor</div></div>
+  <div class="stat"><div class="slabel">Média % FIPE</div><div class="sval b" id="stat-fipe-med">—</div><div class="ssub" id="stat-fipe-sub">aguardando dados</div></div>
+  <div class="stat"><div class="slabel">Melhor negócio</div><div class="sval g" id="stat-best">—</div><div class="ssub" id="stat-best-sub">—</div></div>
+</div>
+
+<!-- Busca global -->
+<div class="global-search-wrap" style="position:relative;">
+  <input type="text" class="global-search" id="global-search" placeholder="🔍 Buscar moto em todos os leilões (marca, modelo, lote...)" oninput="buscaGlobal()" autocomplete="off">
+  <div class="search-results" id="search-results" style="display:none;"></div>
+</div>
+
+<!-- PAGE LEILÕES -->
+<div id="page-leiloes" class="page active">
+  <!-- Filtros rápidos -->
+  <div id="home-filters" style="padding:10px 28px;border-bottom:1px solid var(--border);background:var(--s1);display:flex;flex-direction:column;gap:8px;">
+    <!-- Linha 1: selects + condição + limpar -->
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span class="hf-label">Filtrar:</span>
+      <select class="hf-select" id="hf-marca" onchange="aplicarFiltrosHome()">
+        <option value="">🏍 Todas as marcas</option>
+      </select>
+      <select class="hf-select" id="hf-leilao" onchange="aplicarFiltrosHome()" style="max-width:200px;">
+        <option value="">📋 Todas as leiloeiras</option>
+      </select>
+      <div class="hf-divider"></div>
+      <span class="hf-label">Condição:</span>
+      <button class="hf-chip active" data-cond="" onclick="setFiltroHomeCond('',this)">Todas</button>
+      <button class="hf-chip" data-cond="financiada" onclick="setFiltroHomeCond('financiada',this)">Financiada</button>
+      <button class="hf-chip" data-cond="sinistro" onclick="setFiltroHomeCond('sinistro',this)">Sinistro</button>
+      <button class="hf-chip" data-cond="sucata" onclick="setFiltroHomeCond('sucata',this)">Sucata</button>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:11px;color:var(--muted);" id="hf-count"></span>
+        <button id="hf-clear" onclick="limparFiltrosHome()"
+          style="display:flex;align-items:center;gap:5px;background:rgba(255,77,0,.08);border:1px solid rgba(255,77,0,.25);color:var(--accent);font-size:11px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .2s;white-space:nowrap;"
+          onmouseover="this.style.background='rgba(255,77,0,.18)'" onmouseout="this.style.background='rgba(255,77,0,.08)'">
+          ✕ Limpar filtros
+        </button>
+      </div>
+    </div>
+    <!-- Linha 2: porte + período -->
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span class="hf-label">Porte:</span>
+      <button class="hf-chip active" data-porte="" onclick="setFiltroHomePorte('',this)">Todos</button>
+      <button class="hf-chip" data-porte="pequena" onclick="setFiltroHomePorte('pequena',this)" style="color:#1a7bbf;">🔵 Baixa CC</button>
+      <button class="hf-chip" data-porte="media" onclick="setFiltroHomePorte('media',this)" style="color:#b07a00;">🟡 Média CC</button>
+      <button class="hf-chip" data-porte="alta" onclick="setFiltroHomePorte('alta',this)" style="color:var(--red);">🔴 Alta CC</button>
+      <div class="hf-divider"></div>
+      <span class="hf-label">Período:</span>
+      <button class="hf-chip active" data-per="" onclick="setFiltroHomePer('',this)">Todos</button>
+      <button class="hf-chip" data-per="semana" onclick="setFiltroHomePer('semana',this)">Esta semana</button>
+      <button class="hf-chip" data-per="proxima" onclick="setFiltroHomePer('proxima',this)">Próxima semana</button>
+    </div>
+  </div>
+  <div style="padding:12px 28px 0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--muted);" id="semana-info"></div>
+  </div>
+  <div class="leiloes-grid" id="leiloes-grid"></div>
+</div>
+
+<!-- PAGE MOTOS -->
+<div id="page-motos" class="page">
+  <div class="motos-header">
+    <button class="back-btn" onclick="showPage('leiloes')">← Voltar</button>
+    <div class="motos-title" id="motos-title">MOTOS DO LEILÃO</div>
+    <div class="motos-filters">
+      <input type="text" class="finput" id="moto-search" placeholder="🔍 buscar modelo..." oninput="renderMotos()" style="width:180px;">
+      <button class="ftab active" onclick="setFiltroMoto('todos',this)">Todos</button>
+      <button class="ftab" onclick="setFiltroMoto('financiada',this)">Financiada</button>
+      <button class="ftab" onclick="setFiltroMoto('sinistro',this)">Sinistro</button>
+      <button class="ftab" onclick="setFiltroMoto('sucata',this)">Sucata</button>
+      <button class="ftab" onclick="setFiltroMoto('lotamento',this)">Lote</button>
+      <div style="width:1px;height:20px;background:var(--border);margin:0 2px;"></div>
+      <button class="ftab" onclick="setFiltroPorte('',this)" id="ftab-porte-todos" style="border-color:rgba(100,100,100,.3);">🏍 Todos</button>
+      <button class="ftab" onclick="setFiltroPorte('pequena',this)" style="border-color:rgba(30,120,220,.3);color:#1a7bbf;">🔵 Baixa CC</button>
+      <button class="ftab" onclick="setFiltroPorte('media',this)" style="border-color:rgba(180,130,0,.3);color:#b07a00;">🟡 Média CC</button>
+      <button class="ftab" onclick="setFiltroPorte('alta',this)" style="border-color:rgba(211,47,47,.3);color:var(--red);">🔴 Alta CC</button>
+      <button class="btn btn-accent btn-sm" onclick="buscarFipeLeilao()">⚡ Buscar FIPE</button>
+      <button class="btn btn-ghost btn-sm" onclick="limparCacheFipe()" title="Limpar cache FIPE e rebuscar">🗑 Cache</button>
+      <div style="width:1px;height:20px;background:var(--border);margin:0 4px;"></div>
+      <button class="btn btn-green btn-sm" onclick="abrirModalMoto()" title="Adicionar moto ao leilão" style="font-weight:700;">＋ Incluir Moto</button>
+    </div>
+  </div>
+  <div class="motos-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px;text-align:center;">
+            <input type="checkbox" id="check-all" onclick="toggleSelecionarTodas(this)"
+              style="width:15px;height:15px;cursor:pointer;accent-color:var(--accent);">
+          </th>
+          <th onclick="sortMotos('lote')" id="th-lote">Lote</th>
+          <th onclick="sortMotos('marca')" id="th-marca">Moto</th>
+          <th onclick="sortMotos('ano')" id="th-ano">Ano</th>
+          <th onclick="sortMotos('cilindrada')" id="th-cilindrada">Porte</th>
+          <th>Cor</th>
+          <th onclick="sortMotos('condicao')" id="th-condicao">Condição</th>
+          <th onclick="sortMotos('lance_inicial')" id="th-lance_inicial">Lance ini.</th>
+          <th onclick="sortMotos('fipe')" id="th-fipe">FIPE</th>
+          <th onclick="sortMotos('pct_fipe')" id="th-pct_fipe">% FIPE</th>
+          <th>Valor arrematado</th><th>Indicador</th><th style="text-align:center;">Hist. / Del.</th>
+        </tr>
+      </thead>
+      <tbody id="motos-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- BARRA FLUTUANTE DE SELEÇÃO -->
+<div id="selecao-bar" style="
+  display:none;position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  background:var(--s2);border:1px solid var(--accent);border-radius:12px;
+  padding:12px 20px;display:none;align-items:center;gap:16px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 0 1px rgba(255,77,0,.2);
+  z-index:999;animation:slideUp .2s ease;white-space:nowrap;
+">
+  <span id="selecao-count" style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--accent);"></span>
+  <span style="color:var(--muted);font-size:12px;" id="selecao-label">motos selecionadas</span>
+  <div style="width:1px;height:20px;background:var(--border);"></div>
+  <button onclick="limparSelecao()" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;">
+    ✕ Cancelar
+  </button>
+  <button onclick="excluirSelecionadas()" style="background:rgba(220,50,50,.12);border:1px solid rgba(220,50,50,.35);color:#e05050;font-size:12px;font-weight:700;padding:5px 14px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;"
+    onmouseover="this.style.background='rgba(220,50,50,.25)'" onmouseout="this.style.background='rgba(220,50,50,.12)'">
+    🗑 Excluir selecionadas
+  </button>
+</div>
+
+<!-- PAGE ANÁLISE -->
+<div id="page-analise" class="page">
+  <div class="analise-layout">
+    <div class="analise-main">
+      <div class="atitle">RESUMO GERAL</div>
+      <div class="analise-cards" id="analise-kpis"></div>
+      <div class="atitle">% FIPE POR CONDIÇÃO</div>
+      <div id="chart-condicao" style="margin-bottom:24px;"></div>
+      <div class="atitle">MODELOS COM MAIOR DESCONTO</div>
+      <div id="chart-modelos"></div>
+    </div>
+    <div class="analise-side">
+      <div class="atitle">DISTRIBUIÇÃO POR MARCA</div>
+      <div id="chart-marca" style="margin-bottom:20px;"></div>
+      <div class="atitle">FAIXA DE LANCE INICIAL</div>
+      <div id="chart-faixa" style="margin-bottom:20px;"></div>
+      <div class="atitle">FINANCEIRAS</div>
+      <div id="chart-fin"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE HISTÓRICO -->
+<div id="page-historico" class="page">
+  <div style="padding:20px 28px;">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--muted);">HISTÓRICO DE ARREMATAÇÕES</div>
+      <input type="text" id="hist-search" class="finput" placeholder="🔍 buscar marca, modelo, condição..."
+        oninput="renderHistoricoGeral()"
+        style="width:260px;margin-left:auto;">
+      <span id="hist-count" style="font-size:11px;color:var(--muted);white-space:nowrap;"></span>
+    </div>
+    <div id="hist-geral-table"></div>
+  </div>
+</div>
+
+<!-- HIST MODAL -->
+<div class="hist-modal" id="hist-modal" onclick="if(event.target===this)closeHist()">
+  <div class="hist-box">
+    <button class="hist-close" onclick="closeHist()">✕</button>
+    <h2 id="hist-modal-title">HISTÓRICO</h2>
+    <div style="color:var(--muted);font-size:12px;" id="hist-modal-sub"></div>
+    <div class="hist-list" id="hist-modal-list"></div>
+  </div>
+</div>
+
+<!-- MODAL FICHA MOTO -->
+<div class="modal-overlay" id="modal-ficha-moto" onclick="if(event.target===this)fecharFichaMoto()">
+  <div class="modal-ficha">
+    <button class="hist-close" onclick="fecharFichaMoto()">✕</button>
+    <div class="ficha-header">
+      <div class="ficha-lote" id="ficha-lote">—</div>
+      <div class="ficha-title">
+        <div class="ficha-marca" id="ficha-marca"></div>
+        <div class="ficha-modelo" id="ficha-modelo"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="ficha-badges"></div>
+      </div>
+    </div>
+    <div class="ficha-grid" id="ficha-grid"></div>
+    <div id="ficha-leilao-info" style="background:var(--s2);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="fecharFichaMoto()">Fechar</button>
+      <button class="btn btn-accent" id="ficha-btn-leilao" onclick="">Ver Leilão Completo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMPORTAR MOTOS -->
+<div class="modal-overlay" id="modal-importar" onclick="if(event.target===this)fecharModalImportar()">
+  <div class="modal-box" style="width:720px;max-width:98vw;">
+    <button class="hist-close" onclick="fecharModalImportar()">✕</button>
+    <h2>📥 IMPORTAR MOTOS</h2>
+    <div style="margin-bottom:14px;">
+      <label class="form-label">Plataforma</label>
+      <select class="form-select" id="imp-plataforma" onchange="atualizarDicaImport()">
+        <option value="freitas">Freitas Leiloeiro</option>
+        <option value="sodre">Sodré Santoro</option>
+        <option value="superbid">Superbid</option>
+        <option value="vip">VIP Leilões</option>
+        <option value="copart">Copart (CSV)</option>
+      </select>
+    </div>
+    <div id="imp-dica" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;"></div>
+    <div id="imp-area-texto">
+      <label class="form-label">Cole o texto copiado do site aqui</label>
+      <textarea id="imp-texto" style="width:100%;height:180px;font-family:monospace;font-size:11px;padding:10px;border:1px solid var(--border);border-radius:8px;resize:vertical;background:var(--s2);color:var(--text);margin-bottom:12px;" placeholder="Ctrl+A → Ctrl+C no site → Ctrl+V aqui..."></textarea>
+    </div>
+    <div id="imp-area-csv" style="display:none;">
+      <label class="form-label">Selecione o arquivo CSV exportado do Copart</label>
+      <div id="imp-csv-dropzone" style="border:2px dashed var(--border);border-radius:10px;padding:32px;text-align:center;cursor:pointer;background:var(--s2);margin-bottom:12px;transition:border-color .2s;"
+        onclick="document.getElementById('imp-csv-file').click()"
+        ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+        ondragleave="this.style.borderColor='var(--border)'"
+        ondrop="handleCsvDrop(event)">
+        <div style="font-size:32px;margin-bottom:8px;">📂</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);">Clique para selecionar ou arraste os CSVs aqui</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Pode selecionar múltiplos arquivos .csv (uma página por arquivo)</div>
+        <div id="imp-csv-nome" style="font-size:11px;color:var(--accent);margin-top:8px;font-weight:600;line-height:1.8;"></div>
+      </div>
+      <input type="file" id="imp-csv-file" accept=".csv,.txt" style="display:none" multiple onchange="handleCsvFile(event)">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;">
+      <div id="imp-preview-info" style="font-size:12px;color:var(--muted);"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="fecharModalImportar()">Cancelar</button>
+        <button class="btn btn-ghost" onclick="previewImport()">🔍 Preview</button>
+        <button class="btn btn-accent" id="imp-btn-salvar" onclick="executarImport()" disabled>💾 Importar para Supabase</button>
+      </div>
+    </div>
+    <!-- Preview por leilão -->
+    <div id="imp-preview-area" style="display:none;margin-top:16px;max-height:320px;overflow-y:auto;border-top:1px solid var(--border);padding-top:12px;">
+      <div id="imp-preview-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVO LEILÃO -->
+<div class="modal-overlay" id="modal-leilao" onclick="if(event.target===this)fecharModalLeilao()">
+  <div class="modal-box">
+    <button class="hist-close" onclick="fecharModalLeilao()">✕</button>
+    <h2>NOVO LEILÃO</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ID único</label>
+        <input type="text" class="form-input" id="nl-id" placeholder="ex: freitas_15_04">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Plataforma</label>
+        <select class="form-select" id="nl-plat">
+          <option>Freitas Leiloeiro</option><option>Copart</option><option>Superbid</option>
+          <option>Sodré Santoro</option><option>Milan Leilões</option><option>Rico Leilões</option>
+          <option>Barreto Leilões</option><option>WR Leilões</option><option>VIP Leilões</option><option>Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nome do leilão</label>
+      <input type="text" class="form-input" id="nl-nome" placeholder="ex: Freitas — Sinistros e Financiadas">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data (DD/MM/AAAA)</label>
+        <input type="text" class="form-input" id="nl-data" placeholder="15/04/2026">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hora</label>
+        <input type="text" class="form-input" id="nl-hora" placeholder="10h00">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Local</label>
+        <input type="text" class="form-input" id="nl-local" placeholder="Online / SP">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Link</label>
+        <input type="text" class="form-input" id="nl-link" placeholder="https://...">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="fecharModalLeilao()">Cancelar</button>
+      <button class="btn btn-accent" onclick="salvarNovoLeilao()">💾 Salvar Leilão</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVA MOTO -->
+<div class="modal-overlay" id="modal-moto" onclick="if(event.target===this)fecharModalMoto()">
+  <div class="modal-box">
+    <button class="hist-close" onclick="fecharModalMoto()">✕</button>
+    <h2>NOVA MOTO</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Lote</label>
+        <input type="text" class="form-input" id="nm-lote" placeholder="ex: 158">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Condição</label>
+        <select class="form-select" id="nm-cond">
+          <option value="financiada">Financiada</option>
+          <option value="sinistro">Sinistro</option>
+          <option value="sucata">Sucata</option>
+          <option value="lotamento">Lotamento</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Marca</label>
+        <input type="text" class="form-input" id="nm-marca" placeholder="Honda">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Modelo</label>
+        <input type="text" class="form-input" id="nm-modelo" placeholder="CG 160 Titan">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Ano (fab/mod)</label>
+        <input type="text" class="form-input" id="nm-ano" placeholder="24/25">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cor</label>
+        <input type="text" class="form-input" id="nm-cor" placeholder="Preta">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Lance inicial (R$)</label>
+        <input type="number" class="form-input" id="nm-lance" placeholder="8000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Financeira</label>
+        <input type="text" class="form-input" id="nm-fin" placeholder="Santander">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="fecharModalMoto()">Cancelar</button>
+      <button class="btn btn-accent" onclick="salvarNovaMoto()">💾 Salvar Moto</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toast-i">✅</span><span id="toast-m"></span></div>
+
+<script>
+// ===================== SUPABASE CONFIG =====================
+const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50bHdod210c3luaWluYmt3amdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTM4OTIsImV4cCI6MjA4ODg4OTg5Mn0.zZi8nMpKMcFvZe_uDLZQB3Jtb80UpkefKa3Q7M6mDwA';
+
+async function supaFetch(path, opts={}) {
+  const isWrite = opts.method && opts.method !== 'GET';
+  const res = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
+    ...opts,
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': `Bearer ${SUPA_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer !== undefined ? opts.prefer : (isWrite ? 'return=minimal' : 'return=representation'),
+      ...(opts.headers||{})
+    }
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Supabase error: ${res.status} ${err}`);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+// ===================== STATE =====================
+let LEILOES = [];
+let MOTOS = [];
+let ARREMATADOS = {}; // { moto_id: { id, valor } }
+let fipeCache = {};
+try { fipeCache = JSON.parse(localStorage.getItem('fipeCache') || '{}'); } catch(e){}
+
+let currentLeilao = null;
+let filtroMoto = 'todos';
+let filtroPorte = '';
+let sortField = null, sortDir = 1;
+let motosSelecionadas = new Set(); // ids das motos marcadas para exclusão em lote
+let histSortField = 'data', histSortDir = -1; // histórico: padrão data decrescente
+
+// ===================== CARREGAR DADOS =====================
+async function carregarDados() {
+  setLoading('CARREGANDO LEILÕES...');
+  try {
+    // Leilões ordenados por data
+    LEILOES = await supaFetch('leiloes?select=*&order=data.asc,hora.asc');
+
+    setLoading('CARREGANDO MOTOS...');
+    // Motos com paginação (max 1000 por req)
+    let allMotos = [];
+    let offset = 0;
+    while(true) {
+      const batch = await supaFetch(`motos?select=*&order=id.asc&limit=1000&offset=${offset}`);
+      allMotos = allMotos.concat(batch);
+      if(batch.length < 1000) break;
+      offset += 1000;
+    }
+    MOTOS = allMotos;
+
+    setLoading('CARREGANDO ARREMATADOS...');
+    const arrList = await supaFetch('arrematados?select=*&order=data_registro.desc');
+    // Manter apenas o mais recente por moto
+    ARREMATADOS = {};
+    arrList.forEach(a => {
+      if(!ARREMATADOS[a.moto_id]) ARREMATADOS[a.moto_id] = a;
+    });
+
+    hideLoading();
+    updateStats();
+    renderLeiloes();
+
+    // Se estava em leilão específico, re-renderiza
+    if(currentLeilao) renderMotos();
+    // FIPE é buscada só quando usuário abre um leilão (evita rate limit da API)
+  } catch(err) {
+    hideLoading();
+    showToast('Erro ao carregar: ' + err.message, '❌');
+    console.error(err);
+  }
+}
+
+function setLoading(msg) {
+  document.getElementById('loading-text').textContent = msg;
+  document.getElementById('loading-overlay').style.display = 'flex';
+}
+function hideLoading() {
+  document.getElementById('loading-overlay').style.display = 'none';
+}
+
+// ===================== SEMANA =====================
+function getSemanaLimites() {
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const diaSemana = hoje.getDay();
+  const inicioSemana = new Date(hoje); inicioSemana.setDate(hoje.getDate() - diaSemana);
+  const fimSemana = new Date(inicioSemana); fimSemana.setDate(inicioSemana.getDate() + 6);
+  const inicioProxima = new Date(fimSemana); inicioProxima.setDate(fimSemana.getDate() + 1);
+  const fimProxima = new Date(inicioProxima); fimProxima.setDate(inicioProxima.getDate() + 6);
+  return { hoje, inicioSemana, fimSemana, inicioProxima, fimProxima };
+}
+
+function parseDateISO(str) {
+  // "2026-03-11" -> Date
+  const [y,m,d] = str.split('-').map(Number);
+  const dt = new Date(y, m-1, d); dt.setHours(0,0,0,0); return dt;
+}
+
+function getBadgeLeilao(l) {
+  if(l.encerrado) return 'encerrado';
+  const { hoje, fimSemana, fimProxima } = getSemanaLimites();
+  const dt = parseDateISO(l.data);
+  if(dt < hoje) return 'encerrado'; // data já passou mas não marcado manualmente
+  if(dt.getTime() === hoje.getTime()) return 'hoje';
+  if(dt <= fimSemana) return 'urgente';
+  if(dt <= fimProxima) return 'proxima';
+  return 'none';
+}
+
+// ===================== NAVEGAÇÃO =====================
+function showPage(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(btn) btn.classList.add('active');
+  else { const t = document.getElementById('tab-'+page); if(t) t.classList.add('active'); }
+  if(page === 'analise') renderAnalise();
+  if(page === 'historico') renderHistoricoGeral();
+}
+
+// ===================== LEILÕES =====================
+function renderLeiloes() {
+  const grid = document.getElementById('leiloes-grid');
+  if(!LEILOES.length) { grid.innerHTML = '<div style="padding:48px;text-align:center;color:var(--muted);">Nenhum leilão encontrado.</div>'; return; }
+
+  // Popular dropdown de marcas (só na primeira vez)
+  if(document.getElementById('hf-marca').options.length <= 1) popularFiltroMarcas();
+  popularFiltroLeiloes();
+
+  const { fimSemana, inicioProxima, fimProxima } = getSemanaLimites();
+
+  // Filtrar leilões conforme filtros ativos
+  const leiloesFiltrados = LEILOES.filter(l => {
+    const motos = MOTOS.filter(m => m.leilao_id === l.id);
+    // Filtro por leiloeira (plataforma)
+    if(hfLeilao && (l.plataforma||'') !== hfLeilao) return false;
+    // Filtro de marca (compara com marca normalizada)
+    if(hfMarca && !motos.some(m => normalizarMarca(m.marca) === hfMarca)) return false;
+    // Filtro de condição
+    if(hfCond && !motos.some(m => (m.condicao||'').toLowerCase().includes(hfCond))) return false;
+    // Filtro de porte/cilindrada
+    if(hfPorte && !motos.some(m => getPorte(m.cilindrada) === hfPorte)) return false;
+    // Filtro de período
+    if(hfPer === 'semana') {
+      if(!l.data || parseDateISO(l.data) > fimSemana) return false;
+    } else if(hfPer === 'proxima') {
+      if(!l.data) return false;
+      const dt = parseDateISO(l.data);
+      if(dt < inicioProxima || dt > fimProxima) return false;
+    }
+    return true;
+  });
+
+  const temFiltro = hfMarca || hfCond || hfPer || hfLeilao || hfPorte;
+  const clearBtn = document.getElementById('hf-clear');
+  clearBtn.style.opacity = temFiltro ? '1' : '0.35';
+  clearBtn.style.pointerEvents = temFiltro ? '' : 'none';
+  document.getElementById('hf-count').textContent = temFiltro ? `${leiloesFiltrados.length} leilão(ões)` : '';
+
+  const ativos = leiloesFiltrados.filter(l => getBadgeLeilao(l) !== 'encerrado');
+  const encerrados = leiloesFiltrados.filter(l => getBadgeLeilao(l) === 'encerrado');
+  const semanaInfo = ativos.filter(l => l.data && parseDateISO(l.data) <= fimSemana);
+  document.getElementById('semana-info').textContent = semanaInfo.length ? `${semanaInfo.length} leilão(ões) esta semana` : '';
+
+  const renderCard = (l) => {
+    // Se há filtro de marca/condição, mostrar quantas motos batem no filtro
+    let motos = MOTOS.filter(m => m.leilao_id === l.id);
+    let motosFiltradas = motos;
+    if(hfMarca) motosFiltradas = motosFiltradas.filter(m => normalizarMarca(m.marca) === hfMarca);
+    if(hfCond) motosFiltradas = motosFiltradas.filter(m => (m.condicao||'').toLowerCase().includes(hfCond));
+    const comArr = motos.filter(m => ARREMATADOS[m.id]);
+    const badge = getBadgeLeilao(l);
+    const badgeHTML = badge === 'encerrado' ? '<div class="encerrado-badge">ENCERRADO</div>'
+      : badge === 'hoje'    ? '<div class="hoje-badge">🔴 AO VIVO</div>'
+      : badge === 'urgente' ? '<div class="urgente-badge">🔥 ESTA SEMANA</div>'
+      : badge === 'proxima' ? '<div class="proxima-badge">PRÓXIMA SEMANA</div>' : '';
+    const motoLabel = (hfMarca || hfCond) && motosFiltradas.length !== motos.length
+      ? `<span class="ltag ltag-motos">🏍 <strong>${motosFiltradas.length}</strong>/${motos.length} motos</span>`
+      : `<span class="ltag ltag-motos">🏍 ${motos.length} motos</span>`;
+    return `<div class="leilao-card${l.encerrado?' encerrado-card':''}${badge==='hoje'?' hoje-card':''}" onclick="abrirLeilaoFiltrado('${l.id}')">
+      ${badgeHTML}
+      <div class="lcard-header">
+        <div class="lcard-date">
+          <div class="lcard-day">${l.dia}</div>
+          <div class="lcard-month">${l.mes}</div>
+        </div>
+        <div class="lcard-plat">${l.plataforma||''}</div>
+        <div class="lcard-nome">${l.nome}</div>
+        <div class="lcard-tags">
+          ${l.hora?`<span class="ltag ltag-hora">⏰ ${l.hora}</span>`:''}
+          ${motoLabel}
+          ${l.local?`<span class="ltag ltag-local">📍 ${l.local}</span>`:''}
+        </div>
+      </div>
+      <div class="lcard-footer">
+        <div class="lcstat"><strong>${comArr.length}</strong> arrematadas registradas</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          ${l.link?`<a href="${l.link}" target="_blank" class="lcard-btn" onclick="event.stopPropagation()">VER SITE ↗</a>`:''}
+          <button class="lcard-btn" style="background:rgba(220,50,50,.1);color:#dc3232;border:1px solid rgba(220,50,50,.25);" onclick="event.stopPropagation();deletarLeilao('${l.id}','${l.nome.replace(/'/g,"\\'")}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  };
+
+  if(!leiloesFiltrados.length) {
+    grid.innerHTML = '<div style="padding:48px;text-align:center;color:var(--muted);grid-column:1/-1;">Nenhum leilão com esse filtro.</div>';
+  } else {
+    const hoje   = ativos.filter(l => getBadgeLeilao(l) === 'hoje');
+    const semana = ativos.filter(l => getBadgeLeilao(l) === 'urgente');
+    const proxima= ativos.filter(l => getBadgeLeilao(l) === 'proxima');
+    const outros = ativos.filter(l => !['hoje','urgente','proxima'].includes(getBadgeLeilao(l)));
+
+    let html = '';
+
+    if(hoje.length) {
+      html += `<div class="hoje-section-header">
+        <div class="hoje-dot"></div>
+        <span class="hoje-section-title">ACONTECENDO AGORA</span>
+        <span class="hoje-section-sub">${hoje.length} leilão${hoje.length>1?'ões':''} hoje</span>
+      </div>` + hoje.map(renderCard).join('');
+    }
+
+    if(semana.length) {
+      html += `<div class="semana-section-header">🔥 ESTA SEMANA</div>` + semana.map(renderCard).join('');
+    }
+
+    if(proxima.length) {
+      html += `<div class="semana-section-header">PRÓXIMA SEMANA</div>` + proxima.map(renderCard).join('');
+    }
+
+    if(outros.length) {
+      html += `<div class="semana-section-header">EM BREVE</div>` + outros.map(renderCard).join('');
+    }
+
+    if(encerrados.length) {
+      html += `<div class="semana-section-header">ENCERRADOS</div>` + encerrados.map(renderCard).join('');
+    }
+
+    grid.innerHTML = html;
+  }
+
+  document.getElementById('stat-leiloes').textContent = LEILOES.length;
+  document.getElementById('stat-leiloes-sub').textContent = `${LEILOES.filter(l=>!l.encerrado).length} ativos`;
+}
+
+// Abre leilão com filtros de marca/condição pré-aplicados
+function abrirLeilaoFiltrado(id) {
+  abrirLeilao(id);
+  // Pré-aplicar filtro de condição se estiver ativo
+  if(hfCond) {
+    filtroMoto = hfCond;
+    document.querySelectorAll('.ftab').forEach(t => {
+      t.classList.toggle('active', t.textContent.toLowerCase().includes(hfCond));
+    });
+    renderMotos();
+  }
+  // Pré-aplicar busca de marca se estiver ativa
+  if(hfMarca) {
+    const inp = document.getElementById('moto-search');
+    // Busca pela marca normalizada mas mostra todas as variantes (honda, honda/cg, etc)
+    if(inp) { inp.value = hfMarca; renderMotos(); }
+  }
+}
+
+async function deletarLeilao(id, nome) {
+  if(!confirm(`Deletar "${nome}"?\n\nIsso vai apagar o leilão e TODAS as motos vinculadas (exceto as com arrematado registrado).`)) return;
+  try {
+    // Buscar motos do leilão
+    const motos = await supaFetch(`motos?select=id&leilao_id=eq.${id}`);
+    const ids = (motos||[]).map(m => m.id);
+
+    if(ids.length) {
+      // Proteger motos com arrematado
+      const comArr = await supaFetch(`arrematados?select=moto_id&moto_id=in.(${ids.join(',')})`);
+      const idsComArr = new Set((comArr||[]).map(a => a.moto_id));
+      const idsDeletar = ids.filter(i => !idsComArr.has(i));
+
+      if(idsDeletar.length) {
+        const BATCH = 100;
+        for(let i = 0; i < idsDeletar.length; i += BATCH) {
+          await supaFetch(`motos?id=in.(${idsDeletar.slice(i,i+BATCH).join(',')})`, { method:'DELETE', prefer:'' });
+        }
+      }
+
+      if(idsComArr.size > 0) {
+        showToast(`⚠️ ${idsComArr.size} moto(s) com arrematado mantidas`, '⚠️');
+        return; // Não deleta o leilão se ainda tem motos vinculadas
+      }
+    }
+
+    // Deletar leilão
+    await supaFetch(`leiloes?id=eq.${id}`, { method:'DELETE', prefer:'' });
+    showToast(`🗑 Leilão "${nome}" deletado`, '✅');
+    await carregarDados();
+  } catch(err) {
+    showToast('Erro ao deletar: ' + err.message, '❌');
+  }
+}
+
+function abrirLeilao(id) {
+  currentLeilao = LEILOES.find(l => l.id === id);
+  if(!currentLeilao) return;
+  filtroMoto = 'todos';
+  filtroPorte = '';
+  sortField = null;
+  motosSelecionadas.clear();
+  document.getElementById('selecao-bar').style.display = 'none';
+  document.getElementById('moto-search').value = '';
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.ftab').classList.add('active');
+  document.getElementById('motos-title').textContent = currentLeilao.nome.toUpperCase();
+  const tabMotos = document.getElementById('tab-motos');
+  tabMotos.style.display = '';
+  tabMotos.onclick = () => { showPage('motos', tabMotos); };
+  showPage('motos', tabMotos);
+  renderMotos();
+  // Auto-busca FIPE só se houver poucas motos sem valor (evita flood 429)
+  const semFipe = MOTOS.filter(m => m.leilao_id === currentLeilao.id && !m.fipe_csv && !fipeCache[fipeKey(m)]);
+  const el = document.getElementById('fipe-global-status');
+  if(semFipe.length === 0) {
+    el.className = 'fipe-status ok'; el.textContent = '✓ FIPE completa';
+  } else if(semFipe.length <= 8) {
+    buscarFipeLeilao(); // pequeno lote, dispara automático
+  } else {
+    el.className = 'fipe-status';
+    el.textContent = `${semFipe.length} sem FIPE — clique ⚡ para buscar`;
+  }
+}
+
+// ===================== FIPE API =====================
+function fipeKey(m) { return `${m.marca}|${m.modelo}|${(m.ano||'').split('/')[0]}`; }
+
+// ===================== MAPA DE SINÔNIMOS FIPE =====================
+// Quando o nome do modelo no nosso cadastro não bate bem com a API FIPE,
+// mapeamos para o termo de busca exato. Formato: 'MARCA|MODELO' -> 'termo na FIPE'
+const FIPE_SINONIMOS = {
+  // Honda CG 160 — variantes distintas na FIPE
+  'honda|cg 160 fan':       'CG 160 FAN',
+  'honda|cg 160 titan':     'CG 160 TITAN',
+  'honda|cg 160 start':     'CG 160 START',
+  'honda|cg 160 cargo':     'CG 160 CARGO',
+  'honda|cg 160':           'CG 160',
+  // Honda CG 125
+  'honda|cg 125 fan':       'CG 125 FAN',
+  'honda|cg 125i fan':      'CG 125i FAN',
+  'honda|cg 125':           'CG 125 TITAN',
+  // Honda CG 150
+  'honda|cg 150 titan ks':  'CG 150 TITAN KS',
+  'honda|cg 150 titan esd': 'CG 150 TITAN ESD',
+  'honda|cg150 fan esdi':   'CG 150 FAN ESDI',
+  'honda|cg 150 titan ex':  'CG 150 TITAN EX',
+  'honda|cg 150 titan':     'CG 150 TITAN KS',
+  'honda|cg 150 fan':       'CG 150 FAN ESDI',
+  'honda|cg 150 start':     'CG 150 START',
+  'honda|cg150 start':      'CG 150 START',
+  'honda|cg150 fan esdi':   'CG 150 FAN ESDI',
+  'honda|cg150':            'CG 150 TITAN KS',
+  // Honda NXR (Bros)
+  'honda|nxr 160 bros':     'NXR 160 BROS',
+  'honda|nxr160 bros esdd': 'NXR 160 BROS ESDD',
+  'honda|nxr150 bros es':   'NXR 150 BROS ES',
+  'honda|nxr150 bros esd':  'NXR 150 BROS ESD',
+  'honda|nxr125 bros es':   'NXR 125 BROS ES',
+  'honda|nxr 160':          'NXR 160 BROS',
+  'honda|nxr':              'NXR 160 BROS',
+  // Honda PCX
+  'honda|pcx 160':          'PCX 160',
+  'honda|pcx 160 abs':      'PCX 160 ABS',
+  'honda|pcx 160 sport':    'PCX 160 SPORT',
+  'honda|pcx 160 sport abs':'PCX 160 SPORT ABS',
+  'honda|pcx 160 dlx abs':  'PCX 160 DLX ABS',
+  'honda|pcx 150':          'PCX 150',
+  'honda|pcx 150 dlx':      'PCX 150 DLX',
+  'honda|pcx':              'PCX 160',
+  // Honda CB / Twister
+  'honda|cb250f twister cbs': 'CB 250F TWISTER CBS',
+  'honda|cb 250f twister':    'CB 250F TWISTER',
+  'honda|cbx 250 twister':    'CBX 250 TWISTER',
+  'honda|cb 350f twister':    'CB 350F TWISTER',
+  'honda|cb 300f':            'CB 300F',
+  'honda|cb 300r':            'CB 300R',
+  'honda|cb 500x':            'CB 500X',
+  'honda|cb 250 f':           'CB 250F TWISTER',
+  // Honda XRE
+  'honda|xre 300 abs':      'XRE 300 ABS',
+  'honda|xre 300':          'XRE 300',
+  'honda|xre 195 adv':      'XRE 195 ADV',
+  'honda|xre 190':          'XRE 190',
+  // Honda outros
+  'honda|biz 125':          'BIZ 125',
+  'honda|biz 125 es':       'BIZ 125 ES',
+  'honda|biz es 25':        'BIZ 125 ES',
+  'honda|biz':              'BIZ 125',
+  'honda|elite 125':        'ELITE 125',
+  'honda|pop 110 es':       'POP 110i ES',
+  'honda|sh 300i':          'SH 300i',
+  'honda|nc 750x':          'NC 750X',
+  'honda|300s':             'CB 300R',
+  'honda|xlr 125':          'XLR 125',
+  // Yamaha
+  'yamaha|yzf r3 abs':      'YZF-R3 ABS',
+  'yamaha|mt03 abs':        'MT-03 ABS',
+  'yamaha|mt-03 abs':       'MT-03 ABS',
+  'yamaha|xmax 300':        'XMAX 300',
+  'yamaha|nmax 160':        'NMAX 160',
+  'yamaha|nmax':            'NMAX',
+  'yamaha|fz25 fazer':      'FZ25 FAZER',
+  'yamaha|fz15 fazer abs':  'FZ15 FAZER ABS',
+  'yamaha|ys 150 fazer':    'YS 150 FAZER SED',
+  'yamaha|ys150 fazer sed': 'YS 150 FAZER SED',
+  'yamaha|ys150 factor':    'YS150 FACTOR',
+  'yamaha|ybr 150 factor ed':'YBR 150 FACTOR ED',
+  'yamaha|ybr150 factor ed': 'YBR 150 FACTOR ED',
+  'yamaha|ybr 125k':        'YBR 125K',
+  'yamaha|crosser s abs':   'CROSSER S ABS',
+  'yamaha|xtz250 lander':   'XTZ 250 LANDER',
+  'yamaha|xtz 250 lander':  'XTZ 250 LANDER',
+  'yamaha|xtz 250':         'XTZ 250 LANDER',
+  'yamaha|fazer250 blueflex':'FAZER 250 BLUEFLEX',
+  'yamaha|neo 125':         'NEO 125',
+  'yamaha|fluo 125':        'FLUO 125',
+  'yamaha|xj6':             'XJ6',
+  'yamaha|fazer 125':       'FAZER 125',
+  'yamaha|biz 125':         'YBR 125K', // não existe BIZ Yamaha
+  // BMW
+  'bmw|s 1000 rr m package': 'S 1000 RR',
+  'bmw|s 1000 rr h package': 'S 1000 RR',
+  'bmw|s 1000 sr':           'S 1000 RR',
+  'bmw|s1000 rr':            'S 1000 RR',
+  'bmw|r1300gs triple black':'R 1300 GS',
+  'bmw|r1250 gs a':          'R 1250 GS',
+  'bmw|r1200 gs':            'R 1200 GS',
+  'bmw|f 900':               'F 900 R',
+  'bmw|f800 gs':             'F 800 GS',
+  'bmw|f750 gs':             'F 750 GS',
+  'bmw|g 310 gs':            'G 310 GS',
+  // Honda extras
+  'honda|pop 110i es':       'POP 110i ES',
+  'honda|pop 110i':          'POP 110i',
+  'honda|pop110i':           'POP 110i',
+  'honda|biz es':            'BIZ 125 ES',
+  'honda|biz 125 es':        'BIZ 125 ES',
+  'honda|biz 125 ex':        'BIZ 125 EX',
+  'honda|biz 125ex':         'BIZ 125 EX',
+  'honda|biz 100 es':        'BIZ 100 ES',
+  'honda|biz100 es':         'BIZ 100 ES',
+  'honda|cb300f twister cbs':'CB 300F TWISTER CBS',
+  'honda|xre 190 adv':       'XRE 190 ADV',
+  'honda|xre 190':           'XRE 190',
+  'honda|lead 110':          'LEAD 110',
+  'honda|pcx 150 sport abs': 'PCX 150 SPORT ABS',
+  'honda|pcx 150 sport':     'PCX 150 SPORT',
+  'honda|cg 160 fan esdi':   'CG 160 FAN ESDI',
+  'honda|cg 160 titan ex':   'CG 160 TITAN EX',
+  'honda|cg 160 fan ex':     'CG 160 FAN EX',
+  'honda|cg160 fan':         'CG 160 FAN',
+  'honda|cg160 titan':       'CG 160 TITAN',
+  'honda|cg160 start':       'CG 160 START',
+  'honda|cg160':             'CG 160',
+  // Yamaha extras
+  'yamaha|yzf r3 monster':   'YZF-R3',
+  'yamaha|yzf r3 abs':       'YZF-R3 ABS',
+  'yamaha|factor ybr125 k':  'YBR 125K FACTOR',
+  'yamaha|ybr125i factor ed':'YBR 150 FACTOR ED',
+  'yamaha|ybr150 factor':    'YBR 150 FACTOR',
+  'yamaha|fazer ys250':      'YS 250 FAZER',
+  'yamaha|ybr 125k':         'YBR 125K',
+  'yamaha|ybr 125':          'YBR 125K',
+  'yamaha|fazer250 blueflex':'FAZER 250 BLUEFLEX',
+  'yamaha|fazer 250 blueflex':'FAZER 250 BLUEFLEX',
+  'yamaha|fazer250':         'FAZER 250',
+  'yamaha|ys 250 fazer':     'YS 250 FAZER',
+  'yamaha|ys250 fazer':      'YS 250 FAZER',
+  'yamaha|fz 25 fazer':      'FZ25 FAZER',
+  'yamaha|fz25':             'FZ25 FAZER',
+  'yamaha|mt 03':            'MT-03',
+  'yamaha|mt 03 abs':        'MT-03 ABS',
+  'yamaha|lander 250':       'XTZ 250 LANDER',
+  'yamaha|xtz250':           'XTZ 250 LANDER',
+  'yamaha|crosser 150':      'XTZ 150 CROSSER',
+  'yamaha|xtz 150 crosser':  'XTZ 150 CROSSER',
+  // Ducati
+  'ducati|multistrada v4 s': 'MULTISTRADA V4 S',
+  'ducati|mts v4 rally':     'MULTISTRADA V4 RALLY',
+  // Triumph
+  'triumph|speed 400':       'SPEED 400',
+  // Royal Enfield
+  'royal enfield|int 650':   'INTERCEPTOR 650',
+  // Kawasaki
+  'kawasaki|versys-x 300 tr':'VERSYS-X 300 TOURER',
+  'kawasaki|versys x 300':   'VERSYS-X 300',
+  // Shineray / importadas
+  'shineray|xy125-6a':       'XY 125',
+  'jtz|downtown 300':        'DOWNTOWN 300i',
+  'jtz|dr160':               'DR 160',
+};
+
+// Normaliza string para comparação: minúsculo, sem acentos, sem hífens/pontos, espaços simples
+function normFipe(s) {
+  return s.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[-./]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Pontua similaridade entre string do modelo FIPE e termo buscado
+function scoreModelo(fipeNome, termo) {
+  const fn = normFipe(fipeNome);
+  const mn = normFipe(termo);
+  if(fn === mn) return 1000;
+  if(fn.includes(mn)) return 800;
+  if(mn.includes(fn)) return 700;
+
+  const tokensQuery = mn.split(/\s+/).filter(p => p.length > 0);
+  const tokensFipe  = fn.split(/\s+/).filter(p => p.length > 0);
+
+  let score = 0;
+  let matched = 0;
+  for(const t of tokensQuery) {
+    if(tokensFipe.includes(t)) {
+      // Números e siglas curtas valem mais
+      const isNum = /^\d+$/.test(t);
+      const isShort = t.length <= 2;
+      score += isNum ? t.length * 15 : isShort ? 5 : t.length * 4;
+      matched++;
+    } else if(tokensFipe.some(f => f.startsWith(t) || t.startsWith(f))) {
+      score += 2;
+      matched++;
+    }
+  }
+  // Penaliza se poucos tokens bateram
+  if(matched === 0) return 0;
+  const coverage = matched / tokensQuery.length;
+  if(coverage < 0.5) score = Math.floor(score * 0.3);
+
+  // Bônus se começa igual
+  if(fn.startsWith(tokensQuery[0] || '')) score += 20;
+
+  return score;
+}
+
+async function fipeFetch(url) {
+  for(let tentativa = 0; tentativa < 3; tentativa++) {
+    try {
+      const r = await fetch(url);
+      if(r.status === 429) {
+        await new Promise(res => setTimeout(res, 3000 * (tentativa + 1))); // 3s, 6s, 9s
+        continue;
+      }
+      if(!r.ok) return null;
+      return r.json();
+    } catch(e) {
+      if(tentativa < 2) await new Promise(res => setTimeout(res, 2000));
+    }
+  }
+  return null;
+}
+
+async function buscarFipe(m) {
+  const key = fipeKey(m);
+  if(fipeCache[key]) return fipeCache[key];
+  if(m.fipe_csv) { fipeCache[key] = m.fipe_csv; return m.fipe_csv; }
+  try {
+    if(!Array.isArray(window._fipeMarcas)) {
+      const r = await fipeFetch('https://parallelum.com.br/fipe/api/v1/motos/marcas');
+      if(!Array.isArray(r)) return null;
+      window._fipeMarcas = r;
+    }
+    const marcas = window._fipeMarcas;
+
+    // Limpar marca antes de buscar na API (remove sufixos como /cg, /cg150, /cb, etc.)
+    const marcaLimpa = (normalizarMarca(m.marca) || m.marca).toLowerCase()
+      .replace(/[^a-z\s\-]/g, '').trim();
+    const marcaNorm = normFipe(marcaLimpa);
+    let marcaObj = marcas.find(x => normFipe(x.nome) === marcaNorm)
+      || marcas.find(x => normFipe(x.nome).includes(marcaNorm))
+      || marcas.find(x => marcaNorm.includes(normFipe(x.nome)))
+      // fallback: primeira palavra da marca
+      || marcas.find(x => normFipe(x.nome) === marcaNorm.split(' ')[0]);
+    if(!marcaObj) return null;
+
+    // Cache de modelos por marca
+    const cacheKeyMod = `_fipeModelos_${marcaObj.codigo}`;
+    if(!window[cacheKeyMod]) {
+      const r = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos`);
+      window[cacheKeyMod] = r ? r.modelos : [];
+    }
+    const modelos = window[cacheKeyMod];
+
+    // Verificar se tem sinônimo mapeado (tenta com marca limpa e original)
+    const marcaParaSinon = marcaLimpa;
+    const sinonKeyOrig = `${marcaParaSinon}|${m.modelo.toLowerCase()}`;
+    const sinonKeyNorm = `${marcaNorm}|${normFipe(m.modelo)}`;
+    const termoBusca = FIPE_SINONIMOS[sinonKeyOrig] || FIPE_SINONIMOS[sinonKeyNorm]
+      // também tenta com m.marca original (para sinônimos já mapeados)
+      || FIPE_SINONIMOS[`${m.marca.toLowerCase()}|${m.modelo.toLowerCase()}`]
+      || m.modelo;
+
+    // Estratégias de busca em ordem de prioridade
+    const tentativas = [termoBusca];
+
+    // Fallback 1: sem sufixos (ABS, CBS, ES, ESD, ESDI, ADV, EX, FAN, TITAN, etc.)
+    const semSufixo = normFipe(termoBusca)
+      .replace(/\b(abs|cbs|es|esd|esdi|esdd|adv|sed|seds|plus|sport|dlx|pro|limited|edition|ed|ex|ks|fan|titan|start|cargo)\b/g, '')
+      .replace(/\s+/g, ' ').trim();
+    if(semSufixo !== normFipe(termoBusca) && semSufixo.length > 2) tentativas.push(semSufixo);
+
+    // Fallback 2: letras+número inicial (ex: "cg 160", "pcx 160", "biz 125", "pop 110")
+    const numMatch = normFipe(m.modelo).match(/^([a-z]+[\s]?\d+[a-z]?)/);
+    if(numMatch && !tentativas.includes(numMatch[1])) tentativas.push(numMatch[1]);
+
+    // Fallback 3: só o número principal para modelos como "160", "150", "125"
+    const soNum = normFipe(m.modelo).match(/\b(\d{3})\b/);
+    if(soNum) {
+      // Tenta prefixo + número sem espaço
+      const prefixo = normFipe(m.modelo).match(/^([a-z]+)/);
+      if(prefixo) tentativas.push(`${prefixo[1]} ${soNum[1]}`);
+    }
+
+    let modeloObj = null;
+    for(const tentativa of tentativas) {
+      const scored = modelos
+        .map(x => ({ x, score: scoreModelo(x.nome, tentativa) }))
+        .filter(x => x.score > 0)
+        .sort((a,b) => b.score - a.score);
+      if(scored.length && scored[0].score >= 30) {
+        modeloObj = scored[0].x;
+        break;
+      }
+    }
+    if(!modeloObj) return null;
+
+    // Ano: tenta fab primeiro, depois modelo, depois mais recente
+    const anoFab = (m.ano||'').split('/')[0].replace(/\D/g,'');
+    const anoMod = (m.ano||'').split('/')[1]?.replace(/\D/g,'');
+    const anos = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos/${modeloObj.codigo}/anos`);
+    if(!anos || !anos.length) return null;
+
+    let anoObj = anos.find(a => a.nome.startsWith(anoFab))
+      || anos.find(a => a.nome.includes(anoFab))
+      || (anoMod ? anos.find(a => a.nome.includes(anoMod)) : null)
+      || anos[0];
+    if(!anoObj) return null;
+
+    const dados = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos/${modeloObj.codigo}/anos/${anoObj.codigo}`);
+    if(!dados || !dados.Valor) return null;
+    const val = parseFloat(dados.Valor.replace('R$ ','').replace(/\./g,'').replace(',','.'));
+    fipeCache[key] = val;
+    localStorage.setItem('fipeCache', JSON.stringify(fipeCache));
+    return val;
+  } catch(e) { return null; }
+}
+
+function saveFipeCache() { try { localStorage.setItem('fipeCache', JSON.stringify(fipeCache)); } catch(e){} }
+
+
+// ===================== IMPORTAR MOTOS =====================
+
+const DICAS_IMPORT = {
+  freitas: `1. Acesse freitasleiloeiro.com.br → filtre por Motos\n2. Ctrl+A → Ctrl+C na página toda\n3. Cole aqui (Ctrl+V)\n✓ Detecta leilões por data, lote, marca, modelo, ano, cor, lance, condição`,
+  sodre:   `1. Acesse sodresantoro.com.br → filtre por Motos\n2. O site tem paginação — copie TODAS as páginas:\n   • Página 1: Ctrl+A → Ctrl+C → Cole aqui\n   • Página 2: Ctrl+A → Ctrl+C → Cole ABAIXO do texto anterior\n   • Repita para todas as páginas (geralmente 4–5)\n✓ Pode colar várias páginas juntas — duplicatas são removidas automaticamente\n✓ Detecta múltiplos leilões por data, lote, modelo, ano, lance, condição, pátio`,
+  superbid:`1. Acesse superbid.net → filtre por Motocicletas\n2. Clique em "Exibir lista" (ícone ☰ no canto direito)\n3. Role até carregar todos → Ctrl+A → Ctrl+C → Cole aqui\n✓ Detecta leilões pela data, lote, modelo, ano, lance, pátio`,
+  vip:     `1. Acesse vipleiloes.com.br → filtre por Motos\n2. Role até o final para carregar todos os lotes\n3. Ctrl+A → Ctrl+C → Cole aqui\n✓ Detecta leilões pela data, lote, marca, modelo, ano, lance, pátio`,
+  copart:  `1. Acesse copart.com.br → filtre por Motos\n2. Clique em "Exportar" no topo da tabela\n3. Selecione o(s) arquivo(s) CSV exportado(s) abaixo\n✓ Detecta todos os campos + FIPE automático`,
+};
+
+let _motosParaImportar = []; // Array de { leilao_id, lote, marca, modelo, ... }
+let _leloesParaCriar = {};   // { leilao_id: { id, nome, plataforma, data, dia, mes, hora } }
+
+function abrirModalImportar() {
+  _motosParaImportar = [];
+  _leloesParaCriar = {};
+  document.getElementById('imp-preview-area').style.display = 'none';
+  document.getElementById('imp-btn-salvar').disabled = true;
+  document.getElementById('imp-preview-info').textContent = '';
+  document.getElementById('imp-texto').value = '';
+  _csvTexto = '';
+  _csvArquivos = [];
+  document.getElementById('imp-csv-nome').textContent = '';
+  document.getElementById('imp-csv-file').value = '';
+  document.getElementById('modal-importar').classList.add('open');
+  atualizarDicaImport();
+}
+
+function fecharModalImportar() {
+  document.getElementById('modal-importar').classList.remove('open');
+  const btn = document.getElementById('imp-btn-salvar');
+  btn.disabled = true;
+  btn.textContent = '💾 Importar para Supabase';
+}
+
+function atualizarDicaImport() {
+  const plat = document.getElementById('imp-plataforma').value;
+  document.getElementById('imp-dica').textContent = DICAS_IMPORT[plat] || '';
+  const isCopart = plat === 'copart';
+  document.getElementById('imp-area-texto').style.display = isCopart ? 'none' : 'block';
+  document.getElementById('imp-area-csv').style.display = isCopart ? 'block' : 'none';
+  document.getElementById('imp-csv-nome').textContent = '';
+  document.getElementById('imp-csv-dropzone').style.borderColor = 'var(--border)';
+  _csvTexto = '';
+}
+
+let _csvTexto = '';
+let _csvArquivos = [];
+
+function handleCsvFile(event) {
+  const files = Array.from(event.target.files);
+  if(!files.length) return;
+  lerCsvFiles(files);
+}
+
+function handleCsvDrop(event) {
+  event.preventDefault();
+  document.getElementById('imp-csv-dropzone').style.borderColor = 'var(--border)';
+  const files = Array.from(event.dataTransfer.files).filter(f => f.name.match(/\.(csv|txt)$/i));
+  if(!files.length) return;
+  lerCsvFiles(files);
+}
+
+function lerCsvFiles(files) {
+  _csvArquivos = [];
+  let lidos = 0;
+  const nomeEl = document.getElementById('imp-csv-nome');
+  nomeEl.textContent = '⏳ Lendo arquivos...';
+  files.forEach((file, idx) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      _csvArquivos[idx] = { nome: file.name, texto: e.target.result, size: file.size };
+      lidos++;
+      if(lidos === files.length) {
+        _csvTexto = combinarCsvs(_csvArquivos);
+        nomeEl.innerHTML = _csvArquivos.map(a => `✅ ${a.nome} <span style="color:var(--muted)">(${(a.size/1024).toFixed(1)} KB)</span>`).join('<br>');
+        document.getElementById('imp-csv-dropzone').style.borderColor = 'var(--green)';
+        previewImport();
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+  });
+}
+
+function combinarCsvs(arquivos) {
+  if(!arquivos.length) return '';
+  const primeiro = arquivos[0].texto.replace(/\r\n|\n/g, '\n').split('\n');
+  const header = primeiro[0];
+  let linhas = [header];
+  const seenLotes = new Set();
+  arquivos.forEach(arq => {
+    const ls = arq.texto.replace(/\r\n|\n/g, '\n').split('\n');
+    const headers = ls[0].split(';').map(h => h.trim().toLowerCase().replace(/"/g,''));
+    const iCodigo = headers.findIndex(h => h.includes('código') || h.includes('codigo') || h === 'code');
+    const iLote = headers.findIndex(h => h.includes('lote'));
+    const iDedup = iCodigo >= 0 ? iCodigo : iLote;
+    for(let i = 1; i < ls.length; i++) {
+      const l = ls[i].trim();
+      if(!l) continue;
+      if(iDedup >= 0) {
+        const cols = l.split(';');
+        const key = cols[iDedup]?.replace(/"/g,'').trim();
+        if(key && seenLotes.has(key)) continue;
+        if(key) seenLotes.add(key);
+      }
+      linhas.push(l);
+    }
+  });
+  return linhas.join('\n');
+}
+
+// ---- PARSERS ----
+
+
+// ===================== CILINDRADA =====================
+function extractCilindrada(marca, modelo) {
+  const texto = ((marca||'') + ' ' + (modelo||'')).toUpperCase();
+  const MODELOS_FIXOS = {
+    'MT-03':321,'MT03':321,'MT 03':321,'MT-07':689,'MT07':689,'MT-09':890,'MT09':890,
+    'NINJA 400':399,'Z400':399,'NINJA 650':649,'Z650':649,'NINJA 1000':1043,
+    'R3':321,'R7':689,'R1':998,'CBR 600':599,'CBR600':599,'CBR 1000':999,'CBR1000':999,
+    'CB 500':471,'CB500':471,'CB 650':649,'CB650':649,'XRE 300':292,'XRE300':292,
+    'XRE 190':184,'XRE190':184,'HORNET':599,'AFRICA TWIN':1084,'AFRICA-TWIN':1084,
+    'PAN AMERICA':1252,'S1000RR':999,'S1000 RR':999,'S1000XR':999,
+    'R1200GS':1170,'R1250GS':1254,'F800':798,'F 800':798,'F850':853,'F 850':853,
+    'VERSYS 650':649,'VERSYS-X 300':296,'VERSYS X 300':296,'VERSYS 300':296,
+    'Z 650':649,'Z 900':948,'Z900':948,'Z 1000':1043,'Z1000':1043,
+    'DUKE 390':373,'DUKE 250':248,'SCRAMBLER':803,'MONSTER':937,'MULTISTRADA':1103,
+    'TIGER 800':800,'TIGER 900':888,'BONNEVILLE':1200,'STREET TRIPLE':765,
+    'SPORTSTER':883,'FAT BOY':1868,'FATBOY':1868,'ROAD KING':1745,'STREET BOB':1745,
+    'HIMALAYAN':411,'METEOR 350':349,'BURGMAN 400':400,'BURGMAN 650':638,
+    'TMAX':560,'T-MAX':560,'NMAX':155,'N-MAX':155,'XMAX':292,'X-MAX':292,
+    'PCX':160,'LEAD 110':110,'LEAD110':110,'BIZ 110':110,'BIZ110':110,
+    'BIZ 125':125,'BIZ125':125,'POP 110':110,'POP110':110,'POP 100':100,'POP100':100,
+    'FACTOR 150':150,'FACTOR150':150,'FAZER 150':150,'FAZER150':150,
+    'FAZER 250':249,'FAZER250':249,'YBR 125':125,'YBR125':125,
+    'LANDER 250':249,'CRYPTON':115,'FLUO 125':125,'FLUO125':125,
+    'CROSSER 150':150,'CROSSER150':150,
+  };
+  for(const [key,cc] of Object.entries(MODELOS_FIXOS)) {
+    if(texto.includes(key)) return cc;
+  }
+  // Extrai número direto: 125, 160, 300, 1000...
+  const numeros = (texto.match(/\b(\d{2,4})\b/g)||[]).map(Number);
+  for(const n of numeros) { if(n>=50 && n<=2500) return n; }
+  return null;
+}
+function getPorte(cc) {
+  if(!cc) return null;
+  if(cc<=150) return 'pequena';
+  if(cc<=500) return 'media';
+  return 'alta';
+}
+function getPorteLabel(cc) {
+  const p=getPorte(cc);
+  if(!p) return null;
+  if(p==='pequena') return {label:`🔵 ${cc}cc`,cls:'porte-pequena',texto:'Baixa CC'};
+  if(p==='media')   return {label:`🟡 ${cc}cc`,cls:'porte-media',  texto:'Média CC'};
+  return                   {label:`🔴 ${cc}cc`,cls:'porte-alta',   texto:'Alta CC'};
+}
+
+function toTitle(str) {
+  return str.toLowerCase().replace(/(?:^|\s)\w/g, c => c.toUpperCase()).trim();
+}
+
+// ===================== FREITAS LEILOEIRO =====================
+function parseFreitas(texto) {
+  const linhas = texto.split(/\r\n|\n/).map(l => l.trim());
+  const motos = [];
+  const seen = new Set();
+  for (let i = 0; i < linhas.length; i++) {
+    const l = linhas[i];
+    if (!l.includes('/') || !l.includes(',')) continue;
+    const anoMatch = l.match(/,\s*(\d{2}\/\d{2})\s*,/);
+    if (!anoMatch) continue;
+    if (/^\d{2}\/\d{2}\/\d{4}/.test(l)) continue;
+    if (l.indexOf('/') > l.indexOf(',')) continue;
+    try {
+      const slashIdx = l.indexOf('/');
+      const firstComma = l.indexOf(',');
+      const marcaRaw = l.substring(0, slashIdx).replace(/^I\//, '').trim();
+      const modeloRaw = l.substring(slashIdx + 1, firstComma).trim();
+      if (!marcaRaw || !modeloRaw) continue;
+      const ano = anoMatch[1];
+      const partes = l.split(',').map(p => p.trim());
+      const corRaw = partes[partes.length - 1] || '';
+      const cor = /SUCATA|PLACA/i.test(corRaw) ? '' : corRaw;
+      const key = marcaRaw + '|' + modeloRaw + '|' + ano;
+      if (seen.has(key)) continue;
+      let lance = 0;
+      for (let j = i + 1; j < Math.min(i + 4, linhas.length); j++) {
+        if (linhas[j].startsWith('R$')) { lance = parseInt(linhas[j].replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0; break; }
+      }
+      let condicao = 'financiada', financeira = 'Financeira';
+      for (let j = i + 1; j < Math.min(i + 7, linhas.length); j++) {
+        const u = linhas[j].toUpperCase();
+        if (u === 'SEGURADORA') financeira = 'Seguradora';
+        if (u.startsWith('SINISTRO')) condicao = 'sinistro';
+        if (u === 'SUCATA' || u.startsWith('SUCATA')) condicao = 'sucata';
+      }
+      let lote = '';
+      for (let j = i - 1; j >= Math.max(0, i - 5); j--) {
+        const lj = linhas[j].trim();
+        if (/^\d{1,4}$/.test(lj) || lj === 'X') { lote = lj; break; }
+      }
+      // Data e hora do leilão: DD/MM/YYYY HH:MM nas linhas anteriores
+      let dataLeilao = '', horaLeilao = '';
+      for (let j = i - 1; j >= Math.max(0, i - 4); j--) {
+        const dm = linhas[j].match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})/);
+        if (dm) { dataLeilao = `${dm[3]}-${dm[2]}-${dm[1]}`; horaLeilao = dm[4]; break; }
+      }
+      seen.add(key);
+      motos.push({ lote, marca: toTitle(marcaRaw), modelo: toTitle(modeloRaw), ano, cor: toTitle(cor), condicao, lance, financeira, cilindrada: extractCilindrada(marcaRaw, modeloRaw), data_leilao: dataLeilao, hora_leilao: horaLeilao });
+    } catch (e) {}
+  }
+  return motos;
+}
+
+// ===================== SODRÉ SANTORO =====================
+function parseSodre(texto) {
+  const linhas = texto.split(/\r\n|\n/).map(l => l.trim()).filter(l => l);
+  const motos = [];
+  const seen = new Set();
+
+  // Data global do leilão (fallback se moto não tiver data própria)
+  let dataGlobal = '', horaGlobal = '';
+  for (const l of linhas) {
+    const dm = l.match(/^(\d{2})\/(\d{2})\/(\d{2})\s+(\d{2}:\d{2})/);
+    if (dm) { dataGlobal = `20${dm[3]}-${dm[2]}-${dm[1]}`; horaGlobal = dm[4]; break; }
+    const dm2 = l.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})/);
+    if (dm2) { dataGlobal = `${dm2[3]}-${dm2[2]}-${dm2[1]}`; horaGlobal = dm2[4]; break; }
+  }
+
+  for (let i = 0; i < linhas.length; i++) {
+    const l = linhas[i];
+    // Aceita "Leilão NNNNN - 0071" e "Leilão NNNNN - Indef."
+    if (!/^Leil[aã]o\s+\d+\s*-\s*\S+/.test(l)) continue;
+
+    // Lote: número após o "-", ou próxima linha se for número solto
+    const loteM = l.match(/-\s*(\d+)\s*$/);
+    let lote = loteM ? loteM[1].replace(/^0+/, '') || loteM[1] : '';
+    // Para "Indef.", pegar próxima linha que seja só número
+    if (!lote && linhas[i+1] && /^\d+$/.test(linhas[i+1])) lote = linhas[i+1];
+
+    // Descrição: linha com padrão "marca modelo XX/XX"
+    let descLinha = '';
+    for (let j = i + 1; j < Math.min(i + 6, linhas.length); j++) {
+      if (/\d{2}\/\d{2}/.test(linhas[j]) && linhas[j].split(' ').length >= 2) { descLinha = linhas[j]; break; }
+    }
+    if (!descLinha) continue;
+    const anoM = descLinha.match(/(\d{2}\/\d{2})/);
+    if (!anoM) continue;
+    const ano = anoM[1];
+    const semAno = descLinha.substring(0, descLinha.lastIndexOf(anoM[0])).trim();
+    const palavras = semAno.split(/\s+/);
+    const marca = toTitle(palavras[0] || '');
+    const modelo = toTitle(palavras.slice(1).join(' '));
+    if (!marca || !modelo) continue;
+    const key = marca + '|' + modelo + '|' + ano + '|' + lote;
+    if (seen.has(key)) continue;
+
+    // Data individual da moto (cada moto pode ter data própria)
+    let dataLeilao = dataGlobal, horaLeilao = horaGlobal;
+    for (let j = i + 1; j < Math.min(i + 10, linhas.length); j++) {
+      const dm = linhas[j].match(/^(\d{2})\/(\d{2})\/(\d{2})\s+(\d{2}:\d{2})/);
+      if (dm) { dataLeilao = `20${dm[3]}-${dm[2]}-${dm[1]}`; horaLeilao = dm[4]; break; }
+      const dm2 = linhas[j].match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})/);
+      if (dm2) { dataLeilao = `${dm2[3]}-${dm2[2]}-${dm2[1]}`; horaLeilao = dm2[4]; break; }
+    }
+
+    // Lance: aceita "lance atual" e "lance inicial"
+    let lance = 0;
+    for (let j = i + 1; j < Math.min(i + 18, linhas.length); j++) {
+      const u = linhas[j].toLowerCase();
+      if (u.includes('lance atual') || u.includes('lance inicial')) {
+        for (let k = j + 1; k < Math.min(j + 4, linhas.length); k++) {
+          if (/^\d[\d.]*$/.test(linhas[k])) { lance = parseInt(linhas[k].replace(/\./g, '')) || 0; break; }
+        }
+        break;
+      }
+    }
+
+    // Condição e pátio
+    let condicao = 'financiada', financeira = 'Financeira', patio = '';
+    for (let j = i + 1; j < Math.min(i + 22, linhas.length); j++) {
+      const u = linhas[j].toLowerCase();
+      if (u === 'seguro' || u === 'seguradora') { financeira = 'Seguradora'; condicao = 'sinistro'; }
+      if (u.includes('financiamento')) { condicao = 'financiada'; financeira = 'Financeira'; }
+      if (u.includes('sucata')) condicao = 'sucata';
+      if (u.includes('sem sinistro')) condicao = 'financiada';
+      if (!patio && linhas[j].includes(' / ') && linhas[j].length < 50) patio = toTitle(linhas[j]);
+    }
+
+    seen.add(key);
+    motos.push({ lote, marca, modelo, ano, cor: '', condicao, lance, financeira, patio, cilindrada: extractCilindrada(marca, modelo), data_leilao: dataLeilao, hora_leilao: horaLeilao });
+  }
+  return motos;
+}
+
+// ===================== SUPERBID =====================
+function parseSuperbid(texto) {
+  const linhas = texto.split(/\r\n|\n/).map(l => l.trim()).filter(l => l);
+  const motos = [];
+  const seen = new Set();
+
+  for (let i = 0; i < linhas.length; i++) {
+    // Detecta exatamente "Lote N" (linha isolada com só o número)
+    if (!/^Lote\s+\d+$/.test(linhas[i])) continue;
+    const lote = linhas[i].match(/\d+/)[0];
+    const desc = linhas[i + 1] || '';
+
+    // ── ANO ──────────────────────────────────────────────────────────────
+    let ano = '';
+    // 1) "Ano NN/NN" nas linhas próximas (badge da UI)
+    for (let j = i - 4; j < Math.min(i + 16, linhas.length); j++) {
+      if (j < 0) continue;
+      const am = linhas[j].match(/\bAno\s+(\d{2})\/(\d{2})\b/i);
+      if (am) { ano = am[1] + '/' + am[2]; break; }
+    }
+    // 2) AAAA/AAAA na descrição
+    if (!ano) { const af = desc.match(/\b((?:19|20)\d{2})[\/\-]((?:19|20)\d{2})\b/); if (af) ano = af[1].slice(-2) + '/' + af[2].slice(-2); }
+    // 3) NN/NN na descrição
+    if (!ano) { const as = desc.match(/\b(\d{2})\/(\d{2})\b(?!\d)/); if (as) ano = as[1] + '/' + as[2]; }
+    // 4) ano solto
+    if (!ano) { const al = desc.match(/\b(20\d{2}|19\d{2})\b/); if (al) { const a = al[1].slice(-2); ano = a+'/'+a; } }
+
+    // ── COR ──────────────────────────────────────────────────────────────
+    let cor = '';
+    const corM = desc.match(/\b(PRETA|BRANCA|VERMELHA|AZUL|CINZA|PRATA|AMARELA|VERDE|ROSA|LARANJA|ROXA|MARROM)\b/i);
+    if (corM) cor = toTitle(corM[1]);
+
+    // ── MARCA / MODELO ────────────────────────────────────────────────────
+    let descLimpa = desc
+      .replace(/\(Ref\.?:?[^)]*\)/gi, '')
+      .replace(/,?\s*Placa\s+(?:FINAL\s+)?\w[\w\s]*?(?:\([A-Z]{2}\))?(?=\s*[,.-]|$)/gi, '')
+      .replace(/,?\s*ANO\/MOD(?:ELO)?(?:\s+DE\s+FABRICA[ÇC][ÃA]O)?[:\s]*[\d\s\/]+/gi, '')
+      .replace(/,?\s*ANO:\s*[\d\/]+/gi, '')
+      .replace(/,?\s*\b(19|20)\d{2}[\/\-](19|20)\d{2}\b/g, '')
+      .replace(/,?\s*\b(19|20)\d{2}\b/g, '')
+      .replace(/,?\s*\b\d{2}\/\d{2}\b/g, '')
+      .replace(/,?\s*COR:\s*\w+/gi, '')
+      .replace(/,?\s*\b(PRETA|BRANCA|VERMELHA|AZUL|CINZA|PRATA|AMARELA|VERDE|ROSA|LARANJA|ROXA|MARROM)\b.*/gi, '')
+      .replace(/^(VEÍCULO|VVEÍCULO|MOTOCICLETA|MOTONETA|UMA MOTOCICLETA|MOTO\s+(?:ELÉTRICA\s+)?|Marca\/Modelo:\s*)/gi, '')
+      .replace(/^(LOTE\s+\d+\s+MOTO\s+)/gi, '')
+      .replace(/^1ª\s+Vara\s+.*?-\s*/gi, '')
+      .replace(/\s*-\s*(SEM DÍVIDAS|PARA CIRCULAR|GASOLINA|sem placa|chassi|[Cc]om\s+\d+km).*/g, '')
+      .replace(/,?\s*(cor\s+\w+|combustível\s+\w+|[^,]*km\s+rodados)[^,]*/gi, '')
+      .replace(/\s*em\s+[A-Za-zÀ-ÿ\s]+\/[A-Z]{2}\s*$/gi, '')
+      .replace(/[-,].*$/, '')
+      .replace(/\s+/g, ' ').trim();
+
+    let marca = '', modelo = '';
+    const slashIdx = descLimpa.search(/\//);
+    if (slashIdx > 0 && slashIdx < 16) {
+      marca = toTitle(descLimpa.slice(0, slashIdx).trim());
+      modelo = toTitle(descLimpa.slice(slashIdx + 1).trim());
+    } else {
+      const palavras = descLimpa.split(/\s+/);
+      marca = toTitle(palavras[0] || '');
+      modelo = toTitle(palavras.slice(1).join(' '));
+    }
+    if (!marca || marca.length < 2 || !modelo) continue;
+
+    // ── DATA ─────────────────────────────────────────────────────────────
+    // Antes do "Lote N": "DD/MM - HH:MM" ou "Hoje - HH:MM" ou "N praças | DD/MM - HH:MM"
+    let dataLeilao = '', horaLeilao = '';
+    for (let j = i - 1; j >= Math.max(0, i - 10); j--) {
+      const dm = linhas[j].match(/(\d{2})\/(\d{2})\s*-\s*(\d{2}:\d{2})/);
+      if (dm) { dataLeilao = `${new Date().getFullYear()}-${dm[2]}-${dm[1]}`; horaLeilao = dm[3]; break; }
+      const hoje = linhas[j].match(/^Hoje\s*-\s*(\d{2}:\d{2})/);
+      if (hoje) { const now = new Date(); dataLeilao = now.toISOString().split('T')[0]; horaLeilao = hoje[1]; break; }
+    }
+    // fallback: 1ª praça depois do Lote
+    if (!dataLeilao) {
+      for (let j = i + 1; j < Math.min(i + 16, linhas.length); j++) {
+        const dm = linhas[j].match(/(\d{2})\/(\d{2})\s*-\s*(\d{2}:\d{2})/);
+        if (dm) { dataLeilao = `${new Date().getFullYear()}-${dm[2]}-${dm[1]}`; horaLeilao = dm[3]; break; }
+      }
+    }
+
+    // ── LANCE ─────────────────────────────────────────────────────────────
+    let lance = 0;
+    for (let j = i + 1; j < Math.min(i + 18, linhas.length); j++) {
+      if (/lance\s+(atual|inicial)|1ª\s+pra[çc]a\s*:/i.test(linhas[j])) {
+        for (let k = j + 1; k < Math.min(j + 4, linhas.length); k++) {
+          const lm = linhas[k].match(/^R\$\s*([\d.]+,\d{2})/);
+          if (lm) { lance = parseFloat(lm[1].replace(/\./g, '').replace(',', '.')); break; }
+        }
+        if (lance) break;
+      }
+      const lm = linhas[j].match(/^R\$\s*([\d.]+,\d{2})/);
+      if (lm && !lance) { lance = parseFloat(lm[1].replace(/\./g, '').replace(',', '.')); break; }
+    }
+
+    // ── PÁTIO ─────────────────────────────────────────────────────────────
+    let patio = '';
+    for (let j = i + 1; j < Math.min(i + 8, linhas.length); j++) {
+      if (/^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s.]+ - [A-Z]{2}$/.test(linhas[j])) { patio = toTitle(linhas[j]); break; }
+    }
+
+    const key = `${lote}|${marca}|${modelo}|${ano}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (!dataLeilao) continue;
+    motos.push({ lote, marca, modelo, ano, cor, condicao: 'sinistro', lance, financeira: 'Seguradora', patio, cilindrada: extractCilindrada(marca, modelo), data_leilao: dataLeilao, hora_leilao: horaLeilao });
+  }
+  return motos;
+}
+
+// ===================== VIP LEILÕES =====================
+function parseVip(texto) {
+  const linhas = texto.split(/\r\n|\n/).map(l => l.trim()).filter(l => l);
+  const motos = [];
+  const seen = new Set();
+  for (let i = 0; i < linhas.length; i++) {
+    const l = linhas[i];
+    // Detecta "MARCA - MODELO" — tudo maiúsculas, modelo pode ter hífen e números (ex: XY150-8)
+    if (!/^[A-Z][A-Z0-9\s]+ - [A-Z][A-Z0-9\s\-]+$/.test(l)) continue;
+    const dashIdx = l.indexOf(' - ');
+    const marca = toTitle(l.substring(0, dashIdx).trim());
+    const modeloNome = toTitle(l.substring(dashIdx + 3).trim());
+
+    // Ano: linha seguinte tem "MODELO - AAAA/AAAA"
+    const anoLinha = linhas[i + 1] || '';
+    const anoM = anoLinha.match(/\b((?:19|20)\d{2})[\/\-]((?:19|20)\d{2})\b/);
+    if (!anoM) continue;
+    const ano = anoM[1].slice(-2) + '/' + anoM[2].slice(-2);
+
+    // Lote, pátio, data, hora — todos dentro do bloco até "Ver mais"
+    let lote = '', patio = '', dataLeilao = '', horaLeilao = '', lance = 0;
+    for (let j = i + 1; j < Math.min(i + 18, linhas.length); j++) {
+      const lm = linhas[j].match(/Lote:\s*(\d+)\s+Local:\s*(\S+)/i);
+      if (lm) { lote = lm[1]; patio = lm[2]; }
+
+      const dm = linhas[j].match(/In[íi]cio:\s*(\d{2})\/(\d{2})\/(\d{4})/i);
+      if (dm) {
+        dataLeilao = `${dm[3]}-${dm[2]}-${dm[1]}`;
+        if (/^\d{2}:\d{2}$/.test(linhas[j + 1] || '')) horaLeilao = linhas[j + 1];
+      }
+
+      // Pega "Valor Atual" → próxima linha com R$
+      if (/valor atual/i.test(linhas[j])) {
+        const vm = linhas[j + 1]?.match(/^R\$\s*([\d.]+,\d{2})/);
+        if (vm) lance = parseFloat(vm[1].replace(/\./g, '').replace(',', '.'));
+      }
+
+      if (linhas[j] === 'Ver mais') break;
+    }
+
+    const key = `${lote}|${marca}|${modeloNome}|${ano}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (!dataLeilao) continue;
+    motos.push({ lote, marca, modelo: modeloNome, ano, cor: '', condicao: 'sinistro', lance, financeira: 'Seguradora', patio, cilindrada: extractCilindrada(marca, modeloNome), data_leilao: dataLeilao, hora_leilao: horaLeilao });
+  }
+  return motos;
+}
+
+// ===================== COPART (CSV separador ;) =====================
+function parseCopart(texto) {
+  const linhas = texto.split(/\r\n|\n/).map(l => l.trim()).filter(l => l);
+  const motos = [];
+  const seen = new Set();
+  let headerIdx = linhas.findIndex(l => l.includes('Marca') && l.includes('Modelo') && l.includes('Lote'));
+  if (headerIdx < 0) headerIdx = 0;
+  const sep = linhas[headerIdx].includes(';') ? ';' : ',';
+  const headers = linhas[headerIdx].split(sep).map(h => h.trim().toLowerCase().replace(/["\uFEFF]/g, ''));
+  const iAno    = headers.findIndex(h => h.includes('ano'));
+  const iMarca  = headers.findIndex(h => h === 'marca');
+  const iModelo = headers.findIndex(h => h === 'modelo');
+  const iCond   = headers.findIndex(h => h.includes('condi') && !h.includes('func'));
+  const iLance  = headers.findIndex(h => h.includes('lance') && !h.includes('meu'));
+  const iPatio  = headers.findIndex(h => (h.includes('pátio') || h.includes('patio')) && h.includes('veículo'));
+  const iLote   = headers.findIndex(h => h === 'lote');
+  const iFipe   = headers.findIndex(h => h.includes('fipe'));
+  const iData   = headers.findIndex(h => h.includes('data') && h.includes('leil'));
+  const iPatioLeilao = headers.findIndex(h => (h.includes('pátio') || h.includes('patio')) && h.includes('leil'));
+
+  for (let i = headerIdx + 1; i < linhas.length; i++) {
+    const cols = linhas[i].split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
+    if (cols.length < 5) continue;
+    const marca  = toTitle(cols[iMarca] || '');
+    const modelo = toTitle(cols[iModelo] || '');
+    if (!marca || !modelo) continue;
+    const anoRaw = String(cols[iAno] || '');
+    const anoNum = anoRaw.match(/(\d{2,4})/);
+    const anoShort = anoNum ? anoNum[1].slice(-2) : '';
+    const ano = anoShort ? anoShort + '/' + anoShort : '';
+    const condRaw = (cols[iCond] || '').toUpperCase();
+    let condicao = 'financiada';
+    if (condRaw.includes('COLISÃO') || condRaw.includes('COLISAO') || condRaw.includes('ROUBO') || condRaw.includes('FURTO') || condRaw.includes('SINISTRO')) condicao = 'sinistro';
+    if (condRaw.includes('SUCATA')) condicao = 'sucata';
+    const lance = parseInt(String(cols[iLance] || '0').replace(/[^\d]/g, '')) || 0;
+    const fipeRaw = cols[iFipe] || '';
+    const fipeVal = parseFloat(String(fipeRaw).replace(/\./g,'').replace(',','.').replace(/[^\d.]/g,'')) || null;
+    const patio  = toTitle(cols[iPatio] || '');
+    const loteRaw = cols[iLote] || '';
+    const lote   = loteRaw.includes('/') ? loteRaw.split('/')[0] : loteRaw;
+    // Data do leilão: "12.03.2026 18:30 BRT"
+    let dataLeilao = '', horaLeilao = '';
+    const dataRaw = cols[iData] || '';
+    const dmatch = dataRaw.match(/(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}:\d{2})/);
+    if (dmatch) { dataLeilao = `${dmatch[3]}-${dmatch[2]}-${dmatch[1]}`; horaLeilao = dmatch[4]; }
+    // Pátio do leilão (cidade)
+    const patioLeilao = iPatioLeilao >= 0 ? toTitle(cols[iPatioLeilao] || '') : '';
+
+    const key = lote + '|' + marca + '|' + modelo;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    motos.push({ lote, marca, modelo, ano, cor: '', condicao, lance, financeira: 'Particular/Empresa', patio: patioLeilao || patio, fipe_csv: fipeVal, cilindrada: extractCilindrada(marca, modelo), data_leilao: dataLeilao, hora_leilao: horaLeilao });
+  }
+  return motos;
+}
+
+// ---- Gerar ID de leilão a partir da plataforma + data ----
+function gerarLeilaoId(plataforma, dataISO) {
+  const platSlug = { freitas:'freitas', sodre:'sodre', superbid:'superbid', vip:'vip', copart:'copart' };
+  const slug = platSlug[plataforma] || plataforma;
+  const d = dataISO.replace(/-/g,'_'); // "2026_03_13"
+  return `${slug}_${d}`;
+}
+
+function gerarLeilaoObj(plataforma, dataISO, hora) {
+  const id = gerarLeilaoId(plataforma, dataISO);
+  const existe = !!LEILOES.find(l => l.id === id);
+  const platNomes = { freitas:'Freitas Leiloeiro', sodre:'Sodré Santoro', superbid:'Superbid', vip:'VIP Leilões', copart:'Copart' };
+  const meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const dt = new Date(dataISO + 'T00:00:00');
+  const dia = dt.getDate();
+  const mes = meses[dt.getMonth()];
+  const nomePlat = platNomes[plataforma] || plataforma;
+  return {
+    id,
+    nome: `${nomePlat} — ${dia}/${mes}`,
+    plataforma: nomePlat,
+    data: dataISO,
+    dia,
+    mes,
+    hora: hora || '',
+    local: 'Online',
+    link: '',
+    encerrado: false,
+    existe, // flag interna, removida antes do upsert
+  };
+}
+
+function previewImport() {
+  const plat = document.getElementById('imp-plataforma').value;
+  const texto = plat === 'copart' ? _csvTexto : document.getElementById('imp-texto').value;
+  if(!texto.trim()) { showToast(plat === 'copart' ? 'Selecione o arquivo CSV primeiro!' : 'Cole o texto primeiro!', '⚠️'); return; }
+
+  const parsers = { freitas: parseFreitas, sodre: parseSodre, superbid: parseSuperbid, vip: parseVip, copart: parseCopart };
+  const motosRaw = parsers[plat](texto);
+
+  if(!motosRaw.length) {
+    document.getElementById('imp-preview-info').textContent = '⚠️ Nenhuma moto encontrada. Verifique se selecionou a plataforma correta.';
+    document.getElementById('imp-preview-area').style.display = 'none';
+    document.getElementById('imp-btn-salvar').disabled = true;
+    return;
+  }
+
+  // Agrupar motos por leilão (data+hora extraída do parser)
+  _leloesParaCriar = {};
+  _motosParaImportar = [];
+
+  motosRaw.forEach(m => {
+    const dataISO = m.data_leilao || new Date().toISOString().split('T')[0];
+    const hora = m.hora_leilao || '';
+    const leilaoId = gerarLeilaoId(plat, dataISO);
+
+    if(!_leloesParaCriar[leilaoId]) {
+      _leloesParaCriar[leilaoId] = gerarLeilaoObj(plat, dataISO, hora);
+    }
+    _motosParaImportar.push({ ...m, leilao_id: leilaoId });
+  });
+
+  // Montar preview agrupado por leilão
+  const content = document.getElementById('imp-preview-content');
+  const leilaoIds = Object.keys(_leloesParaCriar);
+  content.innerHTML = leilaoIds.map(lid => {
+    const l = _leloesParaCriar[lid];
+    const motos = _motosParaImportar.filter(m => m.leilao_id === lid);
+    const badge = l.existe
+      ? `<span style="background:rgba(26,107,191,.1);color:var(--blue);font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;">ATUALIZAR</span>`
+      : `<span style="background:rgba(26,158,92,.1);color:var(--green);font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;">NOVO LEILÃO</span>`;
+    return `
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          ${badge}
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;">${l.nome}</span>
+          <span style="font-size:11px;color:var(--muted);">${l.data}${l.hora ? ' · '+l.hora : ''} · ${motos.length} motos</span>
+        </div>
+        <table style="width:100%;font-size:11px;border-collapse:collapse;">
+          <thead><tr style="background:var(--s3);">
+            <th style="padding:3px 8px;text-align:left;border:1px solid var(--border);">Lote</th>
+            <th style="padding:3px 8px;text-align:left;border:1px solid var(--border);">Marca</th>
+            <th style="padding:3px 8px;text-align:left;border:1px solid var(--border);">Modelo</th>
+            <th style="padding:3px 8px;text-align:left;border:1px solid var(--border);">Ano</th>
+            <th style="padding:3px 8px;text-align:right;border:1px solid var(--border);">Lance ini.</th>
+            <th style="padding:3px 8px;text-align:left;border:1px solid var(--border);">Cond.</th>
+          </tr></thead>
+          <tbody>${motos.slice(0,8).map(m => `<tr>
+            <td style="padding:2px 8px;border:1px solid var(--border);">${m.lote||'—'}</td>
+            <td style="padding:2px 8px;border:1px solid var(--border);">${m.marca}</td>
+            <td style="padding:2px 8px;border:1px solid var(--border);">${m.modelo}</td>
+            <td style="padding:2px 8px;border:1px solid var(--border);">${m.ano}</td>
+            <td style="padding:2px 8px;border:1px solid var(--border);text-align:right;">${m.lance ? 'R$'+Number(m.lance).toLocaleString('pt-BR') : '—'}</td>
+            <td style="padding:2px 8px;border:1px solid var(--border);">${m.condicao}</td>
+          </tr>`).join('')}
+          ${motos.length > 8 ? `<tr><td colspan="6" style="padding:4px 8px;color:var(--muted);border:1px solid var(--border);">... e mais ${motos.length - 8} motos</td></tr>` : ''}
+          </tbody>
+        </table>
+      </div>`;
+  }).join('<hr style="border:none;border-top:1px solid var(--border);margin:8px 0;">');
+
+  document.getElementById('imp-preview-area').style.display = 'block';
+  const novos = leilaoIds.filter(id => !_leloesParaCriar[id].existe).length;
+  document.getElementById('imp-preview-info').textContent =
+    `✅ ${motosRaw.length} motos · ${leilaoIds.length} leilão(ões)${novos ? ' · '+novos+' novo(s)' : ''}`;
+  document.getElementById('imp-btn-salvar').disabled = false;
+}
+
+async function executarImport() {
+  if(!_motosParaImportar.length) return;
+  const btn = document.getElementById('imp-btn-salvar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Importando...';
+
+  try {
+    const leilaoIds = Object.keys(_leloesParaCriar);
+
+    // 1. Upsert leilões — cria se não existe, ignora se já existe (mesmo id)
+    for(const lid of leilaoIds) {
+      const l = _leloesParaCriar[lid];
+      const { existe, ...payload } = l;
+      // Upsert: POST com Prefer resolution=merge-duplicates atualiza se existir
+      await supaFetch('leiloes?on_conflict=id', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        prefer: 'resolution=merge-duplicates,return=minimal'
+      });
+    }
+
+    // 2. Para cada leilão: deletar motos antigas sem arrematado
+    for(const lid of leilaoIds) {
+      const motosExist = await supaFetch(`motos?select=id&leilao_id=eq.${lid}`);
+      const idsExist = (motosExist||[]).map(m => m.id);
+      if(idsExist.length) {
+        const comArr = await supaFetch(`arrematados?select=moto_id&moto_id=in.(${idsExist.join(',')})`);
+        const idsComArr = new Set((comArr||[]).map(a => a.moto_id));
+        const idsDeletar = idsExist.filter(id => !idsComArr.has(id));
+        if(idsDeletar.length) {
+          const DBATCH = 100;
+          for(let i = 0; i < idsDeletar.length; i += DBATCH) {
+            await supaFetch(`motos?id=in.(${idsDeletar.slice(i,i+DBATCH).join(',')})`, { method:'DELETE', prefer:'' });
+          }
+        }
+      }
+    }
+
+    // 3. Inserir novas motos em cada leilão (id gerado automaticamente pelo banco)
+    for(const lid of leilaoIds) {
+      const novas = _motosParaImportar
+        .filter(m => m.leilao_id === lid)
+        .map(m => ({
+          leilao_id: lid,
+          lote: m.lote || null,
+          marca: m.marca,
+          modelo: m.modelo,
+          ano: m.ano || null,
+          cor: m.cor || null,
+          condicao: m.condicao,
+          lance_inicial: m.lance || null,
+          financeira: m.financeira || null,
+          patio: m.patio || null,
+          fipe_csv: m.fipe_csv || null,
+          cilindrada: m.cilindrada || null,
+        }));
+
+      const BATCH = 50;
+      for(let i = 0; i < novas.length; i += BATCH) {
+        await supaFetch('motos', { method:'POST', body: JSON.stringify(novas.slice(i, i+BATCH)), prefer: 'return=minimal' });
+      }
+    }
+
+    await carregarDados();
+    fecharModalImportar();
+    showToast(`✅ ${_motosParaImportar.length} motos importadas em ${leilaoIds.length} leilão(ões)!`, '📥');
+
+  } catch(err) {
+    console.error('Import error:', err);
+    showToast('Erro ao importar: ' + err.message, '❌');
+    btn.disabled = false;
+    btn.textContent = '💾 Importar para Supabase';
+  }
+}
+
+async function limparCacheFipe() {
+  if(!confirm('Limpar cache FIPE e rebuscar agora?')) return;
+  // Limpar tudo em memória
+  fipeCache = {};
+  window._fipeMarcas = null;
+  Object.keys(window).filter(k => k.startsWith('_fipeModelos_')).forEach(k => { delete window[k]; });
+  try { localStorage.removeItem('fipeCache'); } catch(e){}
+  // Re-render imediato para zerar colunas na tela
+  renderMotos();
+  showToast('Cache limpo! Rebuscando FIPE...', '🗑️');
+  // Rebuscar automaticamente
+  await buscarFipeLeilao();
+}
+
+// Busca FIPE automática em background para todas as motos sem valor
+let _fipeBgRunning = false;
+async function buscarFipeBackground(forcar = false) {
+  if(_fipeBgRunning) return;
+  _fipeBgRunning = true;
+
+  const el = document.getElementById('fipe-global-status');
+  try {
+    const semFipe = MOTOS.filter(m => !m.fipe_csv && !fipeCache[fipeKey(m)]);
+    const total = semFipe.length;
+    if(total === 0) { el.className='fipe-status ok'; el.textContent=`✓ já em cache`; _fipeBgRunning=false; return; }
+
+    el.className = 'fipe-status';
+    el.textContent = `⚡ carregando marcas...`;
+
+    // Passo 1: buscar lista de marcas com retry
+    if(!Array.isArray(window._fipeMarcas)) {
+      window._fipeMarcas = null;
+      for(let t = 0; t < 5; t++) {
+        await new Promise(r => setTimeout(r, 600 * (t + 1)));
+        const r = await fipeFetch('https://parallelum.com.br/fipe/api/v1/motos/marcas');
+        if(Array.isArray(r)) { window._fipeMarcas = r; break; }
+      }
+      if(!Array.isArray(window._fipeMarcas)) {
+        el.textContent = '⚠️ API FIPE indisponível — tente mais tarde';
+        _fipeBgRunning = false; return;
+      }
+      await new Promise(r => setTimeout(r, 600));
+    }
+
+    // Passo 2: pré-carregar modelos de TODAS as marcas presentes nas motos (1 req por marca)
+    const marcasNecessarias = [...new Set(semFipe.map(m => {
+      const limpa = (normalizarMarca(m.marca)||m.marca).toLowerCase().replace(/[^a-z\s\-]/g,'').trim();
+      return normFipe(limpa);
+    }))];
+
+    el.textContent = `⚡ carregando modelos (${marcasNecessarias.length} marcas)...`;
+    for(const marcaNorm of marcasNecessarias) {
+      const marcaObj = window._fipeMarcas.find(x => normFipe(x.nome) === marcaNorm)
+        || window._fipeMarcas.find(x => normFipe(x.nome).includes(marcaNorm))
+        || window._fipeMarcas.find(x => marcaNorm.includes(normFipe(x.nome)));
+      if(!marcaObj) continue;
+      const ck = `_fipeModelos_${marcaObj.codigo}`;
+      if(!window[ck]) {
+        const r = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos`);
+        window[ck] = (r && r.modelos) ? r.modelos : [];
+        await new Promise(r => setTimeout(r, 500));
+      }
+    }
+
+    // Passo 3: buscar anos+valor de cada moto (as partes lentas — 2 reqs por moto)
+    el.textContent = `⚡ 0/${total}`;
+    let ok = 0, falhas = 0;
+    const falhaLog = [];
+
+    for(const m of semFipe) {
+      try {
+        const v = await buscarFipe(m);
+        if(v) {
+          ok++;
+          el.textContent = `⚡ ${ok}/${total}`;
+          if(currentLeilao && m.leilao_id === currentLeilao.id) renderMotos();
+          if(ok % 20 === 0) { updateStats(); saveFipeCache(); }
+        } else {
+          falhas++;
+          falhaLog.push(`${m.marca}|${m.modelo}`);
+        }
+      } catch(e) { falhas++; }
+      await new Promise(r => setTimeout(r, 350)); // 350ms entre motos — ~3 req/s
+    }
+
+    el.className = 'fipe-status ok';
+    el.textContent = `✓ ${ok}/${ok+falhas} FIPE`;
+    if(falhaLog.length) {
+      const grouped = {};
+      falhaLog.forEach(f => { grouped[f]=(grouped[f]||0)+1; });
+      console.warn('FIPE falhas:', Object.entries(grouped).sort((a,b)=>b[1]-a[1]));
+    }
+    saveFipeCache(); updateStats();
+    if(currentLeilao) renderMotos();
+  } catch(e) {
+    el.className = 'fipe-status';
+    el.textContent = '⚠️ Erro FIPE';
+    console.error('buscarFipeBackground:', e);
+  } finally {
+    _fipeBgRunning = false;
+  }
+}
+
+async function buscarFipeLeilao() {
+  if(!currentLeilao) return;
+  const motos = MOTOS.filter(m => m.leilao_id === currentLeilao.id && !m.fipe_csv && !fipeCache[fipeKey(m)]);
+
+  const el  = document.getElementById('fipe-global-status');
+  const btn = document.querySelector('.btn-accent[onclick="buscarFipeLeilao()"]');
+
+  if(!motos.length) {
+    el.className = 'fipe-status ok';
+    el.textContent = '✓ FIPE completa';
+    return;
+  }
+
+  // Travar botão durante busca
+  if(btn) { btn.disabled = true; btn.textContent = '⏳ Buscando...'; }
+  el.className = 'fipe-status';
+  el.textContent = `⚡ 0/${motos.length}`;
+
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+
+  // 1. Carregar lista de marcas
+  if(!Array.isArray(window._fipeMarcas)) {
+    el.textContent = '⚡ carregando marcas...';
+    const r = await fipeFetch('https://parallelum.com.br/fipe/api/v1/motos/marcas');
+    if(!Array.isArray(r)) {
+      el.textContent = '⚠️ API indisponível — tente novamente';
+      if(btn) { btn.disabled = false; btn.textContent = '⚡ Buscar FIPE'; }
+      return;
+    }
+    window._fipeMarcas = r;
+    await delay(800);
+  }
+
+  // 2. Pré-carregar modelos de cada marca presente no leilão
+  const marcasLeilao = [...new Set(motos.map(m => {
+    const limpa = (normalizarMarca(m.marca)||m.marca).toLowerCase().replace(/[^a-z\s\-]/g,'').trim();
+    return normFipe(limpa);
+  }))];
+  let marcaIdx = 0;
+  for(const marcaNorm of marcasLeilao) {
+    marcaIdx++;
+    const marcaObj = window._fipeMarcas.find(x => normFipe(x.nome) === marcaNorm)
+      || window._fipeMarcas.find(x => normFipe(x.nome).includes(marcaNorm))
+      || window._fipeMarcas.find(x => marcaNorm.includes(normFipe(x.nome)));
+    if(!marcaObj) continue;
+    const ck = `_fipeModelos_${marcaObj.codigo}`;
+    if(!window[ck]) {
+      el.textContent = `⚡ marcas ${marcaIdx}/${marcasLeilao.length}...`;
+      const r = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos`);
+      window[ck] = (r && r.modelos) ? r.modelos : [];
+      await delay(700);
+    }
+  }
+
+  // 3. Buscar FIPE moto a moto
+  let ok = 0, falhas = 0;
+  for(let i = 0; i < motos.length; i++) {
+    const m = motos[i];
+    el.textContent = `⚡ ${i+1}/${motos.length}`;
+    try {
+      const v = await buscarFipe(m);
+      if(v) { ok++; renderMotos(); }
+      else falhas++;
+    } catch(e) { falhas++; }
+    // Salvar cache a cada 10 motos
+    if((i+1) % 10 === 0) saveFipeCache();
+    await delay(700);
+  }
+
+  el.className = 'fipe-status ok';
+  el.textContent = falhas > 0 ? `✓ ${ok}/${motos.length} (${falhas} sem match)` : `✓ ${ok}/${motos.length} FIPE`;
+  if(btn) { btn.disabled = false; btn.textContent = '⚡ Buscar FIPE'; }
+  saveFipeCache();
+  updateStats();
+}
+
+// ===================== MOTOS TABLE =====================
+// ===================== SELEÇÃO EM LOTE =====================
+function toggleMotoSelecionada(id, chk) {
+  if(chk.checked) motosSelecionadas.add(id);
+  else motosSelecionadas.delete(id);
+  atualizarBarraSelecao();
+  // Atualizar classe da linha
+  const tr = chk.closest('tr');
+  if(tr) tr.classList.toggle('tr-selecionada', chk.checked);
+  // Atualizar estado do check-all
+  const checkAll = document.getElementById('check-all');
+  const todos = document.querySelectorAll('#motos-tbody input[type=checkbox]');
+  if(checkAll) checkAll.indeterminate = motosSelecionadas.size > 0 && motosSelecionadas.size < todos.length;
+  if(checkAll) checkAll.checked = motosSelecionadas.size === todos.length && todos.length > 0;
+}
+
+function toggleSelecionarTodas(chkAll) {
+  const checkboxes = document.querySelectorAll('#motos-tbody input[type=checkbox]');
+  checkboxes.forEach(chk => {
+    const id = parseInt(chk.getAttribute('onchange').match(/\d+/)[0]);
+    if(chkAll.checked) { motosSelecionadas.add(id); chk.checked = true; }
+    else { motosSelecionadas.delete(id); chk.checked = false; }
+    const tr = chk.closest('tr');
+    if(tr) tr.classList.toggle('tr-selecionada', chkAll.checked);
+  });
+  atualizarBarraSelecao();
+}
+
+function atualizarBarraSelecao() {
+  const bar = document.getElementById('selecao-bar');
+  const count = motosSelecionadas.size;
+  if(count > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('selecao-count').textContent = count;
+    document.getElementById('selecao-label').textContent = count === 1 ? 'moto selecionada' : 'motos selecionadas';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function limparSelecao() {
+  motosSelecionadas.clear();
+  atualizarBarraSelecao();
+  const checkAll = document.getElementById('check-all');
+  if(checkAll) { checkAll.checked = false; checkAll.indeterminate = false; }
+  document.querySelectorAll('#motos-tbody input[type=checkbox]').forEach(c => c.checked = false);
+  document.querySelectorAll('#motos-tbody tr').forEach(r => r.classList.remove('tr-selecionada'));
+}
+
+async function excluirSelecionadas() {
+  const ids = [...motosSelecionadas];
+  if(!ids.length) return;
+  const temArr = ids.some(id => !!ARREMATADOS[id]);
+  const msg = temArr
+    ? `Excluir ${ids.length} moto(s)? ATENÇÃO: ${ids.filter(id=>ARREMATADOS[id]).length} têm arrematação registrada — será deletada também.`
+    : `Excluir ${ids.length} moto(s) selecionada(s)?`;
+  if(!confirm(msg)) return;
+
+  const btn = document.querySelector('#selecao-bar button:last-child');
+  if(btn) btn.textContent = '⏳ Excluindo...';
+
+  try {
+    // Deletar arrematados primeiro
+    const comArr = ids.filter(id => ARREMATADOS[id]);
+    for(const id of comArr) {
+      await supaFetch(`arrematados?id=eq.${ARREMATADOS[id].id}`, { method:'DELETE', prefer:'' });
+      delete ARREMATADOS[id];
+    }
+    // Deletar motos em lote (até 100 por vez)
+    const BATCH = 50;
+    for(let i = 0; i < ids.length; i += BATCH) {
+      const slice = ids.slice(i, i + BATCH);
+      await supaFetch(`motos?id=in.(${slice.join(',')})`, { method:'DELETE', prefer:'' });
+      slice.forEach(id => { const idx = MOTOS.findIndex(m => m.id === id); if(idx > -1) MOTOS.splice(idx, 1); });
+    }
+    showToast(`${ids.length} moto(s) removida(s).`, '🗑️');
+    limparSelecao();
+    renderMotos();
+    updateStats();
+  } catch(err) {
+    showToast('Erro ao excluir: ' + err.message, '❌');
+    if(btn) btn.textContent = '🗑 Excluir selecionadas';
+  }
+}
+
+function setFiltroPorte(val, btn) {
+  filtroPorte = val;
+  // Reset visual de todos os botões de porte
+  document.querySelectorAll('[onclick^="setFiltroPorte"]').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else document.getElementById('ftab-porte-todos').classList.add('active');
+  renderMotos();
+}
+
+async function editarCilindrada(id, ccAtual) {
+  const input = prompt('Informe a cilindrada em cc (ex: 160, 300, 600):', ccAtual || '');
+  if(input === null) return; // cancelou
+  const cc = parseInt(input) || null;
+  if(cc && (cc < 50 || cc > 2500)) { alert('Valor inválido. Use entre 50 e 2500cc.'); return; }
+  try {
+    await supaFetch(`motos?id=eq.${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ cilindrada: cc }),
+      prefer: 'return=minimal'
+    });
+    const m = MOTOS.find(m => m.id === id);
+    if(m) m.cilindrada = cc;
+    renderMotos();
+    const pl = getPorteLabel(cc);
+    showToast(cc ? `Cilindrada: ${cc}cc — ${pl?.texto||''}` : 'Cilindrada removida.', '✏️');
+  } catch(err) {
+    showToast('Erro ao salvar: ' + err.message, '❌');
+  }
+}
+
+function setFiltroMoto(f, btn) {
+  filtroMoto = f;
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderMotos();
+}
+
+function sortMotos(field) {
+  if(sortField === field) sortDir *= -1; else { sortField = field; sortDir = 1; }
+  // Atualizar setas nos headers
+  const labels = { lote:'Lote', marca:'Moto', ano:'Ano', cilindrada:'Porte', condicao:'Condição', lance_inicial:'Lance ini.', fipe:'FIPE', pct_fipe:'% FIPE' };
+  Object.keys(labels).forEach(f => {
+    const th = document.getElementById('th-' + f);
+    if(!th) return;
+    if(f === field) th.innerHTML = labels[f] + (sortDir === 1 ? ' ↑' : ' ↓');
+    else th.innerHTML = labels[f];
+  });
+  renderMotos();
+}
+
+function getPct(m) {
+  const arr = ARREMATADOS[m.id];
+  const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
+  if(!arr || !fipe) return null;
+  return Math.round((arr.valor / fipe) * 100);
+}
+
+function renderMotos() {
+  if(!currentLeilao) return;
+  const search = (document.getElementById('moto-search').value || '').toLowerCase();
+  let lista = MOTOS.filter(m => m.leilao_id === currentLeilao.id);
+  if(filtroMoto !== 'todos') lista = lista.filter(m => m.condicao === filtroMoto);
+  if(filtroPorte) lista = lista.filter(m => getPorte(m.cilindrada) === filtroPorte);
+  if(search) lista = lista.filter(m =>
+    (m.marca||'').toLowerCase().includes(search) ||
+    (m.modelo||'').toLowerCase().includes(search) ||
+    (m.lote||'').toLowerCase().includes(search) ||
+    (m.ano||'').toLowerCase().includes(search)
+  );
+  if(sortField) {
+    lista.sort((a,b) => {
+      let va, vb;
+      if(sortField === 'pct_fipe') {
+        va = getPct(a) ?? 999; vb = getPct(b) ?? 999;
+      } else if(sortField === 'fipe') {
+        va = a.fipe_csv || fipeCache[fipeKey(a)] || 0;
+        vb = b.fipe_csv || fipeCache[fipeKey(b)] || 0;
+      } else if(sortField === 'lote') {
+        // Lote pode ser numérico ou string — comparar como número quando possível
+        va = parseInt(a.lote) || 0; vb = parseInt(b.lote) || 0;
+        if(!va && !vb) { va = a.lote||''; vb = b.lote||''; }
+      } else if(sortField === 'cilindrada') {
+        va = a.cilindrada || 0; vb = b.cilindrada || 0;
+      } else if(['marca','ano','condicao'].includes(sortField)) {
+        va = (a[sortField]||'').toLowerCase();
+        vb = (b[sortField]||'').toLowerCase();
+        return va < vb ? -sortDir : va > vb ? sortDir : 0;
+      } else {
+        va = a[sortField] || 0; vb = b[sortField] || 0;
+      }
+      return (va - vb) * sortDir;
+    });
+  }
+
+  document.getElementById('stat-motos').textContent = MOTOS.length;
+  document.getElementById('stat-motos-sub').textContent = `${LEILOES.filter(l=>!l.encerrado).length} leilões ativos`;
+
+  const condClass = {financiada:'cond-fin',sinistro:'cond-sin',sucata:'cond-suc',lotamento:'cond-lot'};
+  document.getElementById('motos-tbody').innerHTML = lista.map(m => {
+    const arr = ARREMATADOS[m.id];
+    const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
+    const pct = getPct(m);
+    const pctC = pct ? (pct<30?'pct-great':pct<50?'pct-good':pct<70?'pct-ok':'pct-high') : '';
+    const ind = getIndicador(m, pct);
+    return `<tr class="${motosSelecionadas.has(m.id)?'tr-selecionada':''}">
+      <td style="text-align:center;">
+        <input type="checkbox" ${motosSelecionadas.has(m.id)?'checked':''} 
+          onchange="toggleMotoSelecionada(${m.id},this)"
+          style="width:15px;height:15px;cursor:pointer;accent-color:var(--accent);">
+      </td>
+      <td class="td-lote">${m.lote||'—'}</td>
+      <td class="td-modelo"><strong>${m.marca} ${m.modelo}</strong>${m.financeira?`<br><span style="font-size:10px;color:var(--muted);">${m.financeira}</span>`:''}</td>
+      <td class="td-ano">${m.ano||'—'}</td>
+      <td>${(()=>{
+        const pl = getPorteLabel(m.cilindrada);
+        return pl
+          ? `<span class="porte-tag ${pl.cls}" onclick="editarCilindrada(${m.id},${m.cilindrada})" title="Clique para editar">${pl.label}</span>`
+          : `<span class="porte-tag porte-none" onclick="editarCilindrada(${m.id},null)" title="Clique para informar">—cc</span>`;
+      })()}</td>
+      <td style="font-size:11px;color:var(--muted);">${m.cor||'—'}</td>
+      <td><span class="cond-tag ${condClass[m.condicao]||''}">${m.condicao||'—'}</span></td>
+      <td class="td-lance">${m.lance_inicial?'R$'+Number(m.lance_inicial).toLocaleString('pt-BR'):'—'}</td>
+      <td>${fipe?`<span class="fipe-ok">R$${Number(fipe).toLocaleString('pt-BR')}</span>`:`<span class="fipe-err">—</span>`}</td>
+      <td>${pct?`<span class="pct-tag ${pctC}">${pct}%</span>`:'—'}</td>
+      <td class="td-arrematado">
+        <input type="number" placeholder="R$ arrematado"
+          value="${arr?arr.valor:''}"
+          class="${arr?'saved':''}"
+          onchange="salvarArrematado(${m.id}, this.value, this)"
+          onkeydown="if(event.key==='Enter')salvarArrematado(${m.id},this.value,this)">
+      </td>
+      <td><span class="${ind.cls}">${ind.text}</span></td>
+      <td style="white-space:nowrap;text-align:center;">
+        <span class="td-hist" onclick="verHistModelo('${m.marca}','${m.modelo}')" title="Histórico do modelo">ver</span>
+        <span style="color:var(--border);margin:0 4px;">|</span>
+        <span onclick="excluirMoto(${m.id},'${(m.marca+' '+m.modelo).replace(/'/g,"\\'")}',${!!ARREMATADOS[m.id]})"
+          title="Remover moto do leilão"
+          style="color:#c0392b;cursor:pointer;font-size:12px;font-weight:600;opacity:.7;transition:opacity .15s;"
+          onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'">🗑</span>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function getIndicador(m, pct) {
+  const arr = ARREMATADOS[m.id];
+  if(!arr) return {cls:'ind-none',text:'—'};
+  if(pct===null) return {cls:'ind-ok',text:'✅ SEM FIPE'};
+  if(pct < 30) return {cls:'ind-great',text:'🔥 EXCELENTE'};
+  if(pct < 50) return {cls:'ind-good',text:'✅ ÓTIMO'};
+  if(pct < 70) return {cls:'ind-ok',text:'⚠️ OK'};
+  return {cls:'ind-pass',text:'❌ CARO'};
+}
+
+// ===================== SALVAR ARREMATADO (SUPABASE) =====================
+async function salvarArrematado(id, val, input) {
+  const v = parseFloat(val);
+  if(v && v > 0) {
+    try {
+      const existing = ARREMATADOS[id];
+      if(existing) {
+        await supaFetch(`arrematados?id=eq.${existing.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ valor: v }),
+          prefer: 'return=minimal'
+        });
+        ARREMATADOS[id].valor = v;
+      } else {
+        // Pedir return=representation para receber o registro inserido com o id gerado
+        const res = await supaFetch('arrematados', {
+          method: 'POST',
+          body: JSON.stringify({ moto_id: id, valor: v }),
+          prefer: 'return=representation'
+        });
+        if(res && res[0]) {
+          ARREMATADOS[id] = res[0];
+        } else {
+          // fallback: buscar o registro recém-inserido
+          const arr = await supaFetch(`arrematados?moto_id=eq.${id}&order=id.desc&limit=1`);
+          ARREMATADOS[id] = arr && arr[0] ? arr[0] : { moto_id: id, valor: v };
+        }
+      }
+      input.classList.add('saved');
+      showToast('Valor salvo!', '💾');
+    } catch(err) {
+      showToast('Erro ao salvar: ' + err.message, '❌');
+      return;
+    }
+  } else {
+    // Deletar arrematado se limpar o campo
+    const existing = ARREMATADOS[id];
+    if(existing) {
+      try {
+        await supaFetch(`arrematados?id=eq.${existing.id}`, { method: 'DELETE', prefer: '' });
+        delete ARREMATADOS[id];
+        input.classList.remove('saved');
+        showToast('Registro removido.', '🗑️');
+      } catch(err) {
+        showToast('Erro ao remover: ' + err.message, '❌');
+        return;
+      }
+    }
+  }
+  updateStats();
+  renderAnalise();
+}
+
+// ===================== HISTÓRICO MODELO =====================
+function verHistModelo(marca, modelo) {
+  const motos = MOTOS.filter(m => m.marca === marca && m.modelo === modelo);
+  document.getElementById('hist-modal-title').textContent = `${marca} ${modelo}`;
+  document.getElementById('hist-modal-sub').textContent = `${motos.length} aparição(ões) nos leilões mapeados`;
+  document.getElementById('hist-modal-list').innerHTML = motos.map(m => {
+    const arr = ARREMATADOS[m.id];
+    const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
+    const pct = arr && fipe ? Math.round((arr.valor/fipe)*100) : null;
+    // Buscar nome do leilão
+    const leilao = LEILOES.find(l => l.id === m.leilao_id);
+    return `<div class="hist-row">
+      <div class="hist-row-info">
+        <div style="font-weight:600;">${leilao ? leilao.data : m.leilao_id} — Lote ${m.lote}</div>
+        <div style="color:var(--muted);font-size:11px;">${m.condicao} · ${m.cor} · ${m.ano}${m.financeira?' · '+m.financeira:''}</div>
+        <div style="font-size:11px;color:var(--muted);">Lance ini: ${m.lance_inicial?'R$'+Number(m.lance_inicial).toLocaleString('pt-BR'):'—'}</div>
+      </div>
+      <div style="text-align:right;">
+        ${arr ? `<div class="hist-row-val">R$${Number(arr.valor).toLocaleString('pt-BR')}</div>` : '<div style="color:var(--muted);font-size:12px;">não registrado</div>'}
+        ${pct ? `<div style="font-size:11px;color:var(--muted);">${pct}% FIPE</div>` : ''}
+        ${fipe ? `<div style="font-size:10px;color:var(--muted);">FIPE: R$${Number(fipe).toLocaleString('pt-BR')}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);text-align:center;padding:16px;">Nenhuma aparição encontrada.</div>';
+  document.getElementById('hist-modal').classList.add('open');
+}
+
+function closeHist() { document.getElementById('hist-modal').classList.remove('open'); }
+
+// ===================== ANÁLISE =====================
+function renderAnalise() {
+  const todosComArr = MOTOS.filter(m => ARREMATADOS[m.id]);
+  const todosComFipe = MOTOS.filter(m => (m.fipe_csv||fipeCache[fipeKey(m)]) && ARREMATADOS[m.id]);
+  const pcts = todosComFipe.map(m => ({ m, pct: Math.round((ARREMATADOS[m.id].valor/(m.fipe_csv||fipeCache[fipeKey(m)]))*100) }));
+  const kpis = document.getElementById('analise-kpis');
+  const med = pcts.length ? Math.round(pcts.reduce((a,b)=>a+b.pct,0)/pcts.length) : null;
+  const min = pcts.length ? Math.min(...pcts.map(x=>x.pct)) : null;
+  const melhor = pcts.length ? pcts.find(x=>x.pct===min) : null;
+  kpis.innerHTML = `
+    <div class="acard"><div class="acard-title">Motos mapeadas</div><div class="acard-val" style="color:var(--a2)">${MOTOS.length}</div><div class="acard-sub">em ${LEILOES.length} leilões</div></div>
+    <div class="acard"><div class="acard-title">Arrematações registradas</div><div class="acard-val" style="color:var(--green)">${todosComArr.length}</div><div class="acard-sub">com valor</div></div>
+    <div class="acard"><div class="acard-title">Média % FIPE</div><div class="acard-val" style="color:var(--blue)">${med?med+'%':'—'}</div><div class="acard-sub">${pcts.length} com FIPE</div></div>
+    <div class="acard"><div class="acard-title">Melhor negócio</div><div class="acard-val" style="color:var(--green)">${min?min+'%':'—'}</div><div class="acard-sub">${melhor?melhor.m.marca+' '+melhor.m.modelo:'aguardando dados'}</div></div>`;
+  const buildH = (groups, elId, colorFn) => {
+    const items = Object.entries(groups).map(([k,vs])=>({label:k,v:Array.isArray(vs)?Math.round(vs.reduce((a,b)=>a+b,0)/vs.length):vs,n:Array.isArray(vs)?vs.length:1})).sort((a,b)=>a.v-b.v);
+    if(!items.length){document.getElementById(elId).innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px;">Adicione arrematações para ver</div>';return;}
+    const mx=Math.max(...items.map(x=>x.v));
+    document.getElementById(elId).innerHTML=items.map(i=>`
+      <div class="hbar-item">
+        <div class="hbar-head"><span>${i.label}</span><span>${i.v}${Array.isArray(groups[i.label])?'% ('+i.n+'x)':''}</span></div>
+        <div class="hbar-track"><div class="hbar-fill" style="width:${Math.round(i.v/mx*100)}%;background:${colorFn(i.v)};"></div></div>
+      </div>`).join('');
+  };
+  const byCond={};
+  pcts.forEach(({m,pct})=>{
+    const k={financiada:'Financiada',sinistro:'Sinistro/Pronta',sucata:'Sucata c/Doc',lotamento:'Lote'}[m.condicao]||m.condicao;
+    if(!byCond[k])byCond[k]=[];byCond[k].push(pct);
+  });
+  buildH(byCond,'chart-condicao',v=>v<40?'var(--green)':v<65?'var(--a2)':'var(--red)');
+  const byMod={};
+  pcts.forEach(({m,pct})=>{const k=`${m.marca} ${m.modelo}`;if(!byMod[k])byMod[k]=[];byMod[k].push(pct);});
+  const modItems=Object.entries(byMod).map(([k,vs])=>({label:k,v:Math.round(vs.reduce((a,b)=>a+b,0)/vs.length),n:vs.length})).sort((a,b)=>a.v-b.v).slice(0,8);
+  const mxMod=modItems.length?Math.max(...modItems.map(x=>x.v)):100;
+  document.getElementById('chart-modelos').innerHTML=modItems.length?modItems.map((i,idx)=>`
+    <div class="hbar-item">
+      <div class="hbar-head"><span>${['🥇','🥈','🥉','4°','5°','6°','7°','8°'][idx]} ${i.label}</span><span>${i.v}% (${i.n}x)</span></div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${Math.round(i.v/mxMod*100)}%;background:${i.v<40?'var(--green)':i.v<65?'var(--a2)':'var(--red)'}"></div></div>
+    </div>`).join(''):'<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px;">Registre arrematações para ver o ranking</div>';
+  const byMarca={};
+  MOTOS.forEach(m=>{if(!byMarca[m.marca])byMarca[m.marca]=0;byMarca[m.marca]++;});
+  const marcaItems=Object.entries(byMarca).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const mxMarca=Math.max(...marcaItems.map(x=>x[1]));
+  document.getElementById('chart-marca').innerHTML=marcaItems.map(([k,v])=>`
+    <div class="hbar-item">
+      <div class="hbar-head"><span>${k}</span><span>${v} motos</span></div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${Math.round(v/mxMarca*100)}%;background:var(--blue);"></div></div>
+    </div>`).join('');
+  const faixas={'Até R$5k':0,'R$5k–10k':0,'R$10k–20k':0,'R$20k–50k':0,'Acima R$50k':0};
+  MOTOS.filter(m=>m.lance_inicial).forEach(m=>{
+    const v=Number(m.lance_inicial);
+    if(v<=5000)faixas['Até R$5k']++;
+    else if(v<=10000)faixas['R$5k–10k']++;
+    else if(v<=20000)faixas['R$10k–20k']++;
+    else if(v<=50000)faixas['R$20k–50k']++;
+    else faixas['Acima R$50k']++;
+  });
+  const mxF=Math.max(...Object.values(faixas));
+  document.getElementById('chart-faixa').innerHTML=Object.entries(faixas).map(([k,v])=>`
+    <div class="hbar-item">
+      <div class="hbar-head"><span>${k}</span><span>${v}</span></div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${v?Math.round(v/mxF*100):0}%;background:var(--a2);"></div></div>
+    </div>`).join('');
+  const byFin={};
+  MOTOS.filter(m=>m.financeira).forEach(m=>{if(!byFin[m.financeira])byFin[m.financeira]=0;byFin[m.financeira]++;});
+  const finItems=Object.entries(byFin).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(finItems.length){const mxFin=Math.max(...finItems.map(x=>x[1]));document.getElementById('chart-fin').innerHTML=finItems.map(([k,v])=>`
+    <div class="hbar-item">
+      <div class="hbar-head"><span>${k}</span><span>${v}</span></div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${Math.round(v/mxFin*100)}%;background:var(--muted);"></div></div>
+    </div>`).join('');}
+}
+
+// ===================== HISTÓRICO GERAL =====================
+function sortHistorico(field) {
+  if(histSortField === field) histSortDir *= -1;
+  else { histSortField = field; histSortDir = field === 'data' ? -1 : 1; }
+  renderHistoricoGeral();
+}
+
+function renderHistoricoGeral() {
+  // Só mostra motos que foram ARREMATADAS (têm valor registrado)
+  let comValor = MOTOS.filter(m => ARREMATADOS[m.id]);
+
+  // Filtro de busca — só nessa aba
+  const searchEl = document.getElementById('hist-search');
+  const search = searchEl ? searchEl.value.toLowerCase().trim() : '';
+  if(search) {
+    comValor = comValor.filter(m => {
+      const leilao = LEILOES.find(l => l.id === m.leilao_id);
+      return (m.marca||'').toLowerCase().includes(search)
+        || (m.modelo||'').toLowerCase().includes(search)
+        || (m.condicao||'').toLowerCase().includes(search)
+        || (m.ano||'').toLowerCase().includes(search)
+        || (m.lote||'').toLowerCase().includes(search)
+        || (leilao?.nome||'').toLowerCase().includes(search)
+        || (leilao?.plataforma||'').toLowerCase().includes(search);
+    });
+  }
+
+  const countEl = document.getElementById('hist-count');
+  if(countEl) countEl.textContent = comValor.length ? `${comValor.length} arrematação(ões)` : '';
+
+  const el = document.getElementById('hist-geral-table');
+  if(!comValor.length) {
+    el.innerHTML = search
+      ? `<div style="text-align:center;padding:48px;color:var(--muted);">Nenhuma arrematação encontrada para "<strong>${search}</strong>".</div>`
+      : '<div style="text-align:center;padding:48px;color:var(--muted);">Nenhuma arrematação registrada ainda.</div>';
+    return;
+  }
+
+  // Ordenação dinâmica
+  comValor.sort((a, b) => {
+    const la = LEILOES.find(l => l.id === a.leilao_id);
+    const lb = LEILOES.find(l => l.id === b.leilao_id);
+    const arrA = ARREMATADOS[a.id], arrB = ARREMATADOS[b.id];
+    const fipeA = a.fipe_csv || fipeCache[fipeKey(a)];
+    const fipeB = b.fipe_csv || fipeCache[fipeKey(b)];
+    let va, vb;
+    switch(histSortField) {
+      case 'data':       va = la?.data||''; vb = lb?.data||''; break;
+      case 'plataforma': va = (la?.plataforma||'').toLowerCase(); vb = (lb?.plataforma||'').toLowerCase(); break;
+      case 'lote':       va = parseInt(a.lote)||0; vb = parseInt(b.lote)||0; break;
+      case 'moto':       va = (a.marca+' '+a.modelo).toLowerCase(); vb = (b.marca+' '+b.modelo).toLowerCase(); break;
+      case 'ano':        va = (a.ano||'').toLowerCase(); vb = (b.ano||'').toLowerCase(); break;
+      case 'cilindrada': va = a.cilindrada||0; vb = b.cilindrada||0; break;
+      case 'condicao':   va = (a.condicao||'').toLowerCase(); vb = (b.condicao||'').toLowerCase(); break;
+      case 'lance':      va = a.lance_inicial||0; vb = b.lance_inicial||0; break;
+      case 'arrematado': va = arrA?.valor||0; vb = arrB?.valor||0; break;
+      case 'fipe':       va = fipeA||0; vb = fipeB||0; break;
+      case 'pct':        va = (arrA&&fipeA)?Math.round((arrA.valor/fipeA)*100):999; vb = (arrB&&fipeB)?Math.round((arrB.valor/fipeB)*100):999; break;
+      default:           va = 0; vb = 0;
+    }
+    if(typeof va === 'string') return va.localeCompare(vb) * histSortDir;
+    return (va - vb) * histSortDir;
+  });
+
+  // Função para gerar cabeçalho clicável com seta
+  const th = (field, label, extra='') => {
+    const ativo = histSortField === field;
+    const seta = ativo ? (histSortDir === 1 ? ' ↑' : ' ↓') : '';
+    return `<th onclick="sortHistorico('${field}')" style="cursor:pointer;user-select:none;${ativo?'color:var(--accent);':''}" ${extra}>${label}${seta}</th>`;
+  };
+
+  const condClass = {financiada:'cond-fin',sinistro:'cond-sin',sucata:'cond-suc',lotamento:'cond-lot'};
+  el.innerHTML=`<table style="min-width:700px;">
+    <thead><tr>
+      ${th('data','Data')}
+      ${th('plataforma','Plataforma')}
+      ${th('lote','Lote')}
+      ${th('moto','Moto')}
+      ${th('ano','Ano')}
+      ${th('cilindrada','Porte')}
+      ${th('condicao','Condição')}
+      ${th('lance','Lance ini.')}
+      ${th('arrematado','Arrematado')}
+      ${th('fipe','FIPE')}
+      ${th('pct','% FIPE')}
+      <th>Indicador</th><th></th>
+    </tr></thead>
+    <tbody>${comValor.map(m=>{
+      const arr=ARREMATADOS[m.id];
+      const fipe=m.fipe_csv||fipeCache[fipeKey(m)];
+      const pct=arr&&fipe?Math.round((arr.valor/fipe)*100):null;
+      const pctC=pct?(pct<30?'pct-great':pct<50?'pct-good':pct<70?'pct-ok':'pct-high'):'';
+      const ind=getIndicador(m,pct);
+      const leilao=LEILOES.find(l=>l.id===m.leilao_id);
+      return `<tr>
+        <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${leilao?leilao.data:m.leilao_id}</td>
+        <td style="font-size:11px;color:var(--muted);">${leilao?.plataforma||'—'}</td>
+        <td class="td-lote">${m.lote||'—'}</td>
+        <td><strong>${m.marca} ${m.modelo}</strong></td>
+        <td style="color:var(--muted);font-size:11px;">${m.ano||'—'}</td>
+        <td>${(()=>{ const pl=getPorteLabel(m.cilindrada); return pl?`<span class="porte-tag ${pl.cls}">${pl.label}</span>`:'<span style="color:var(--muted);font-size:11px;">—</span>'; })()}</td>
+        <td><span class="cond-tag ${condClass[m.condicao]||''}">${m.condicao||'—'}</span></td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);">${m.lance_inicial?'R$'+Number(m.lance_inicial).toLocaleString('pt-BR'):'—'}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--green);">R$${Number(arr.valor).toLocaleString('pt-BR')}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);">${fipe?'R$'+Number(fipe).toLocaleString('pt-BR'):'—'}</td>
+        <td>${pct?`<span class="pct-tag ${pctC}">${pct}%</span>`:'—'}</td>
+        <td><span class="${ind.cls}">${ind.text}</span></td>
+        <td><button onclick="deletarArrematado(${m.id},this)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+async function deletarArrematado(motoId, btn) {
+  const existing = ARREMATADOS[motoId];
+  if(!existing) return;
+  try {
+    await supaFetch(`arrematados?id=eq.${existing.id}`, { method: 'DELETE', prefer: '' });
+    delete ARREMATADOS[motoId];
+    showToast('Registro removido.', '🗑️');
+    updateStats();
+    renderHistoricoGeral();
+    if(currentLeilao) renderMotos();
+  } catch(err) {
+    showToast('Erro: ' + err.message, '❌');
+  }
+}
+
+// ===================== STATS =====================
+function updateStats() {
+  const arr = MOTOS.filter(m => ARREMATADOS[m.id]);
+  document.getElementById('stat-arr').textContent = arr.length;
+  const comFipe = arr.filter(m => m.fipe_csv||fipeCache[fipeKey(m)]);
+  if(comFipe.length) {
+    const pcts = comFipe.map(m => Math.round((ARREMATADOS[m.id].valor/(m.fipe_csv||fipeCache[fipeKey(m)]))*100));
+    const med = Math.round(pcts.reduce((a,b)=>a+b,0)/pcts.length);
+    const min = Math.min(...pcts);
+    const best = comFipe[pcts.indexOf(min)];
+    document.getElementById('stat-fipe-med').textContent = med+'%';
+    document.getElementById('stat-fipe-sub').textContent = `${comFipe.length} registros c/ FIPE`;
+    document.getElementById('stat-best').textContent = min+'%';
+    document.getElementById('stat-best-sub').textContent = best.marca+' '+best.modelo;
+  }
+}
+
+// ===================== BUSCA GLOBAL =====================
+function buscaGlobal() {
+  const q = document.getElementById('global-search').value.toLowerCase().trim();
+  const box = document.getElementById('search-results');
+  if(q.length < 2) { box.style.display='none'; return; }
+
+  const res = MOTOS.filter(m =>
+    (m.marca||'').toLowerCase().includes(q) ||
+    (m.modelo||'').toLowerCase().includes(q) ||
+    (m.lote||'').toLowerCase().includes(q) ||
+    (`${m.marca} ${m.modelo}`).toLowerCase().includes(q)
+  ).slice(0, 30);
+
+  if(!res.length) {
+    box.style.display='block';
+    box.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;">Nenhuma moto encontrada.</div>';
+    return;
+  }
+
+  // Agrupar por modelo
+  const byModelo = {};
+  res.forEach(m => {
+    const key = `${m.marca}|${m.modelo}`;
+    if(!byModelo[key]) byModelo[key] = [];
+    byModelo[key].push(m);
+  });
+
+  box.style.display='block';
+  box.innerHTML = Object.entries(byModelo).map(([key, motos]) => {
+    const [marca, modelo] = key.split('|');
+    const header = `<div style="padding:7px 14px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--s2);border-bottom:1px solid var(--border);">
+      🏍 ${marca} ${modelo} — ${motos.length} aparição(ões)
+    </div>`;
+    const rows = motos.map(m => {
+      const l = LEILOES.find(l => l.id === m.leilao_id);
+      const arr = ARREMATADOS[m.id];
+      const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
+      const pct = arr && fipe ? Math.round((arr.valor/fipe)*100) : null;
+      const badge = l ? getBadgeLeilao(l) : 'none';
+      const badgeHtml = badge === 'urgente'
+        ? '<span style="background:var(--accent);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:4px;">🔥 ESTA SEMANA</span>'
+        : badge === 'encerrado'
+        ? '<span style="background:rgba(0,0,0,.1);color:var(--muted);font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:4px;">ENCERRADO</span>'
+        : badge === 'proxima'
+        ? '<span style="background:rgba(180,100,0,.1);color:var(--a2);font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:4px;">PRÓX. SEMANA</span>'
+        : '';
+      const dataFmt = l ? (() => {
+        const d = new Date(l.data+'T00:00:00');
+        return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+      })() : '—';
+      return `<div class="search-result-item" onclick="abrirFichaMoto(${m.id});document.getElementById('global-search').value='';document.getElementById('search-results').style.display='none';">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+            <span style="font-size:12px;font-weight:600;">${m.ano} · ${m.cor||'—'}</span>
+            <span style="font-size:10px;color:var(--muted);background:rgba(0,0,0,.05);padding:1px 5px;border-radius:3px;">${m.condicao}</span>
+            ${badgeHtml}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+            📅 ${dataFmt}${l&&l.hora?' às '+l.hora:''} · ${l?l.nome:m.leilao_id}${m.lote?' · Lote <strong>'+m.lote+'</strong>':''}
+          </div>
+        </div>
+        <div style="text-align:right;min-width:130px;padding-left:10px;">
+          <div style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--a2);">
+            ${m.lance_inicial ? 'Lance: R$'+Number(m.lance_inicial).toLocaleString('pt-BR') : 'Lance: —'}
+          </div>
+          ${arr ? `<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);">✅ R$${Number(arr.valor).toLocaleString('pt-BR')}</div>` : '<div style="font-size:10px;color:var(--muted);">não arrematado</div>'}
+          ${pct ? `<div style="font-size:10px;color:var(--muted);">${pct}% FIPE</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+    return header + rows;
+  }).join('');
+}
+document.addEventListener('click', e => {
+  if(!e.target.closest('.global-search-wrap')) document.getElementById('search-results').style.display='none';
+});
+
+// ===================== FICHA MOTO =====================
+function abrirFichaMoto(motoId) {
+  const m = MOTOS.find(x => x.id === motoId);
+  if(!m) return;
+  const l = LEILOES.find(x => x.id === m.leilao_id);
+  const arr = ARREMATADOS[m.id];
+  const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
+  const pct = arr && fipe ? Math.round((arr.valor/fipe)*100) : null;
+
+  document.getElementById('ficha-lote').textContent = m.lote || '—';
+  document.getElementById('ficha-marca').textContent = m.marca || '';
+  document.getElementById('ficha-modelo').textContent = m.modelo || '';
+
+  // Badges
+  const condColor = m.condicao==='financiada'?'var(--blue)':m.condicao==='sinistro'?'var(--a2)':'var(--red)';
+  const badge = l ? getBadgeLeilao(l) : '';
+  const urgBadge = badge==='urgente' ? '<span style="background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">🔥 ESTA SEMANA</span>' : badge==='encerrado' ? '<span style="background:rgba(0,0,0,.1);color:var(--muted);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">ENCERRADO</span>' : '';
+  document.getElementById('ficha-badges').innerHTML = `
+    <span style="background:${condColor}22;color:${condColor};font-size:10px;font-weight:700;padding:2px 9px;border-radius:4px;border:1px solid ${condColor}44;">${m.condicao||'—'}</span>
+    ${urgBadge}`;
+
+  // Grid de dados
+  const items = [
+    ['Ano', m.ano||'—'],
+    ['Cor', m.cor||'—'],
+    ['Lance Inicial', m.lance_inicial ? 'R$'+Number(m.lance_inicial).toLocaleString('pt-BR') : '—'],
+    ['FIPE', fipe ? 'R$'+Number(fipe).toLocaleString('pt-BR') : '—'],
+    ['% FIPE', pct ? `${pct}%` : '—'],
+    ['Financeira/Pátio', m.financeira||m.patio||'—'],
+  ];
+  if(arr) items.push(['✅ Arrematado', 'R$'+Number(arr.valor).toLocaleString('pt-BR')]);
+
+  document.getElementById('ficha-grid').innerHTML = items.map(([lbl,val]) => `
+    <div class="ficha-item">
+      <div class="ficha-item-label">${lbl}</div>
+      <div class="ficha-item-val">${val}</div>
+      ${lbl==='% FIPE' && pct ? `<div class="ficha-fipe-bar"><div class="ficha-fipe-fill" style="width:${Math.min(pct,100)}%;background:${pct<60?'var(--green)':pct<85?'var(--a2)':'var(--red)'};"></div></div>` : ''}
+    </div>`).join('');
+
+  // Info do leilão
+  if(l) {
+    const dataFmt = l.data ? (() => { const d=new Date(l.data+'T00:00:00'); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; })() : '—';
+    document.getElementById('ficha-leilao-info').innerHTML = `
+      <strong style="color:var(--text);">📋 ${l.nome}</strong>
+      <span style="margin:0 8px;color:var(--border);">|</span>
+      📅 ${dataFmt}${l.hora?' às '+l.hora:''}
+      <span style="margin:0 8px;color:var(--border);">|</span>
+      🏢 ${l.plataforma||'—'}
+      ${l.local?`<span style="margin:0 8px;color:var(--border);">|</span>📍 ${l.local}`:''}`;
+  } else {
+    document.getElementById('ficha-leilao-info').innerHTML = '—';
+  }
+
+  // Botão ver leilão
+  const btnLeilao = document.getElementById('ficha-btn-leilao');
+  if(m.url) {
+    btnLeilao.textContent = 'Ver no Site ↗';
+    btnLeilao.onclick = () => window.open(m.url,'_blank');
+  } else {
+    btnLeilao.textContent = 'Ver Leilão Completo';
+    btnLeilao.onclick = () => { fecharFichaMoto(); abrirLeilao(m.leilao_id); };
+  }
+
+  document.getElementById('modal-ficha-moto').classList.add('open');
+}
+function fecharFichaMoto() { document.getElementById('modal-ficha-moto').classList.remove('open'); }
+
+// ===================== FILTROS HOME =====================
+let hfMarca = '', hfCond = '', hfPer = '', hfLeilao = '', hfPorte = '';
+
+// Mapa de normalização de marcas sujas → marca limpa
+const MARCA_NORM = {
+  // Honda variantes
+  'honda/cg': 'Honda', 'honda/cg150': 'Honda', 'honda/cb': 'Honda',
+  'honda/pcx': 'Honda', 'honda/nxr': 'Honda', 'honda/xre': 'Honda',
+  'honda/biz': 'Honda', 'honda/pop': 'Honda', 'honda/lead': 'Honda',
+  // Yamaha variantes
+  'yamaha/factor': 'Yamaha', 'yamaha/ybr': 'Yamaha', 'yamaha/fazer': 'Yamaha',
+  'yamaha/yzf': 'Yamaha', 'yamaha/mt': 'Yamaha', 'yamaha/xtz': 'Yamaha',
+  // Shineray variantes
+  'shineray/xy': 'Shineray', 'shineray': 'Shineray',
+  // Suzuki
+  'suzuki/en125': 'Suzuki', 'suzuki/en': 'Suzuki',
+  // Importadas prefixo I/
+  'i/leopard': 'Leopard', 'i/kawasaki': 'Kawasaki', 'i/bmw': 'BMW',
+  'i/ducati': 'Ducati', 'i/triumph': 'Triumph', 'i/harley-davidson': 'Harley-Davidson',
+  'i/royal enfield': 'Royal Enfield', 'i/yamaha': 'Yamaha', 'i/honda': 'Honda',
+  'i/suzuki': 'Suzuki', 'i/ktm': 'KTM', 'i/aprilia': 'Aprilia',
+  'i/benelli': 'Benelli', 'i/cfmoto': 'CFMoto', 'i/dafra': 'Dafra',
+  'i': null, // descarta marca só "I"
+  // Capitalização
+  'bmw': 'BMW', 'jtz': 'JTZ', 'ktm': 'KTM',
+  'harley-davidson': 'Harley-Davidson', 'harley davidson': 'Harley-Davidson',
+  'royal enfield': 'Royal Enfield',
+  'veiculo': 'Veículo', 'veiculo': 'Veículo',
+  // Palavras genéricas que não são marcas reais
+  'veiculo': null, 'veículo': null, 'vveiculo': null, 'vveículo': null,
+  'moto': null, 'motocicleta': null, 'sucata': null, '—': null, '-': null, '': null,
+};
+
+function normalizarMarca(marca) {
+  if(!marca) return null;
+  const low = marca.toLowerCase().trim();
+  // Lookup direto no mapa
+  if(MARCA_NORM.hasOwnProperty(low)) return MARCA_NORM[low];
+  // Qualquer padrão "Marca/qualquercoisa" → pega só a parte antes da /
+  if(low.includes('/')) {
+    const [prefix] = low.split('/');
+    if(MARCA_NORM.hasOwnProperty(prefix)) return MARCA_NORM[prefix];
+    if(prefix === 'i') return null;
+    if(['veiculo','veículo','vveiculo','vveículo'].includes(prefix)) return null;
+    return prefix.charAt(0).toUpperCase() + prefix.slice(1);
+  }
+  // Descarta strings que são claramente lixo
+  if(['veiculo','veículo','vveiculo','vveículo','moto','motocicleta','-','—'].includes(low)) return null;
+  // Capitaliza primeira letra de cada palavra
+  return marca.trim().split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+}
+
+function popularFiltroMarcas() {
+  // Pega marcas únicas já normalizadas
+  const marcasSet = new Set(
+    MOTOS.map(m => normalizarMarca(m.marca)).filter(Boolean)
+  );
+  const marcas = [...marcasSet].sort();
+  const sel = document.getElementById('hf-marca');
+  sel.innerHTML = '<option value="">🏍 Todas as marcas</option>' +
+    marcas.map(m => `<option value="${m}">${m}</option>`).join('');
+}
+
+function setFiltroHomePorte(val, btn) {
+  hfPorte = val;
+  document.querySelectorAll('[data-porte]').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else document.querySelector('[data-porte=""]').classList.add('active');
+  renderLeiloes();
+}
+
+function setFiltroHomeCond(val, btn) {
+  hfCond = val;
+  document.querySelectorAll('[data-cond]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  aplicarFiltrosHome();
+}
+
+function setFiltroHomePer(val, btn) {
+  hfPer = val;
+  document.querySelectorAll('[data-per]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  aplicarFiltrosHome();
+}
+
+function popularFiltroLeiloes() {
+  const sel = document.getElementById('hf-leilao');
+  if(!sel) return;
+  // Agrupa por plataforma — mostra cada leiloeira uma vez
+  const plataformas = [...new Set(
+    LEILOES.map(l => l.plataforma).filter(Boolean).sort()
+  )];
+  sel.innerHTML = '<option value="">📋 Todas as leiloeiras</option>' +
+    plataformas.map(p => `<option value="${p}">${p}</option>`).join('');
+  if(hfLeilao) sel.value = hfLeilao;
+}
+
+function aplicarFiltrosHome() {
+  hfMarca  = document.getElementById('hf-marca').value;
+  hfLeilao = document.getElementById('hf-leilao').value;
+  renderLeiloes();
+}
+
+function limparFiltrosHome() {
+  hfMarca = ''; hfCond = ''; hfPer = ''; hfLeilao = ''; hfPorte = '';
+  document.getElementById('hf-marca').value = '';
+  document.getElementById('hf-leilao').value = '';
+  document.querySelectorAll('[data-cond]').forEach(b => b.classList.toggle('active', b.dataset.cond===''));
+  document.querySelectorAll('[data-per]').forEach(b => b.classList.toggle('active', b.dataset.per===''));
+  document.querySelectorAll('[data-porte]').forEach(b => b.classList.toggle('active', b.dataset.porte===''));
+  renderLeiloes();
+}
+
+// ===================== MODAL NOVO LEILÃO =====================
+function abrirModalLeilao() { document.getElementById('modal-leilao').classList.add('open'); }
+function fecharModalLeilao() { document.getElementById('modal-leilao').classList.remove('open'); }
+
+async function salvarNovoLeilao() {
+  const id = document.getElementById('nl-id').value.trim();
+  const nome = document.getElementById('nl-nome').value.trim();
+  const dataStr = document.getElementById('nl-data').value.trim(); // DD/MM/AAAA
+  const hora = document.getElementById('nl-hora').value.trim();
+  const plat = document.getElementById('nl-plat').value;
+  const local = document.getElementById('nl-local').value.trim();
+  const link = document.getElementById('nl-link').value.trim();
+  if(!id||!nome||!dataStr) { showToast('Preencha ID, nome e data.','⚠️'); return; }
+  const [d,m,y] = dataStr.split('/');
+  const dataISO = `${y}-${m}-${d}`;
+  const meses=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const payload = { id, nome, plataforma:plat, data:dataISO, dia:parseInt(d), mes:meses[parseInt(m)-1], hora, local, link, encerrado:false };
+  try {
+    await supaFetch('leiloes', { method:'POST', body:JSON.stringify(payload) });
+    fecharModalLeilao();
+    showToast('Leilão criado!', '✅');
+    await carregarDados();
+  } catch(err) {
+    showToast('Erro: '+err.message,'❌');
+  }
+}
+
+// ===================== MODAL NOVA MOTO =====================
+function abrirModalMoto() {
+  if(!currentLeilao) { showToast('Abra um leilão primeiro.','⚠️'); return; }
+  // Limpar campos
+  ['nm-lote','nm-marca','nm-modelo','nm-ano','nm-cor','nm-lance','nm-fin'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  document.getElementById('nm-cond').value = 'sinistro';
+  document.getElementById('modal-moto').classList.add('open');
+  setTimeout(() => document.getElementById('nm-marca').focus(), 100);
+}
+function fecharModalMoto() { document.getElementById('modal-moto').classList.remove('open'); }
+
+async function excluirMoto(id, nome, temArrematado) {
+  if(temArrematado) {
+    showToast(`"${nome}" tem arrematado registrado — remova o valor antes de excluir.`, '⚠️');
+    return;
+  }
+  if(!confirm(`Excluir "${nome}" deste leilão?\nEssa ação não pode ser desfeita.`)) return;
+  try {
+    await supaFetch(`motos?id=eq.${id}`, { method: 'DELETE', prefer: '' });
+    // Remover da memória local
+    const idx = MOTOS.findIndex(m => m.id === id);
+    if(idx !== -1) MOTOS.splice(idx, 1);
+    renderMotos();
+    updateStats();
+    showToast(`"${nome}" removida.`, '🗑️');
+  } catch(err) {
+    showToast('Erro ao excluir: ' + err.message, '❌');
+  }
+}
+
+
+async function salvarNovaMoto() {
+  const marca = document.getElementById('nm-marca').value.trim();
+  const modelo = document.getElementById('nm-modelo').value.trim();
+  if(!marca||!modelo) { showToast('Preencha marca e modelo.','⚠️'); return; }
+  try {
+    const payload = {
+      lote: document.getElementById('nm-lote').value.trim(),
+      leilao_id: currentLeilao.id,
+      marca, modelo,
+      ano: document.getElementById('nm-ano').value.trim(),
+      cor: document.getElementById('nm-cor').value.trim(),
+      condicao: document.getElementById('nm-cond').value,
+      lance_inicial: parseFloat(document.getElementById('nm-lance').value)||null,
+      financeira: document.getElementById('nm-fin').value.trim()||null
+    };
+    await supaFetch('motos', { method:'POST', body:JSON.stringify(payload) });
+    fecharModalMoto();
+    showToast('Moto adicionada!', '✅');
+    await carregarDados();
+    renderMotos();
+  } catch(err) {
+    showToast('Erro: '+err.message,'❌');
+  }
+}
+
+// ===================== TOAST =====================
+function showToast(msg, icon='✅') {
+  document.getElementById('toast-m').textContent = msg;
+  document.getElementById('toast-i').textContent = icon;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ===================== INIT =====================
+carregarDados();
+</script>
+</body>
+</html>
