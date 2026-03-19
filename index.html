@@ -2099,9 +2099,9 @@ function parseMilan(texto) {
     'KASINSKI','BENELLI','CFMOTO','ZONTES','APRILIA','INDIAN','KYMCO','PIAGGIO',
     'VESPA','LEVA','HERO'];
 
-  // Extrair data do cabeçalho
+  // Extrair data do cabeçalho (busca nas primeiras 20 linhas)
   let dataLeilao = '', horaLeilao = '';
-  for(const l of linhas.slice(0, 10)) {
+  for(const l of linhas.slice(0, 20)) {
     const m = l.match(/(\d{1,2})\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)(?:\s+(\d{4}))?\s+(\d{2}:\d{2})/i);
     if(m) {
       const meses = {JAN:'01',FEV:'02',MAR:'03',ABR:'04',MAI:'05',JUN:'06',
@@ -2113,10 +2113,10 @@ function parseMilan(texto) {
     }
   }
 
-  // Encontrar índices dos lotes
+  // Encontrar índices dos lotes (tolerante a espaços extras)
   const loteIdx = [];
   for(let i = 0; i < linhas.length; i++) {
-    const m = linhas[i].trim().match(/^Lote\s+(\d+)$/);
+    const m = linhas[i].trim().match(/^Lote\s+(\d+)\s*$/);
     if(m) loteIdx.push({ i, lote: m[1] });
   }
 
@@ -2133,9 +2133,9 @@ function parseMilan(texto) {
     const ehCarro = PALAVRAS_CARRO.some(p => descU.includes(p));
     if(!ehMoto || ehCarro) continue;
 
-    // Extrair ano
-    const anoM = descU.match(/ANO\s+(\d{4})\/(\d{4})/);
-    const ano = anoM ? `${anoM[1].slice(-2)}/${anoM[2].slice(-2)}` : '';
+    // Extrair ano (com ou sem barra)
+    const anoM = descU.match(/ANO\s+(\d{4})(?:\/(\d{4}))?/);
+    const ano = anoM ? `${anoM[1].slice(-2)}/${(anoM[2] || anoM[1]).slice(-2)}` : '';
 
     // Extrair cor antes de limpar (evita vazar no modelo)
     const corMatchM = desc.match(/\b(PRETA|BRANCA|VERMELHA|AZUL|CINZA|PRATA|AMARELA|VERDE|ROSA|LARANJA|ROXA|MARROM|GRAFITE|TITAN[IÍ]O|BEGE|DOURADA|VINHO|LIL[AÁ]S)\b/i);
@@ -2147,18 +2147,19 @@ function parseMilan(texto) {
     if(corMatchM) descLimpa = descLimpa.replace(new RegExp('\\b' + corMatchM[1] + '\\b', 'i'), '').replace(/\s+/g, ' ').trim();
 
     const partes = descLimpa.split(/\s+/);
-    const marca = toTitle(partes[0] || '');
+    const marcaRaw = toTitle(partes[0] || '');
+    const marca = normalizarMarca(marcaRaw) || marcaRaw;
     const modelo = toTitle(partes.slice(1).join(' '));
 
     // Extrair financeira, condição, lance, monta e pátio do bloco
-    let financeira = 'Financeira', condicao = 'financiada', lance = 0, monta = null, patio = '';
+    let financeira = '', condicao = 'financiada', lance = 0, monta = null, patio = '';
     for(const linha of bloco) {
       const lt = linha.trim();
       const lu = lt.toUpperCase();
       const lw = lt.toLowerCase();
       const fm = lt.match(/^\((.+)\)\.?$/);
       if(fm) financeira = fm[1];
-      if(lu.includes('SINISTRO') || lu.includes('RECUPERADO')) condicao = 'sinistro';
+      if(lu.includes('SINISTRO') || lu.includes('RECUPERADO') || lu.includes('COLISÃO') || lu.includes('COLISAO') || lu.includes('ROUBO') || lu.includes('FURTO') || lu.includes('INCÊNDIO') || lu.includes('INCENDIO') || lu.includes('GRANIZO') || lu.includes('ALAGAMENTO') || lu.includes('VANDALISMO')) condicao = 'sinistro';
       if(lu.includes('SUCATA')) condicao = 'sucata';
       const lm = lt.match(/^R\$\s*([\d.]+,\d{2})/);
       if(lm && !lance) lance = parseFloat(lm[1].replace(/\./g, '').replace(',', '.'));
@@ -2167,7 +2168,9 @@ function parseMilan(texto) {
       if(lw.includes('grande monta')) monta = 'grande';
       if(!patio && /^(Rod\.|Av\.|Rua |Estrada )/i.test(lt)) patio = lt;
     }
-    if(!patio) patio = 'Rod. Raposo Tavares - Km 20';
+    if(!financeira) financeira = 'Particular/Empresa';
+
+    if(!dataLeilao) continue;
 
     const key = `${lote}|${marca}|${modelo}|${ano}`;
     if(seen.has(key)) continue;
