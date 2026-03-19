@@ -1973,15 +1973,18 @@ function parseCopart(texto) {
   if (headerIdx < 0) headerIdx = 0;
   const sep = linhas[headerIdx].includes(';') ? ';' : ',';
   const headers = linhas[headerIdx].split(sep).map(h => h.trim().toLowerCase().replace(/["\uFEFF]/g, ''));
-  const iAno    = headers.findIndex(h => h.includes('ano'));
-  const iMarca  = headers.findIndex(h => h === 'marca');
-  const iModelo = headers.findIndex(h => h === 'modelo');
-  const iCond   = headers.findIndex(h => h.includes('condi') && !h.includes('func'));
-  const iLance  = headers.findIndex(h => h.includes('lance') && !h.includes('meu'));
-  const iPatio  = headers.findIndex(h => (h.includes('pátio') || h.includes('patio')) && h.includes('veículo'));
-  const iLote   = headers.findIndex(h => h === 'lote');
-  const iFipe   = headers.findIndex(h => h.includes('fipe'));
-  const iData   = headers.findIndex(h => h.includes('data') && h.includes('leil'));
+  const iAno         = headers.findIndex(h => h.includes('ano') && h.includes('fab'));
+  const iAnoMod      = headers.findIndex(h => h.includes('ano') && h.includes('mod'));
+  const iMarca       = headers.findIndex(h => h.includes('marca'));
+  const iModelo      = headers.findIndex(h => h.includes('modelo'));
+  const iCor         = headers.findIndex(h => h.includes('cor'));
+  const iCond        = headers.findIndex(h => h.includes('condi') && !h.includes('func'));
+  const iFinanceira  = headers.findIndex(h => h.includes('financ') || h.includes('credor'));
+  const iLance       = headers.findIndex(h => h.includes('lance') && !h.includes('meu'));
+  const iPatio       = headers.findIndex(h => (h.includes('pátio') || h.includes('patio')) && h.includes('veículo'));
+  const iLote        = headers.findIndex(h => h.includes('lote'));
+  const iFipe        = headers.findIndex(h => h.includes('fipe'));
+  const iData        = headers.findIndex(h => h.includes('data') && h.includes('leil'));
   const iPatioLeilao = headers.findIndex(h => (h.includes('pátio') || h.includes('patio')) && h.includes('leil'));
   const iMontaCopart = headers.findIndex(h => h.includes('tipo') && h.includes('monta'));
 
@@ -1991,15 +1994,18 @@ function parseCopart(texto) {
     const marca  = toTitle(cols[iMarca] || '');
     const modelo = toTitle(cols[iModelo] || '');
     if (!marca || !modelo) continue;
-    const anoRaw = String(cols[iAno] || '');
-    const anoNum = anoRaw.match(/(\d{2,4})/);
-    const anoShort = anoNum ? anoNum[1].slice(-2) : '';
-    const ano = anoShort ? anoShort + '/' + anoShort : '';
+    const anoFabRaw = String(iAno >= 0 ? cols[iAno] || '' : cols[headers.findIndex(h => h.includes('ano'))] || '');
+    const anoModRaw = String(iAnoMod >= 0 ? cols[iAnoMod] || '' : '');
+    const anoFabMatch = anoFabRaw.match(/(\d{4}|\d{2})/);
+    const anoModMatch = anoModRaw.match(/(\d{4}|\d{2})/);
+    const anoFabShort = anoFabMatch ? anoFabMatch[1].slice(-2) : '';
+    const anoModShort = anoModMatch ? anoModMatch[1].slice(-2) : anoFabShort;
+    const ano = anoFabShort ? anoFabShort + '/' + anoModShort : '';
     const condRaw = (cols[iCond] || '').toUpperCase();
     let condicao = 'financiada';
-    if (condRaw.includes('COLISÃO') || condRaw.includes('COLISAO') || condRaw.includes('ROUBO') || condRaw.includes('FURTO') || condRaw.includes('SINISTRO')) condicao = 'sinistro';
+    if (condRaw.includes('COLISÃO') || condRaw.includes('COLISAO') || condRaw.includes('ROUBO') || condRaw.includes('FURTO') || condRaw.includes('SINISTRO') || condRaw.includes('INCÊNDIO') || condRaw.includes('INCENDIO') || condRaw.includes('GRANIZO') || condRaw.includes('ALAGAMENTO') || condRaw.includes('VANDALISMO')) condicao = 'sinistro';
     if (condRaw.includes('SUCATA')) condicao = 'sucata';
-    const lance = parseInt(String(cols[iLance] || '0').replace(/[^\d]/g, '')) || 0;
+    const lance = parseFloat(String(cols[iLance] || '0').replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
     const fipeRaw = cols[iFipe] || '';
     const fipeVal = parseFloat(String(fipeRaw).replace(/\./g,'').replace(',','.').replace(/[^\d.]/g,'')) || null;
     const patio  = toTitle(cols[iPatio] || '');
@@ -2016,10 +2022,14 @@ function parseCopart(texto) {
     const montaRaw = iMontaCopart >= 0 ? (cols[iMontaCopart] || '').toLowerCase() : '';
     const monta = montaRaw.includes('pequena') ? 'pequena' : montaRaw.includes('média') || montaRaw.includes('media') ? 'media' : montaRaw.includes('grande') ? 'grande' : null;
 
+    const cor = iCor >= 0 ? toTitle(cols[iCor] || '') : '';
+    const financeiraRaw = iFinanceira >= 0 ? (cols[iFinanceira] || '').trim() : '';
+    const financeira = financeiraRaw || 'Particular/Empresa';
+
     const key = lote + '|' + marca + '|' + modelo;
     if (seen.has(key)) continue;
     seen.add(key);
-    motos.push({ lote, marca, modelo, ano, cor: '', condicao, lance, financeira: 'Particular/Empresa', patio: patioLeilao || patio, fipe_csv: fipeVal, monta, cilindrada: extractCilindrada(marca, modelo), data_leilao: dataLeilao, hora_leilao: horaLeilao });
+    motos.push({ lote, marca, modelo, ano, cor, condicao, lance, financeira, patio: patioLeilao || patio, fipe_csv: fipeVal, monta, cilindrada: extractCilindrada(marca, modelo), data_leilao: dataLeilao, hora_leilao: horaLeilao });
   }
   return motos;
 }
