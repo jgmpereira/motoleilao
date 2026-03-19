@@ -1914,23 +1914,39 @@ function parseVip(texto) {
     if (!anoM) continue;
     const ano = anoM[1].slice(-2) + '/' + anoM[2].slice(-2);
 
-    // Lote, pátio, data, hora — todos dentro do bloco até "Ver mais"
+    // Lote, pátio, data, hora, lance, cor, condição, monta — bloco até "Ver mais"
     let lote = '', patio = '', dataLeilao = '', horaLeilao = '', lance = 0;
+    let cor = '', condicao = 'sinistro', financeira = 'Seguradora', monta = null;
     for (let j = i + 1; j < Math.min(i + 18, linhas.length); j++) {
-      const lm = linhas[j].match(/Lote:\s*(\d+)\s+Local:\s*(\S+)/i);
-      if (lm) { lote = lm[1]; patio = lm[2]; }
+      const u = linhas[j].toLowerCase();
 
-      const dm = linhas[j].match(/In[íi]cio:\s*(\d{2})\/(\d{2})\/(\d{4})/i);
+      // Lote + Local (captura nome completo do pátio, não só primeiro token)
+      const lm = linhas[j].match(/Lote:\s*(\d+)\s+Local:\s*(.+)/i);
+      if (lm) { lote = lm[1]; patio = toTitle(lm[2].trim()); }
+
+      // Início: DD/MM/YYYY [HH:MM] — hora pode estar na mesma linha ou na seguinte
+      const dm = linhas[j].match(/In[íi]cio:\s*(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}:\d{2}))?/i);
       if (dm) {
         dataLeilao = `${dm[3]}-${dm[2]}-${dm[1]}`;
-        if (/^\d{2}:\d{2}$/.test(linhas[j + 1] || '')) horaLeilao = linhas[j + 1];
+        horaLeilao = dm[4] || '';
+        if (!horaLeilao) { const hm = (linhas[j + 1] || '').match(/^\d{2}:\d{2}/); if (hm) horaLeilao = hm[0]; }
       }
 
-      // Pega "Valor Atual" → próxima linha com R$
-      if (/valor atual/i.test(linhas[j])) {
+      // Lance: "Valor Atual", "Lance Inicial" ou "1ª Praça" → próxima linha com R$
+      if (/valor atual|lance\s+(?:atual|inicial)|1ª\s+pra[çc]a/i.test(linhas[j])) {
         const vm = linhas[j + 1]?.match(/^R\$\s*([\d.]+,\d{2})/);
         if (vm) lance = parseFloat(vm[1].replace(/\./g, '').replace(',', '.'));
       }
+
+      // Cor
+      if (!cor) { const cm = linhas[j].match(/\b(preta|branca|vermelha|azul|cinza|prata|amarela|verde|rosa|laranja|roxa|marrom|grafite|titan[ií]o|bege|dourada|vinho|lil[aá]s)\b/i); if (cm) cor = toTitle(cm[1]); }
+
+      // Condição / financeira / monta
+      if (u.includes('financiamento') || u.includes('alienad')) { condicao = 'financiada'; financeira = 'Financeira'; }
+      if (u.includes('sucata') && condicao !== 'financiada') condicao = 'sucata';
+      if (u.includes('pequena monta')) monta = 'pequena';
+      if (u.includes('média monta') || u.includes('media monta')) monta = 'media';
+      if (u.includes('grande monta')) monta = 'grande';
 
       if (linhas[j] === 'Ver mais') break;
     }
@@ -1939,7 +1955,7 @@ function parseVip(texto) {
     if (seen.has(key)) continue;
     seen.add(key);
     if (!dataLeilao) continue;
-    motos.push({ lote, marca, modelo: modeloNome, ano, cor: '', condicao: 'sinistro', lance, financeira: 'Seguradora', patio, cilindrada: extractCilindrada(marca, modeloNome), data_leilao: dataLeilao, hora_leilao: horaLeilao });
+    motos.push({ lote, marca, modelo: modeloNome, ano, cor, condicao, lance, financeira, monta, patio, cilindrada: extractCilindrada(marca, modeloNome), data_leilao: dataLeilao, hora_leilao: horaLeilao });
   }
   return motos;
 }
