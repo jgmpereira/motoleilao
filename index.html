@@ -1965,14 +1965,41 @@ function parseVip(texto) {
 }
 
 // ===================== COPART (CSV separador ;) =====================
+function splitCsvLine(line, sep) {
+  const cols = [];
+  let cur = '', inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQuote = !inQuote; }
+    else if (c === sep && !inQuote) { cols.push(cur); cur = ''; }
+    else { cur += c; }
+  }
+  cols.push(cur);
+  return cols.map(c => c.trim().replace(/^"|"$/g, ''));
+}
+
 function parseCopart(texto) {
+  const PALAVRAS_CARRO = ['4P','2P','5P','3P','HR-V','HB20','ONIX','POLO','KICKS',
+    'COROLLA','YARIS','TRACKER','CRUZE','JETTA','TORO','RENEGADE','EQUINOX','MASTER',
+    'AMBULÂNCIA','HILUX','S10','CIVIC','CITY','FIT ','WRX','DUSTER','LOGAN','SANDERO',
+    'KWID','CLIO','SCENIC','PICANTO','SPORTAGE','TUCSON','COMPASS','COMMANDER','WRANGLER',
+    'GLADIATOR','RANGER','MAVERICK','TERRITORY','BLAZER','TIGGO','BYD','URUS','CAYENNE',
+    'MACAN','F-150','F150','TRANSIT','SORENTO','CARNIVAL','CROSSFOX','SAVEIRO','VOYAGE',
+    'GOL ','PALIO','PUNTO','BRAVO','LINEA','STRADA','OROCH','CAPTUR','KOLEOS','CHERY',
+    'CAOA','FORD ','TOYOTA ','NISSAN ','JEEP ','RENAULT ','HYUNDAI ','PEUGEOT ',
+    'CITROEN ','CHEVROLET ','FIAT '];
+  const MARCAS_MOTO = ['HONDA','YAMAHA','KAWASAKI','SUZUKI','BMW','HARLEY','DUCATI',
+    'TRIUMPH','KTM','ROYAL ENFIELD','DAFRA','SHINERAY','BAJAJ','HAOJUE','JTZ',
+    'KASINSKI','BENELLI','CFMOTO','ZONTES','APRILIA','INDIAN','KYMCO','PIAGGIO',
+    'VESPA','LEVA','HERO'];
+
   const linhas = texto.split(/\r\n|\n/).map(l => l.trim()).filter(l => l);
   const motos = [];
   const seen = new Set();
   let headerIdx = linhas.findIndex(l => l.includes('Marca') && l.includes('Modelo') && l.includes('Lote'));
   if (headerIdx < 0) headerIdx = 0;
   const sep = linhas[headerIdx].includes(';') ? ';' : ',';
-  const headers = linhas[headerIdx].split(sep).map(h => h.trim().toLowerCase().replace(/["\uFEFF]/g, ''));
+  const headers = splitCsvLine(linhas[headerIdx], sep).map(h => h.toLowerCase().replace(/["\uFEFF]/g, ''));
   const iAno         = headers.findIndex(h => h.includes('ano') && h.includes('fab'));
   const iAnoMod      = headers.findIndex(h => h.includes('ano') && h.includes('mod'));
   const iMarca       = headers.findIndex(h => h.includes('marca'));
@@ -1984,52 +2011,67 @@ function parseCopart(texto) {
   const iPatio       = headers.findIndex(h => (h.includes('pátio') || h.includes('patio')) && h.includes('veículo'));
   const iLote        = headers.findIndex(h => h.includes('lote'));
   const iFipe        = headers.findIndex(h => h.includes('fipe'));
+  const iCilindrada  = headers.findIndex(h => h.includes('cilindrada') || h.includes('motor'));
   const iData        = headers.findIndex(h => h.includes('data') && h.includes('leil'));
   const iPatioLeilao = headers.findIndex(h => (h.includes('pátio') || h.includes('patio')) && h.includes('leil'));
   const iMontaCopart = headers.findIndex(h => h.includes('tipo') && h.includes('monta'));
 
   for (let i = headerIdx + 1; i < linhas.length; i++) {
-    const cols = linhas[i].split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
+    const cols = splitCsvLine(linhas[i], sep);
     if (cols.length < 5) continue;
-    const marca  = toTitle(cols[iMarca] || '');
-    const modelo = toTitle(cols[iModelo] || '');
-    if (!marca || !modelo) continue;
-    const anoFabRaw = String(iAno >= 0 ? cols[iAno] || '' : cols[headers.findIndex(h => h.includes('ano'))] || '');
-    const anoModRaw = String(iAnoMod >= 0 ? cols[iAnoMod] || '' : '');
+    const marcaRaw = toTitle(cols[iMarca] || '');
+    const modelo   = toTitle(cols[iModelo] || '');
+    if (!marcaRaw || !modelo) continue;
+
+    // Filtrar carros
+    const marcaU  = marcaRaw.toUpperCase();
+    const modeloU = modelo.toUpperCase();
+    const ehMoto  = MARCAS_MOTO.some(m => marcaU.includes(m));
+    const ehCarro = PALAVRAS_CARRO.some(p => modeloU.includes(p.trim()));
+    if (!ehMoto || ehCarro) continue;
+
+    const marca = normalizarMarca(marcaRaw) || marcaRaw;
+
+    const anoFabRaw   = String(iAno >= 0 ? cols[iAno] || '' : '');
+    const anoModRaw   = String(iAnoMod >= 0 ? cols[iAnoMod] || '' : '');
     const anoFabMatch = anoFabRaw.match(/(\d{4}|\d{2})/);
     const anoModMatch = anoModRaw.match(/(\d{4}|\d{2})/);
     const anoFabShort = anoFabMatch ? anoFabMatch[1].slice(-2) : '';
     const anoModShort = anoModMatch ? anoModMatch[1].slice(-2) : anoFabShort;
     const ano = anoFabShort ? anoFabShort + '/' + anoModShort : '';
+
     const condRaw = (cols[iCond] || '').toUpperCase();
     let condicao = 'financiada';
     if (condRaw.includes('COLISÃO') || condRaw.includes('COLISAO') || condRaw.includes('ROUBO') || condRaw.includes('FURTO') || condRaw.includes('SINISTRO') || condRaw.includes('INCÊNDIO') || condRaw.includes('INCENDIO') || condRaw.includes('GRANIZO') || condRaw.includes('ALAGAMENTO') || condRaw.includes('VANDALISMO')) condicao = 'sinistro';
     if (condRaw.includes('SUCATA')) condicao = 'sucata';
-    const lance = parseFloat(String(cols[iLance] || '0').replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+
+    const lance   = parseFloat(String(cols[iLance] || '0').replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
     const fipeRaw = cols[iFipe] || '';
     const fipeVal = parseFloat(String(fipeRaw).replace(/\./g,'').replace(',','.').replace(/[^\d.]/g,'')) || null;
-    const patio  = toTitle(cols[iPatio] || '');
+    const patio   = toTitle(cols[iPatio] || '');
     const loteRaw = cols[iLote] || '';
-    const lote   = loteRaw.includes('/') ? loteRaw.split('/')[0] : loteRaw;
+    const lote    = loteRaw.includes('/') ? loteRaw.split('/')[0] : loteRaw;
+
     // Data do leilão: "12.03.2026 18:30 BRT"
     let dataLeilao = '', horaLeilao = '';
     const dataRaw = cols[iData] || '';
-    const dmatch = dataRaw.match(/(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}:\d{2})/);
+    const dmatch  = dataRaw.match(/(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}:\d{2})/);
     if (dmatch) { dataLeilao = `${dmatch[3]}-${dmatch[2]}-${dmatch[1]}`; horaLeilao = dmatch[4]; }
-    // Pátio do leilão (cidade)
-    const patioLeilao = iPatioLeilao >= 0 ? toTitle(cols[iPatioLeilao] || '') : '';
-    // Monta
-    const montaRaw = iMontaCopart >= 0 ? (cols[iMontaCopart] || '').toLowerCase() : '';
-    const monta = montaRaw.includes('pequena') ? 'pequena' : montaRaw.includes('média') || montaRaw.includes('media') ? 'media' : montaRaw.includes('grande') ? 'grande' : null;
+    if (!dataLeilao) continue;
 
-    const cor = iCor >= 0 ? toTitle(cols[iCor] || '') : '';
+    const patioLeilao = iPatioLeilao >= 0 ? toTitle(cols[iPatioLeilao] || '') : '';
+    const montaRaw    = iMontaCopart >= 0 ? (cols[iMontaCopart] || '').toLowerCase() : '';
+    const monta       = montaRaw.includes('pequena') ? 'pequena' : montaRaw.includes('média') || montaRaw.includes('media') ? 'media' : montaRaw.includes('grande') ? 'grande' : null;
+    const cor         = iCor >= 0 ? toTitle(cols[iCor] || '') : '';
     const financeiraRaw = iFinanceira >= 0 ? (cols[iFinanceira] || '').trim() : '';
-    const financeira = financeiraRaw || 'Particular/Empresa';
+    const financeira  = financeiraRaw || 'Particular/Empresa';
+    const cilindradaCSV = iCilindrada >= 0 ? parseInt(cols[iCilindrada] || '') || null : null;
+    const cilindrada  = cilindradaCSV || extractCilindrada(marca, modelo);
 
     const key = lote + '|' + marca + '|' + modelo;
     if (seen.has(key)) continue;
     seen.add(key);
-    motos.push({ lote, marca, modelo, ano, cor, condicao, lance, financeira, patio: patioLeilao || patio, fipe_csv: fipeVal, monta, cilindrada: extractCilindrada(marca, modelo), data_leilao: dataLeilao, hora_leilao: horaLeilao });
+    motos.push({ lote, marca, modelo, ano, cor, condicao, lance, financeira, patio: patioLeilao || patio, fipe_csv: fipeVal, monta, cilindrada, data_leilao: dataLeilao, hora_leilao: horaLeilao });
   }
   return motos;
 }
