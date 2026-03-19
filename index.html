@@ -384,6 +384,10 @@ tbody tr:hover{background:var(--s2);}
 
 <!-- PAGE ANÁLISE -->
 <div id="page-analise" class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 28px 0;gap:12px;flex-wrap:wrap;">
+    <span id="fipe-mensal-label" style="font-size:12px;color:var(--muted);"></span>
+    <button id="btn-fipe-mensal" class="btn btn-ghost btn-sm" onclick="atualizarFipeMensal()">🔄 Atualizar FIPE</button>
+  </div>
   <div class="analise-layout">
     <div class="analise-main">
       <div class="atitle">RESUMO GERAL</div>
@@ -755,7 +759,7 @@ function showPage(page, btn) {
   document.getElementById('page-'+page).classList.add('active');
   if(btn) btn.classList.add('active');
   else { const t = document.getElementById('tab-'+page); if(t) t.classList.add('active'); }
-  if(page === 'analise') renderAnalise();
+  if(page === 'analise') { renderAnalise(); atualizarLabelFipeMensal(); }
   if(page === 'historico') renderHistoricoGeral();
 }
 
@@ -1244,13 +1248,15 @@ async function fipeFetch(url) {
   return null;
 }
 
-async function buscarFipe(m) {
+async function buscarFipe(m, forcedRefresh = false) {
   const key = fipeKey(m);
-  if(fipeCache[key]) return fipeCache[key];
-  if(m.fipe_csv) { fipeCache[key] = m.fipe_csv; return m.fipe_csv; }
-  // Consultar banco antes de chamar API externa
-  const valDB = await buscarFipeNoBanco(key);
-  if(valDB) { fipeCache[key] = valDB; return valDB; }
+  if(!forcedRefresh) {
+    if(fipeCache[key]) return fipeCache[key];
+    if(m.fipe_csv) { fipeCache[key] = m.fipe_csv; return m.fipe_csv; }
+    // Consultar banco antes de chamar API externa
+    const valDB = await buscarFipeNoBanco(key);
+    if(valDB) { fipeCache[key] = valDB; return valDB; }
+  }
   try {
     if(!Array.isArray(window._fipeMarcas)) {
       const r = await fipeFetch('https://parallelum.com.br/fipe/api/v1/motos/marcas');
@@ -1390,6 +1396,65 @@ async function salvarFipeNoBanco(m, marcaCodigo, modeloCodigo, dados, val) {
   } catch(e) {
     console.warn('salvarFipeNoBanco:', e.message);
   }
+}
+
+// Atualização mensal: percorre todas as motos do banco e atualiza preços FIPE
+async function atualizarFipeMensal() {
+  const btn = document.getElementById('btn-fipe-mensal');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Verificando...'; }
+  try {
+    // Buscar todas as motos com marca/modelo/ano preenchidos
+    const motos = await supaFetch('motos?select=marca,modelo,ano&marca=not.is.null&modelo=not.is.null&ano=not.is.null');
+    const validas = (motos || []).filter(m => m.marca && m.modelo && m.ano);
+
+    // Deduplica por fipeKey
+    const uniqueMap = new Map();
+    for (const m of validas) {
+      const key = fipeKey(m);
+      if (key && !uniqueMap.has(key)) uniqueMap.set(key, m);
+    }
+    const unique = [...uniqueMap.values()];
+    if (!unique.length) { showToast('Nenhuma moto com dados suficientes para FIPE.', '⚠️'); return; }
+
+    // Buscar quais já têm dados do mês atual (uma única query ao banco)
+    const now = new Date();
+    const mesAtual = now.getMonth() + 1;
+    const anoAtual = now.getFullYear();
+    const existentes = await supaFetch(`fipe_valores?referencia_mes=eq.${mesAtual}&referencia_ano=eq.${anoAtual}&select=lookup_key`);
+    const existentesSet = new Set((existentes || []).map(r => r.lookup_key));
+
+    const paraAtualizar = unique.filter(m => !existentesSet.has(fipeKey(m)));
+    if (!paraAtualizar.length) {
+      showToast('Preços FIPE já estão atualizados para este mês!', '✅');
+      localStorage.setItem('fipeUltimaAtualizacao', new Date().toISOString());
+      return;
+    }
+
+    let ok = 0, erros = 0;
+    for (let i = 0; i < paraAtualizar.length; i++) {
+      if (btn) btn.textContent = `⏳ ${i + 1}/${paraAtualizar.length}...`;
+      const val = await buscarFipe(paraAtualizar[i], true);
+      if (val) ok++; else erros++;
+      if (i < paraAtualizar.length - 1) await new Promise(r => setTimeout(r, 400));
+    }
+
+    localStorage.setItem('fipeUltimaAtualizacao', new Date().toISOString());
+    atualizarLabelFipeMensal();
+    showToast(`FIPE mensal: ${ok} preços atualizados${erros ? `, ${erros} sem correspondência na tabela FIPE` : ''}.`, '✅');
+  } catch(e) {
+    showToast('Erro ao atualizar FIPE: ' + e.message, '❌');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🔄 Atualizar FIPE'; }
+  }
+}
+
+function atualizarLabelFipeMensal() {
+  const el = document.getElementById('fipe-mensal-label');
+  if (!el) return;
+  const ts = localStorage.getItem('fipeUltimaAtualizacao');
+  if (!ts) { el.textContent = 'Nunca atualizado'; return; }
+  const d = new Date(ts);
+  el.textContent = `Última atualização: ${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
 }
 
 
