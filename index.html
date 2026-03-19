@@ -1248,6 +1248,9 @@ async function buscarFipe(m) {
   const key = fipeKey(m);
   if(fipeCache[key]) return fipeCache[key];
   if(m.fipe_csv) { fipeCache[key] = m.fipe_csv; return m.fipe_csv; }
+  // Consultar banco antes de chamar API externa
+  const valDB = await buscarFipeNoBanco(key);
+  if(valDB) { fipeCache[key] = valDB; return valDB; }
   try {
     if(!Array.isArray(window._fipeMarcas)) {
       const r = await fipeFetch('https://parallelum.com.br/fipe/api/v1/motos/marcas');
@@ -1335,11 +1338,59 @@ async function buscarFipe(m) {
     const val = parseFloat(dados.Valor.replace('R$ ','').replace(/\./g,'').replace(',','.'));
     fipeCache[key] = val;
     localStorage.setItem('fipeCache', JSON.stringify(fipeCache));
+    salvarFipeNoBanco(m, marcaObj.codigo, modeloObj.codigo, dados, val); // fire-and-forget
     return val;
   } catch(e) { return null; }
 }
 
 function saveFipeCache() { try { localStorage.setItem('fipeCache', JSON.stringify(fipeCache)); } catch(e){} }
+
+// ===================== FIPE ↔ BANCO =====================
+
+// Consulta fipe_valores pelo lookup_key — retorna o valor mais recente ou null
+async function buscarFipeNoBanco(key) {
+  try {
+    const rows = await supaFetch(
+      `fipe_valores?lookup_key=eq.${encodeURIComponent(key)}&order=referencia_ano.desc,referencia_mes.desc&limit=1&select=valor`
+    );
+    if(rows && rows.length && rows[0].valor) return Number(rows[0].valor);
+  } catch(e) {}
+  return null;
+}
+
+// Persiste resultado da API FIPE em fipe_valores (upsert, sem bloquear o caller)
+async function salvarFipeNoBanco(m, marcaCodigo, modeloCodigo, dados, val) {
+  try {
+    const key = fipeKey(m);
+    const mesRef = (dados.MesReferencia || '').trim();
+    const mesesPT = ['janeiro','fevereiro','março','abril','maio','junho',
+                     'julho','agosto','setembro','outubro','novembro','dezembro'];
+    const partes = mesRef.toLowerCase().split(' de ');
+    const refMes = mesesPT.indexOf(partes[0]) + 1 || null;
+    const refAno = partes[1] ? parseInt(partes[1]) : new Date().getFullYear();
+    const anoFab = parseInt((m.ano || '').split('/')[0]) || null;
+    await supaFetch('fipe_valores', {
+      method: 'POST',
+      prefer: 'resolution=merge-duplicates,return=minimal',
+      body: JSON.stringify({
+        marca_codigo:   marcaCodigo,
+        modelo_codigo:  modeloCodigo,
+        ano_modelo:     anoFab,
+        combustivel:    dados.Combustivel  || null,
+        valor:          val,
+        mes_referencia: dados.MesReferencia || null,
+        codigo_fipe:    dados.CodigoFipe   || null,
+        lookup_key:     key,
+        marca_nome:     dados.Marca        || null,
+        modelo_nome:    dados.Modelo       || null,
+        referencia_mes: refMes,
+        referencia_ano: refAno,
+      })
+    });
+  } catch(e) {
+    console.warn('salvarFipeNoBanco:', e.message);
+  }
+}
 
 
 // ===================== IMPORTAR MOTOS =====================
@@ -1655,7 +1706,9 @@ function parseSodre(texto) {
     const anoM = descLinha.match(/(\d{2}\/\d{2})/);
     if (!anoM) continue;
     const ano = anoM[1];
-    const semAno = descLinha.substring(0, descLinha.lastIndexOf(anoM[0])).trim();
+    let semAno = descLinha.substring(0, descLinha.lastIndexOf(anoM[0])).trim();
+    // Remove prefixos de condição que o Sodré inclui na descrição (ex: "Sucata - Honda Cg 125")
+    semAno = semAno.replace(/^(sucata|sinistro)\s*[-–]\s*/i, '').trim();
     const palavras = semAno.split(/\s+/);
     const marca = toTitle(palavras[0] || '');
     const modelo = toTitle(palavras.slice(1).join(' '));
