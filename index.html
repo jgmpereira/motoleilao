@@ -1795,7 +1795,7 @@ function parseSuperbid(texto) {
 
     // ── COR ──────────────────────────────────────────────────────────────
     let cor = '';
-    const corM = desc.match(/\b(PRETA|BRANCA|VERMELHA|AZUL|CINZA|PRATA|AMARELA|VERDE|ROSA|LARANJA|ROXA|MARROM)\b/i);
+    const corM = desc.match(/\b(PRETA|BRANCA|VERMELHA|AZUL|CINZA|PRATA|AMARELA|VERDE|ROSA|LARANJA|ROXA|MARROM|GRAFITE|TITAN[IÍ]O|BEGE|DOURADA|VINHO|LIL[AÁ]S)\b/i);
     if (corM) cor = toTitle(corM[1]);
 
     // ── MARCA / MODELO ────────────────────────────────────────────────────
@@ -1808,14 +1808,15 @@ function parseSuperbid(texto) {
       .replace(/,?\s*\b(19|20)\d{2}\b/g, '')
       .replace(/,?\s*\b\d{2}\/\d{2}\b/g, '')
       .replace(/,?\s*COR:\s*\w+/gi, '')
-      .replace(/,?\s*\b(PRETA|BRANCA|VERMELHA|AZUL|CINZA|PRATA|AMARELA|VERDE|ROSA|LARANJA|ROXA|MARROM)\b.*/gi, '')
+      .replace(/,?\s*\b(PRETA|BRANCA|VERMELHA|AZUL|CINZA|PRATA|AMARELA|VERDE|ROSA|LARANJA|ROXA|MARROM|GRAFITE|TITAN[IÍ]O|BEGE|DOURADA|VINHO|LIL[AÁ]S)\b.*/gi, '')
       .replace(/^(VEÍCULO|VVEÍCULO|MOTOCICLETA|MOTONETA|UMA MOTOCICLETA|MOTO\s+(?:ELÉTRICA\s+)?|Marca\/Modelo:\s*)/gi, '')
       .replace(/^(LOTE\s+\d+\s+MOTO\s+)/gi, '')
       .replace(/^1ª\s+Vara\s+.*?-\s*/gi, '')
       .replace(/\s*-\s*(SEM DÍVIDAS|PARA CIRCULAR|GASOLINA|sem placa|chassi|[Cc]om\s+\d+km).*/g, '')
       .replace(/,?\s*(cor\s+\w+|combustível\s+\w+|[^,]*km\s+rodados)[^,]*/gi, '')
       .replace(/\s*em\s+[A-Za-zÀ-ÿ\s]+\/[A-Z]{2}\s*$/gi, '')
-      .replace(/[-,].*$/, '')
+      .replace(/,.*$/, '')
+      .replace(/\s+-\s+(?![A-Z0-9]).*$/, '') // remove sufixos "- texto", preserva hífens de modelos (MT-03, R1250-GS)
       .replace(/\s+/g, ' ').trim();
 
     let marca = '', modelo = '';
@@ -1834,15 +1835,19 @@ function parseSuperbid(texto) {
     // Antes do "Lote N": "DD/MM - HH:MM" ou "Hoje - HH:MM" ou "N praças | DD/MM - HH:MM"
     let dataLeilao = '', horaLeilao = '';
     for (let j = i - 1; j >= Math.max(0, i - 10); j--) {
-      const dm = linhas[j].match(/(\d{2})\/(\d{2})\s*-\s*(\d{2}:\d{2})/);
+      const dm4 = linhas[j].match(/(\d{2})\/(\d{2})\/(\d{4})\s*[-–]\s*(\d{2}:\d{2})/);
+      if (dm4) { dataLeilao = `${dm4[3]}-${dm4[2]}-${dm4[1]}`; horaLeilao = dm4[4]; break; }
+      const dm = linhas[j].match(/(\d{2})\/(\d{2})\s*[-–]\s*(\d{2}:\d{2})/);
       if (dm) { dataLeilao = `${new Date().getFullYear()}-${dm[2]}-${dm[1]}`; horaLeilao = dm[3]; break; }
-      const hoje = linhas[j].match(/^Hoje\s*-\s*(\d{2}:\d{2})/);
+      const hoje = linhas[j].match(/^Hoje\s*[-–]\s*(\d{2}:\d{2})/);
       if (hoje) { const now = new Date(); dataLeilao = now.toISOString().split('T')[0]; horaLeilao = hoje[1]; break; }
     }
     // fallback: 1ª praça depois do Lote
     if (!dataLeilao) {
       for (let j = i + 1; j < Math.min(i + 16, linhas.length); j++) {
-        const dm = linhas[j].match(/(\d{2})\/(\d{2})\s*-\s*(\d{2}:\d{2})/);
+        const dm4 = linhas[j].match(/(\d{2})\/(\d{2})\/(\d{4})\s*[-–]\s*(\d{2}:\d{2})/);
+        if (dm4) { dataLeilao = `${dm4[3]}-${dm4[2]}-${dm4[1]}`; horaLeilao = dm4[4]; break; }
+        const dm = linhas[j].match(/(\d{2})\/(\d{2})\s*[-–]\s*(\d{2}:\d{2})/);
         if (dm) { dataLeilao = `${new Date().getFullYear()}-${dm[2]}-${dm[1]}`; horaLeilao = dm[3]; break; }
       }
     }
@@ -1864,14 +1869,28 @@ function parseSuperbid(texto) {
     // ── PÁTIO ─────────────────────────────────────────────────────────────
     let patio = '';
     for (let j = i + 1; j < Math.min(i + 8, linhas.length); j++) {
-      if (/^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s.]+ - [A-Z]{2}$/.test(linhas[j])) { patio = toTitle(linhas[j]); break; }
+      if (/^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s.\d,]+ - [A-Za-z]{2}$/.test(linhas[j])) { patio = toTitle(linhas[j]); break; }
+      // "Cidade SP" sem hífen
+      if (/^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s.]+\s[A-Z]{2}$/.test(linhas[j]) && linhas[j].length < 45) { patio = toTitle(linhas[j]); break; }
+    }
+
+    // ── CONDIÇÃO / FINANCEIRA / MONTA ─────────────────────────────────────
+    let condicao = 'sinistro', financeira = 'Seguradora', monta = null;
+    for (let j = i; j < Math.min(i + 20, linhas.length); j++) {
+      const u = linhas[j].toLowerCase();
+      if (u.includes('financiamento') || u.includes('alienad')) { condicao = 'financiada'; financeira = 'Financeira'; }
+      if (u.includes('sucata') && condicao !== 'financiada') condicao = 'sucata';
+      if (u.includes('sinistro') && condicao === 'financiada') { condicao = 'sinistro'; financeira = 'Seguradora'; }
+      if (u.includes('pequena monta')) monta = 'pequena';
+      if (u.includes('média monta') || u.includes('media monta')) monta = 'media';
+      if (u.includes('grande monta')) monta = 'grande';
     }
 
     const key = `${lote}|${marca}|${modelo}|${ano}`;
     if (seen.has(key)) continue;
     seen.add(key);
     if (!dataLeilao) continue;
-    motos.push({ lote, marca, modelo, ano, cor, condicao: 'sinistro', lance, financeira: 'Seguradora', patio, cilindrada: extractCilindrada(marca, modelo), data_leilao: dataLeilao, hora_leilao: horaLeilao });
+    motos.push({ lote, marca, modelo, ano, cor, condicao, lance, financeira, monta, patio, cilindrada: extractCilindrada(marca, modelo), data_leilao: dataLeilao, hora_leilao: horaLeilao });
   }
   return motos;
 }
