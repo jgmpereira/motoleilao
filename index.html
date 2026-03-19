@@ -1691,6 +1691,9 @@ function parseSodre(texto) {
     // Aceita "Leilão NNNNN - 0071" e "Leilão NNNNN - Indef."
     if (!/^Leil[aã]o\s+\d+\s*-\s*\S+/.test(l)) continue;
 
+    // Número do leilão deste lote específico (suporta múltiplos leilões no mesmo paste)
+    const nmLoteM = l.match(/^Leil[aã]o\s+(\d{4,6})\s*-/);
+    const lotNumeroLeilao = nmLoteM ? nmLoteM[1] : numeroLeilao;
     // Lote: número após o "-", ou próxima linha se for número solto
     const loteM = l.match(/-\s*(\d+)\s*$/);
     let lote = loteM ? loteM[1].replace(/^0+/, '') || loteM[1] : '';
@@ -1700,7 +1703,7 @@ function parseSodre(texto) {
     // Descrição: linha com padrão "marca modelo XX/XX"
     let descLinha = '';
     for (let j = i + 1; j < Math.min(i + 6, linhas.length); j++) {
-      if (/\d{2}\/\d{2}/.test(linhas[j]) && linhas[j].split(' ').length >= 2) { descLinha = linhas[j]; break; }
+      if (/^[A-Za-záàãâéêíóôõúüçÁÀÃÂÉÊÍÓÔÕÚÜÇ]/.test(linhas[j]) && /\d{2}\/\d{2}/.test(linhas[j]) && linhas[j].split(' ').length >= 2) { descLinha = linhas[j]; break; }
     }
     if (!descLinha) continue;
     const anoM = descLinha.match(/(\d{2}\/\d{2})/);
@@ -1709,6 +1712,10 @@ function parseSodre(texto) {
     let semAno = descLinha.substring(0, descLinha.lastIndexOf(anoM[0])).trim();
     // Remove prefixos de condição que o Sodré inclui na descrição (ex: "Sucata - Honda Cg 125")
     semAno = semAno.replace(/^(sucata|sinistro)\s*[-–]\s*/i, '').trim();
+    // Extrai cor antes de partir em marca/modelo
+    const corMatch = semAno.match(/\b(preta|branca|vermelha|azul|cinza|prata|amarela|verde|rosa|laranja|roxa|marrom|bege|dourada)\b/i);
+    const cor = corMatch ? toTitle(corMatch[1]) : '';
+    if (corMatch) semAno = semAno.replace(corMatch[0], '').replace(/\s+/g, ' ').trim();
     const palavras = semAno.split(/\s+/);
     const marca = toTitle(palavras[0] || '');
     const modelo = toTitle(palavras.slice(1).join(' '));
@@ -1731,7 +1738,8 @@ function parseSodre(texto) {
       const u = linhas[j].toLowerCase();
       if (u.includes('lance atual') || u.includes('lance inicial')) {
         for (let k = j + 1; k < Math.min(j + 4, linhas.length); k++) {
-          if (/^\d[\d.]*$/.test(linhas[k])) { lance = parseInt(linhas[k].replace(/\./g, '')) || 0; break; }
+          const lm = linhas[k].match(/^R\$\s*([\d.]+)(?:,\d{2})?$/) || (/^\d[\d.]*$/.test(linhas[k]) ? [null, linhas[k]] : null);
+          if (lm) { lance = parseInt(lm[1].replace(/\./g, '')) || 0; break; }
         }
         break;
       }
@@ -1744,15 +1752,16 @@ function parseSodre(texto) {
       if (u === 'seguro' || u === 'seguradora') { financeira = 'Seguradora'; condicao = 'sinistro'; }
       if (u.includes('financiamento')) { condicao = 'financiada'; financeira = 'Financeira'; }
       if (u.includes('sucata')) condicao = 'sucata';
-      if (u.includes('sem sinistro')) condicao = 'financiada';
+      if (u.includes('sem sinistro') && condicao !== 'sucata') condicao = 'financiada';
       if (u.includes('pequena monta')) monta = 'pequena';
       if (u.includes('média monta') || u.includes('media monta')) monta = 'media';
       if (u.includes('grande monta')) monta = 'grande';
-      if (!patio && linhas[j].includes(' / ') && linhas[j].length < 50) patio = toTitle(linhas[j]);
+      if (!patio && linhas[j].includes(' / ') && linhas[j].length < 50
+          && !u.includes('financ') && !u.includes('seguro') && !u.includes('lance')) patio = toTitle(linhas[j]);
     }
 
     seen.add(key);
-    motos.push({ lote, marca, modelo, ano, cor: '', condicao, lance, financeira, monta, patio, cilindrada: extractCilindrada(marca, modelo), data_leilao: dataLeilao, hora_leilao: horaLeilao, numero_leilao: numeroLeilao });
+    motos.push({ lote, marca, modelo, ano, cor, condicao, lance, financeira, monta, patio, cilindrada: extractCilindrada(marca, modelo), data_leilao: dataLeilao, hora_leilao: horaLeilao, numero_leilao: lotNumeroLeilao });
   }
   return motos;
 }
