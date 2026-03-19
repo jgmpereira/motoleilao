@@ -2045,14 +2045,14 @@ function parseMilan(texto) {
 
   // Extrair data do cabeçalho
   let dataLeilao = '', horaLeilao = '';
-  for(const l of linhas.slice(0, 5)) {
-    const m = l.match(/(\d{1,2})\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\s+(\d{2}:\d{2})/i);
+  for(const l of linhas.slice(0, 10)) {
+    const m = l.match(/(\d{1,2})\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)(?:\s+(\d{4}))?\s+(\d{2}:\d{2})/i);
     if(m) {
       const meses = {JAN:'01',FEV:'02',MAR:'03',ABR:'04',MAI:'05',JUN:'06',
                      JUL:'07',AGO:'08',SET:'09',OUT:'10',NOV:'11',DEZ:'12'};
-      const ano = new Date().getFullYear();
+      const ano = m[3] || new Date().getFullYear();
       dataLeilao = `${ano}-${meses[m[2].toUpperCase()]}-${m[1].padStart(2,'0')}`;
-      horaLeilao = m[3];
+      horaLeilao = m[4];
       break;
     }
   }
@@ -2060,7 +2060,7 @@ function parseMilan(texto) {
   // Encontrar índices dos lotes
   const loteIdx = [];
   for(let i = 0; i < linhas.length; i++) {
-    const m = linhas[i].trim().match(/^Lote\s+(\d{3})$/);
+    const m = linhas[i].trim().match(/^Lote\s+(\d+)$/);
     if(m) loteIdx.push({ i, lote: m[1] });
   }
 
@@ -2081,23 +2081,37 @@ function parseMilan(texto) {
     const anoM = descU.match(/ANO\s+(\d{4})\/(\d{4})/);
     const ano = anoM ? `${anoM[1].slice(-2)}/${anoM[2].slice(-2)}` : '';
 
+    // Extrair cor antes de limpar (evita vazar no modelo)
+    const corMatchM = desc.match(/\b(PRETA|BRANCA|VERMELHA|AZUL|CINZA|PRATA|AMARELA|VERDE|ROSA|LARANJA|ROXA|MARROM|GRAFITE|TITAN[IÍ]O|BEGE|DOURADA|VINHO|LIL[AÁ]S)\b/i);
+    const cor = corMatchM ? toTitle(corMatchM[1]) : '';
+
     // Limpar desc para marca+modelo
     let descLimpa = desc.replace(/\s*(GASOLINA|FLEX|ÁLCOOL|ALCOOL|DIESEL|ELÉTRICO|ELETRICO)\s+ANO.*/i, '').trim();
     descLimpa = descLimpa.replace(/^I\//i, '').trim();
+    if(corMatchM) descLimpa = descLimpa.replace(new RegExp('\\b' + corMatchM[1] + '\\b', 'i'), '').replace(/\s+/g, ' ').trim();
 
     const partes = descLimpa.split(/\s+/);
     const marca = toTitle(partes[0] || '');
     const modelo = toTitle(partes.slice(1).join(' '));
 
-    // Extrair financeira e condição
-    let financeira = 'Financeira', condicao = 'financiada';
+    // Extrair financeira, condição, lance, monta e pátio do bloco
+    let financeira = 'Financeira', condicao = 'financiada', lance = 0, monta = null, patio = '';
     for(const linha of bloco) {
-      const lu = linha.trim().toUpperCase();
-      const fm = linha.trim().match(/^\((.+)\)\.$/);
+      const lt = linha.trim();
+      const lu = lt.toUpperCase();
+      const lw = lt.toLowerCase();
+      const fm = lt.match(/^\((.+)\)\.?$/);
       if(fm) financeira = fm[1];
       if(lu.includes('SINISTRO') || lu.includes('RECUPERADO')) condicao = 'sinistro';
       if(lu.includes('SUCATA')) condicao = 'sucata';
+      const lm = lt.match(/^R\$\s*([\d.]+,\d{2})/);
+      if(lm && !lance) lance = parseFloat(lm[1].replace(/\./g, '').replace(',', '.'));
+      if(lw.includes('pequena monta')) monta = 'pequena';
+      if(lw.includes('média monta') || lw.includes('media monta')) monta = 'media';
+      if(lw.includes('grande monta')) monta = 'grande';
+      if(!patio && /^(Rod\.|Av\.|Rua |Estrada )/i.test(lt)) patio = lt;
     }
+    if(!patio) patio = 'Rod. Raposo Tavares - Km 20';
 
     const key = `${lote}|${marca}|${modelo}|${ano}`;
     if(seen.has(key)) continue;
@@ -2108,11 +2122,12 @@ function parseMilan(texto) {
       marca,
       modelo,
       ano,
-      cor: '',
+      cor,
       condicao,
-      lance: 0,
+      lance,
       financeira,
-      patio: 'Rod. Raposo Tavares - Km 20',
+      monta,
+      patio,
       cilindrada: extractCilindrada(marca, modelo),
       data_leilao: dataLeilao,
       hora_leilao: horaLeilao
