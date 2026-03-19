@@ -2309,21 +2309,25 @@ function parseSodreEncerrados(texto) {
     return true;
   };
 
-  // Extrair número do leilão
+  // Extrair número do leilão (tolerante a espaços finais)
   let numeroLeilao = '';
   for(const l of linhas) {
-    const m = l.trim().match(/^Leil[aã]o\s+(\d{4,6})$/);
+    const m = l.trim().match(/^Leil[aã]o\s+(\d{4,6})\s*$/);
     if(m) { numeroLeilao = m[1]; break; }
   }
 
-  // Extrair data
+  // Extrair data (suporta dd/mm/aa e dd/mm/aaaa)
   let dataISO = '', hora = '';
   for(const l of linhas) {
-    const m = l.trim().match(/(\d{2})\/(\d{2})\/(\d{2})\s+(\d{2}:\d{2})/);
-    if(m) { dataISO = `20${m[3]}-${m[2]}-${m[1]}`; hora = m[4]; break; }
+    const m4 = l.trim().match(/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})/);
+    if(m4) { dataISO = `${m4[3]}-${m4[2]}-${m4[1]}`; hora = m4[4]; break; }
+    const m2 = l.trim().match(/(\d{2})\/(\d{2})\/(\d{2})\s+(\d{2}:\d{2})/);
+    if(m2) { dataISO = `20${m2[3]}-${m2[2]}-${m2[1]}`; hora = m2[4]; break; }
   }
 
   if(!numeroLeilao) return { erro: 'Número do leilão não encontrado. Verifique se copiou a página correta.' };
+
+  const seen = new Set();
 
   // Parsear lotes: situação\tLote\tDescrição\tLance\tUsuário
   let i = 0;
@@ -2338,10 +2342,9 @@ function parseSodreEncerrados(texto) {
           const lote = partes[0].trim();
           const desc = partes[1].trim();
           const lanceRaw = partes[2].trim();
-          let lance = 0;
-          try { lance = parseFloat(lanceRaw.replace('R$','').replace(/\./g,'').replace(',','.').trim()); } catch(e){}
+          const lance = parseFloat(lanceRaw.replace('R$','').replace(/\./g,'').replace(',','.').trim()) || 0;
 
-          if(ehMoto(desc) && situacao === 'vendido' && lance > 0) {
+          if(ehMoto(desc) && (situacao === 'vendido' || situacao === 'condicional') && lance > 0) {
             const anoM = desc.match(/(\d{2}\/\d{2})$/);
             const ano = anoM ? anoM[1] : '';
             let descS = desc.replace(/\s*\d{2}\/\d{2}$/, '').trim();
@@ -2357,8 +2360,12 @@ function parseSodreEncerrados(texto) {
             const marcaRaw = toTitle(pts[0] || '');
             const marca = normalizarMarca(marcaRaw) || marcaRaw;
             const modelo = toTitle(pts.slice(1).join(' '));
+            const loteNorm = lote.replace(/^0+/,'') || lote;
+            const key = `${loteNorm}|${marca}|${modelo}`;
+            if(seen.has(key)) { i++; continue; }
+            seen.add(key);
             motos.push({
-              lote: lote.replace(/^0+/,'') || lote,
+              lote: loteNorm,
               marca, modelo, ano, cor, condicao,
               lance, // valor arrematado
               numero_leilao: numeroLeilao,
@@ -2385,14 +2392,8 @@ async function processarSodreEncerrados(texto) {
 
   showToast(`Processando leilão #${numeroLeilao}...`, '⏳');
 
-  // Buscar leilão no banco pelo número no link
-  const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
-  const KEY = SUPA_KEY;
-  const headers = { 'apikey': KEY, 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' };
-
   // Buscar leilão pelo número no link
-  const rLeilao = await fetch(`${SUPA_URL}/rest/v1/leiloes?link=like.*leilao/${numeroLeilao}/*&select=id,nome,data`, { headers });
-  const leiloes = await rLeilao.json();
+  const leiloes = await supaFetch(`leiloes?link=like.*leilao/${numeroLeilao}/*&select=id,nome,data`);
 
   if(!leiloes.length) {
     showToast(`Leilão #${numeroLeilao} não encontrado no banco. Importe os lotes primeiro!`, '❌');
@@ -2403,8 +2404,7 @@ async function processarSodreEncerrados(texto) {
   showToast(`Leilão encontrado: ${leilao.nome}. Buscando motos...`, '🔍');
 
   // Buscar motos do leilão
-  const rMotos = await fetch(`${SUPA_URL}/rest/v1/motos?leilao_id=eq.${leilao.id}&select=id,lote,marca,modelo`, { headers });
-  const motosDB = await rMotos.json();
+  const motosDB = await supaFetch(`motos?leilao_id=eq.${leilao.id}&select=id,lote,marca,modelo`);
 
   // Cruzar por lote+marca+modelo e inserir arrematados
   let salvos = 0, criados = 0;
@@ -2436,21 +2436,19 @@ async function processarSodreEncerrados(texto) {
       marca: m.marca,
       modelo: m.modelo,
       ano: m.ano,
-      cor: '',
-      condicao: 'sinistro',
+      cor: m.cor || '',
+      condicao: m.condicao || 'sinistro',
       lance_inicial: m.lance,
-      financeira: 'Seguradora',
-      cilindrada: null,
+      financeira: m.condicao === 'sinistro' ? 'Seguradora' : 'Particular/Empresa',
+      cilindrada: extractCilindrada(m.marca, m.modelo),
     }));
-    const rNovas = await fetch(`${SUPA_URL}/rest/v1/motos`, {
+    const novasCriadas = await supaFetch('motos', {
       method: 'POST',
-      headers: { ...headers, 'Prefer': 'return=representation' },
+      prefer: 'return=representation',
       body: JSON.stringify(novasMotos)
     });
-    const novasCriadas = await rNovas.json();
     if(Array.isArray(novasCriadas)) {
       for(const nova of novasCriadas) {
-        // Encontrar o lance correspondente
         const orig = motosNaoEncontradas.find(m => m.lote == nova.lote && m.marca === nova.marca);
         if(orig) arrPayload.push({ moto_id: nova.id, valor: orig.lance });
       }
@@ -2459,17 +2457,9 @@ async function processarSodreEncerrados(texto) {
   }
 
   if(arrPayload.length) {
-    await fetch(`${SUPA_URL}/rest/v1/arrematados`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(arrPayload)
-    });
+    await supaFetch('arrematados', { method: 'POST', body: JSON.stringify(arrPayload) });
     // Marcar leilão como encerrado
-    await fetch(`${SUPA_URL}/rest/v1/leiloes?id=eq.${leilao.id}`, {
-      method: 'PATCH',
-      headers,
-      body: JSON.stringify({ encerrado: true })
-    });
+    await supaFetch(`leiloes?id=eq.${leilao.id}`, { method: 'PATCH', body: JSON.stringify({ encerrado: true }) });
   }
 
   fecharModalImportar();
