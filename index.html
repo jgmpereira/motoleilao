@@ -1927,16 +1927,40 @@ function parseSuperbid(texto) {
 
 // ===================== VIP LEILÕES =====================
 function parseVip(texto) {
+  const PALAVRAS_CARRO = ['4P','2P','5P','3P','HR-V','HB20','ONIX','POLO','KICKS',
+    'COROLLA','YARIS','TRACKER','CRUZE','JETTA','TORO','RENEGADE','EQUINOX','MASTER',
+    'AMBULÂNCIA','HILUX','S10','CIVIC','CITY','FIT ','WRX','DUSTER','LOGAN','SANDERO',
+    'KWID','CLIO','SCENIC','PICANTO','SPORTAGE','TUCSON','COMPASS','COMMANDER','WRANGLER',
+    'GLADIATOR','RANGER','MAVERICK','TERRITORY','BLAZER','TIGGO','BYD','URUS','CAYENNE',
+    'MACAN','F-150','F150','TRANSIT','SORENTO','CARNIVAL','CROSSFOX','SAVEIRO','VOYAGE',
+    'GOL ','PALIO','PUNTO','BRAVO','LINEA','STRADA','OROCH','CAPTUR','KOLEOS','CHERY',
+    'CAOA','FORD ','TOYOTA ','NISSAN ','JEEP ','RENAULT ','HYUNDAI ','PEUGEOT ',
+    'CITROEN ','CHEVROLET ','FIAT '];
+  const MARCAS_MOTO = ['HONDA','YAMAHA','KAWASAKI','SUZUKI','BMW','HARLEY','DUCATI',
+    'TRIUMPH','KTM','ROYAL ENFIELD','DAFRA','SHINERAY','BAJAJ','HAOJUE','JTZ',
+    'KASINSKI','BENELLI','CFMOTO','ZONTES','APRILIA','INDIAN','KYMCO','PIAGGIO',
+    'VESPA','LEVA','HERO'];
+
   const linhas = texto.split(/\r\n|\n/).map(l => l.trim()).filter(l => l);
   const motos = [];
   const seen = new Set();
   for (let i = 0; i < linhas.length; i++) {
     const l = linhas[i];
-    // Detecta "MARCA - MODELO" — tudo maiúsculas, modelo pode ter hífen e números (ex: XY150-8)
-    if (!/^[A-Z][A-Z0-9\s]+ - [A-Z][A-Z0-9\s\-]+$/.test(l)) continue;
-    const dashIdx = l.indexOf(' - ');
-    const marca = toTitle(l.substring(0, dashIdx).trim());
-    const modeloNome = toTitle(l.substring(dashIdx + 3).trim());
+    // Detecta "MARCA - MODELO" ou "I/MARCA - MODELO" — tudo maiúsculas
+    if (!/^(?:I\/)?[A-Z][A-Z0-9\s]+ - [A-Z][A-Z0-9\s\-]+$/.test(l)) continue;
+    const lSemPrefixo = l.replace(/^I\//, '');
+    const dashIdx = lSemPrefixo.indexOf(' - ');
+    const marcaRaw = toTitle(lSemPrefixo.substring(0, dashIdx).trim());
+    const modeloNome = toTitle(lSemPrefixo.substring(dashIdx + 3).trim());
+
+    // Filtrar carros
+    const marcaU  = marcaRaw.toUpperCase();
+    const modeloU = modeloNome.toUpperCase();
+    const ehMoto  = MARCAS_MOTO.some(m => marcaU.includes(m));
+    const ehCarro = PALAVRAS_CARRO.some(p => modeloU.includes(p.trim()));
+    if (!ehMoto || ehCarro) continue;
+
+    const marca = normalizarMarca(marcaRaw) || marcaRaw;
 
     // Ano: linha seguinte tem "MODELO - AAAA/AAAA"
     const anoLinha = linhas[i + 1] || '';
@@ -1946,7 +1970,7 @@ function parseVip(texto) {
 
     // Lote, pátio, data, hora, lance, cor, condição, monta — bloco até "Ver mais"
     let lote = '', patio = '', dataLeilao = '', horaLeilao = '', lance = 0;
-    let cor = '', condicao = 'sinistro', financeira = 'Seguradora', monta = null;
+    let cor = '', condicao = 'financiada', financeira = 'Particular/Empresa', monta = null;
     for (let j = i + 1; j < Math.min(i + 18, linhas.length); j++) {
       const u = linhas[j].toLowerCase();
 
@@ -1973,7 +1997,8 @@ function parseVip(texto) {
 
       // Condição / financeira / monta
       if (u.includes('financiamento') || u.includes('alienad')) { condicao = 'financiada'; financeira = 'Financeira'; }
-      if (u.includes('sucata') && condicao !== 'financiada') condicao = 'sucata';
+      if (u.includes('sucata')) condicao = 'sucata';
+      if (u.includes('sinistro') || u.includes('colisão') || u.includes('colisao') || u.includes('roubo') || u.includes('furto') || u.includes('incêndio') || u.includes('incendio') || u.includes('granizo') || u.includes('alagamento') || u.includes('vandalismo')) { if (condicao !== 'sucata') { condicao = 'sinistro'; if (financeira === 'Particular/Empresa') financeira = 'Seguradora'; } }
       if (u.includes('pequena monta')) monta = 'pequena';
       if (u.includes('média monta') || u.includes('media monta')) monta = 'media';
       if (u.includes('grande monta')) monta = 'grande';
@@ -1981,10 +2006,10 @@ function parseVip(texto) {
       if (linhas[j] === 'Ver mais') break;
     }
 
+    if (!dataLeilao) continue;
     const key = `${lote}|${marca}|${modeloNome}|${ano}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    if (!dataLeilao) continue;
     motos.push({ lote, marca, modelo: modeloNome, ano, cor, condicao, lance, financeira, monta, patio, cilindrada: extractCilindrada(marca, modeloNome), data_leilao: dataLeilao, hora_leilao: horaLeilao });
   }
   return motos;
