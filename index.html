@@ -665,6 +665,8 @@ let MOTOS = [];
 let ARREMATADOS = {}; // { moto_id: { id, valor } }
 let fipeCache = {};
 try { fipeCache = JSON.parse(localStorage.getItem('fipeCache') || '{}'); } catch(e){}
+let fipeModelosCache = {};
+try { fipeModelosCache = JSON.parse(localStorage.getItem('fipeModelosCache') || '{}'); } catch(e){}
 
 let currentLeilao = null;
 let filtroMoto = 'todos';
@@ -1180,10 +1182,92 @@ const FIPE_SINONIMOS = {
   // Kawasaki
   'kawasaki|versys-x 300 tr':'VERSYS-X 300 TOURER',
   'kawasaki|versys x 300':   'VERSYS-X 300',
+  // Kawasaki
+  'kawasaki|ninja 300':          'NINJA 300',
+  'kawasaki|ninja 400':          'NINJA 400',
+  'kawasaki|ninja 400 abs':      'NINJA 400 ABS',
+  'kawasaki|ninja 650':          'NINJA 650',
+  'kawasaki|ninja 650 abs':      'NINJA 650 ABS',
+  'kawasaki|z400 abs':           'Z 400 ABS',
+  'kawasaki|z 400':              'Z 400',
+  'kawasaki|z650 abs':           'Z 650 ABS',
+  'kawasaki|z 650':              'Z 650',
+  'kawasaki|z900 abs':           'Z 900 ABS',
+  'kawasaki|z 900':              'Z 900',
+  'kawasaki|versys 650':         'VERSYS 650',
+  'kawasaki|versys 650 abs':     'VERSYS 650 ABS',
+  'kawasaki|er-6n':              'ER-6N',
+  'kawasaki|er6n':               'ER-6N',
+  'kawasaki|z300':               'Z 300',
+  'kawasaki|klx 300':            'KLX 300',
+  'kawasaki|z 800':              'Z 800',
+  // Suzuki
+  'suzuki|gsx-s 1000':           'GSX-S 1000',
+  'suzuki|gsxs 1000':            'GSX-S 1000',
+  'suzuki|gsx-s 750':            'GSX-S 750',
+  'suzuki|v-strom 650':          'V-STROM 650',
+  'suzuki|vstrom 650':           'V-STROM 650',
+  'suzuki|v-strom 1000':         'V-STROM 1000',
+  'suzuki|vstrom 1000':          'V-STROM 1000',
+  'suzuki|intruder 125':         'INTRUDER 125',
+  'suzuki|yes 125':              'YES 125',
+  'suzuki|yes 125 se':           'YES 125 SE',
+  'suzuki|gsr 150i':             'GSR 150I',
+  'suzuki|gs 120':               'GS 120',
+  'suzuki|burgman 125':          'BURGMAN 125',
+  'suzuki|burgman 400':          'BURGMAN 400',
+  'suzuki|gsx-r 750':            'GSX-R 750',
+  'suzuki|gsx-r 1000':          'GSX-R 1000',
+  // KTM
+  'ktm|duke 200':                'DUKE 200',
+  'ktm|duke 390':                'DUKE 390',
+  'ktm|duke 390 abs':            'DUKE 390 ABS',
+  'ktm|adventure 390':           'ADVENTURE 390',
+  'ktm|adventure 390 abs':       'ADVENTURE 390 ABS',
+  'ktm|duke 890':                'DUKE 890',
+  'ktm|rc 390':                  'RC 390',
+  'ktm|exc':                     'EXC',
+  // Triumph
+  'triumph|speed 400':           'SPEED 400',
+  'triumph|speed twin 900':      'SPEED TWIN 900',
+  'triumph|speed twin':          'SPEED TWIN 900',
+  'triumph|street triple 765':   'STREET TRIPLE 765 RS',
+  'triumph|street triple':       'STREET TRIPLE 765 RS',
+  'triumph|tiger 900':           'TIGER 900',
+  'triumph|tiger 1200':          'TIGER 1200',
+  'triumph|bonneville t100':     'BONNEVILLE T100',
+  'triumph|scrambler 400':       'SCRAMBLER 400 X',
+  'triumph|trident 660':         'TRIDENT 660',
+  // Dafra
+  'dafra|apache 150':            'APACHE 150',
+  'dafra|kansas 150':            'KANSAS 150',
+  'dafra|citycom 300':           'CITYCOM 300i',
+  'dafra|citycom300':            'CITYCOM 300i',
+  'dafra|super 50':              'SUPER 50',
+  'dafra|speed 150':             'SPEED 150',
+  'dafra|horizon 250':           'HORIZON 250',
+  'dafra|riva 150':              'RIVA 150',
+  // Bajaj
+  'bajaj|dominar 400':           'DOMINAR 400',
+  'bajaj|dominar 400 ug':        'DOMINAR 400 UG',
+  'bajaj|pulsar ns 160':         'PULSAR NS 160',
+  'bajaj|pulsar ns 200':         'PULSAR NS 200',
+  'bajaj|pulsar 200 ns':         'PULSAR NS 200',
+  'bajaj|rouser ns 160':         'PULSAR NS 160',
+  'bajaj|rouser ns 200':         'PULSAR NS 200',
+  'bajaj|pulsar rs 200':         'PULSAR RS 200',
+  // Royal Enfield
+  'royal enfield|meteor 350':    'METEOR 350',
+  'royal enfield|classic 350':   'CLASSIC 350',
+  'royal enfield|bullet 350':    'BULLET 350',
+  'royal enfield|himalayan':     'HIMALAYAN',
+  'royal enfield|scram 411':     'SCRAM 411',
+  'royal enfield|hunter 350':    'HUNTER 350',
+  'royal enfield|guerrilla 450': 'GUERRILLA 450',
   // Shineray / importadas
-  'shineray|xy125-6a':       'XY 125',
-  'jtz|downtown 300':        'DOWNTOWN 300i',
-  'jtz|dr160':               'DR 160',
+  'shineray|xy125-6a':           'XY 125',
+  'jtz|downtown 300':            'DOWNTOWN 300i',
+  'jtz|dr160':                   'DR 160',
 };
 
 // Normaliza string para comparação: minúsculo, sem acentos, sem hífens/pontos, espaços simples
@@ -1259,9 +1343,14 @@ async function buscarFipe(m, forcedRefresh = false) {
   }
   try {
     if(!Array.isArray(window._fipeMarcas)) {
+      const cached = localStorage.getItem('fipeMarcasCache');
+      if(cached) { try { window._fipeMarcas = JSON.parse(cached); } catch(e){} }
+    }
+    if(!Array.isArray(window._fipeMarcas)) {
       const r = await fipeFetch('https://parallelum.com.br/fipe/api/v1/motos/marcas');
       if(!Array.isArray(r)) return null;
       window._fipeMarcas = r;
+      try { localStorage.setItem('fipeMarcasCache', JSON.stringify(r)); } catch(e){}
     }
     const marcas = window._fipeMarcas;
 
@@ -1272,15 +1361,20 @@ async function buscarFipe(m, forcedRefresh = false) {
     let marcaObj = marcas.find(x => normFipe(x.nome) === marcaNorm)
       || marcas.find(x => normFipe(x.nome).includes(marcaNorm))
       || marcas.find(x => marcaNorm.includes(normFipe(x.nome)))
-      // fallback: primeira palavra da marca
       || marcas.find(x => normFipe(x.nome) === marcaNorm.split(' ')[0]);
-    if(!marcaObj) return null;
+    if(!marcaObj) { console.warn('FIPE: marca não encontrada:', m.marca); return null; }
 
-    // Cache de modelos por marca
+    // Cache de modelos por marca (localStorage → memória → API)
     const cacheKeyMod = `_fipeModelos_${marcaObj.codigo}`;
     if(!window[cacheKeyMod]) {
-      const r = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos`);
-      window[cacheKeyMod] = r ? r.modelos : [];
+      if(fipeModelosCache[marcaObj.codigo]) {
+        window[cacheKeyMod] = fipeModelosCache[marcaObj.codigo];
+      } else {
+        const r = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos`);
+        window[cacheKeyMod] = r ? r.modelos : [];
+        fipeModelosCache[marcaObj.codigo] = window[cacheKeyMod];
+        try { localStorage.setItem('fipeModelosCache', JSON.stringify(fipeModelosCache)); } catch(e){}
+      }
     }
     const modelos = window[cacheKeyMod];
 
@@ -1320,23 +1414,32 @@ async function buscarFipe(m, forcedRefresh = false) {
         .map(x => ({ x, score: scoreModelo(x.nome, tentativa) }))
         .filter(x => x.score > 0)
         .sort((a,b) => b.score - a.score);
-      if(scored.length && scored[0].score >= 30) {
+      // Score mínimo dinâmico: modelos curtos exigem menos pontos
+      const nTokens = normFipe(tentativa).split(/\s+/).filter(p => p.length > 0).length;
+      const minScore = nTokens <= 1 ? 15 : nTokens === 2 ? 22 : 30;
+      if(scored.length && scored[0].score >= minScore) {
         modeloObj = scored[0].x;
         break;
       }
     }
-    if(!modeloObj) return null;
+    if(!modeloObj) { console.warn('FIPE: modelo não encontrado:', m.marca, m.modelo, '— tentativas:', tentativas); return null; }
 
-    // Ano: tenta fab primeiro, depois modelo, depois mais recente
+    // Ano: tenta fab, depois modelo, depois ano mais próximo (tolerância 3 anos), depois primeiro disponível
     const anoFab = (m.ano||'').split('/')[0].replace(/\D/g,'');
     const anoMod = (m.ano||'').split('/')[1]?.replace(/\D/g,'');
     const anos = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos/${modeloObj.codigo}/anos`);
-    if(!anos || !anos.length) return null;
+    if(!anos || !anos.length) { console.warn('FIPE: sem anos disponíveis:', m.marca, m.modelo); return null; }
 
     let anoObj = anos.find(a => a.nome.startsWith(anoFab))
       || anos.find(a => a.nome.includes(anoFab))
-      || (anoMod ? anos.find(a => a.nome.includes(anoMod)) : null)
-      || anos[0];
+      || (anoMod ? anos.find(a => a.nome.includes(anoMod)) : null);
+    if(!anoObj && anoFab) {
+      const target = parseInt(anoFab);
+      const comAno = anos.map(a => ({ a, y: parseInt((a.nome.match(/^(\d{4})/)||[])[1]||0) })).filter(x => x.y);
+      comAno.sort((a,b) => Math.abs(a.y - target) - Math.abs(b.y - target));
+      if(comAno.length && Math.abs(comAno[0].y - target) <= 3) anoObj = comAno[0].a;
+    }
+    if(!anoObj) anoObj = anos[0];
     if(!anoObj) return null;
 
     const dados = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos/${modeloObj.codigo}/anos/${anoObj.codigo}`);
@@ -1430,12 +1533,16 @@ async function atualizarFipeMensal() {
       return;
     }
 
-    let ok = 0, erros = 0;
+    let ok = 0, erros = 0, nullConsec = 0;
     for (let i = 0; i < paraAtualizar.length; i++) {
       if (btn) btn.textContent = `⏳ ${i + 1}/${paraAtualizar.length}...`;
       const val = await buscarFipe(paraAtualizar[i], true);
-      if (val) ok++; else erros++;
-      if (i < paraAtualizar.length - 1) await new Promise(r => setTimeout(r, 400));
+      if (val) { ok++; nullConsec = 0; } else { erros++; nullConsec++; }
+      // Backoff progressivo: pausa maior se API retornar muitas falhas seguidas (provável rate limit)
+      if (i < paraAtualizar.length - 1) {
+        const delay = nullConsec >= 5 ? 3000 : nullConsec >= 3 ? 1500 : 500;
+        await new Promise(r => setTimeout(r, delay));
+      }
     }
 
     localStorage.setItem('fipeUltimaAtualizacao', new Date().toISOString());
@@ -2757,9 +2864,12 @@ async function limparCacheFipe() {
   if(!confirm('Limpar cache FIPE e rebuscar agora?')) return;
   // Limpar tudo em memória
   fipeCache = {};
+  fipeModelosCache = {};
   window._fipeMarcas = null;
   Object.keys(window).filter(k => k.startsWith('_fipeModelos_')).forEach(k => { delete window[k]; });
   try { localStorage.removeItem('fipeCache'); } catch(e){}
+  try { localStorage.removeItem('fipeMarcasCache'); } catch(e){}
+  try { localStorage.removeItem('fipeModelosCache'); } catch(e){}
   // Re-render imediato para zerar colunas na tela
   renderMotos();
   showToast('Cache limpo! Rebuscando FIPE...', '🗑️');
@@ -2782,13 +2892,20 @@ async function buscarFipeBackground(forcar = false) {
     el.className = 'fipe-status';
     el.textContent = `⚡ carregando marcas...`;
 
-    // Passo 1: buscar lista de marcas com retry
+    // Passo 1: buscar lista de marcas (localStorage → API com retry)
     if(!Array.isArray(window._fipeMarcas)) {
-      window._fipeMarcas = null;
+      const cached = localStorage.getItem('fipeMarcasCache');
+      if(cached) { try { window._fipeMarcas = JSON.parse(cached); } catch(e){} }
+    }
+    if(!Array.isArray(window._fipeMarcas)) {
       for(let t = 0; t < 5; t++) {
         await new Promise(r => setTimeout(r, 600 * (t + 1)));
         const r = await fipeFetch('https://parallelum.com.br/fipe/api/v1/motos/marcas');
-        if(Array.isArray(r)) { window._fipeMarcas = r; break; }
+        if(Array.isArray(r)) {
+          window._fipeMarcas = r;
+          try { localStorage.setItem('fipeMarcasCache', JSON.stringify(r)); } catch(e){}
+          break;
+        }
       }
       if(!Array.isArray(window._fipeMarcas)) {
         el.textContent = '⚠️ API FIPE indisponível — tente mais tarde';
@@ -2797,7 +2914,7 @@ async function buscarFipeBackground(forcar = false) {
       await new Promise(r => setTimeout(r, 600));
     }
 
-    // Passo 2: pré-carregar modelos de TODAS as marcas presentes nas motos (1 req por marca)
+    // Passo 2: pré-carregar modelos (localStorage → API)
     const marcasNecessarias = [...new Set(semFipe.map(m => {
       const limpa = (normalizarMarca(m.marca)||m.marca).toLowerCase().replace(/[^a-z\s\-]/g,'').trim();
       return normFipe(limpa);
@@ -2811,9 +2928,15 @@ async function buscarFipeBackground(forcar = false) {
       if(!marcaObj) continue;
       const ck = `_fipeModelos_${marcaObj.codigo}`;
       if(!window[ck]) {
-        const r = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos`);
-        window[ck] = (r && r.modelos) ? r.modelos : [];
-        await new Promise(r => setTimeout(r, 500));
+        if(fipeModelosCache[marcaObj.codigo]) {
+          window[ck] = fipeModelosCache[marcaObj.codigo];
+        } else {
+          const r = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos`);
+          window[ck] = (r && r.modelos) ? r.modelos : [];
+          fipeModelosCache[marcaObj.codigo] = window[ck];
+          try { localStorage.setItem('fipeModelosCache', JSON.stringify(fipeModelosCache)); } catch(e){}
+          await new Promise(r => setTimeout(r, 500));
+        }
       }
     }
 
@@ -2838,12 +2961,19 @@ async function buscarFipeBackground(forcar = false) {
       await new Promise(r => setTimeout(r, 350)); // 350ms entre motos — ~3 req/s
     }
 
-    el.className = 'fipe-status ok';
-    el.textContent = `✓ ${ok}/${ok+falhas} FIPE`;
-    if(falhaLog.length) {
+    if(falhas > 0) {
       const grouped = {};
       falhaLog.forEach(f => { grouped[f]=(grouped[f]||0)+1; });
-      console.warn('FIPE falhas:', Object.entries(grouped).sort((a,b)=>b[1]-a[1]));
+      const top = Object.entries(grouped).sort((a,b)=>b[1]-a[1]);
+      console.warn('FIPE falhas (ver console para diagnóstico detalhado):\n' + top.map(([k,v])=>`  ${k} (${v}x)`).join('\n'));
+      el.className = 'fipe-status';
+      el.style.cursor = 'pointer';
+      el.title = 'Clique para ver modelos sem FIPE no console';
+      el.textContent = `✓ ${ok} FIPE · ⚠️ ${falhas} sem resultado`;
+      el.onclick = () => { console.table(top.map(([k])=>({modelo:k}))); alert(`Modelos sem FIPE (${falhas}):\n\n${top.slice(0,20).map(([k,v])=>`${k} (${v}x)`).join('\n')}`); };
+    } else {
+      el.className = 'fipe-status ok';
+      el.textContent = `✓ ${ok}/${ok+falhas} FIPE`;
     }
     saveFipeCache(); updateStats();
     if(currentLeilao) renderMotos();
