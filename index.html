@@ -1874,7 +1874,9 @@ function parseFreitas(texto) {
     const key = marcaRaw + '|' + modeloRaw + '|' + ano;
     if (seen.has(key)) continue;
     seen.add(key);
-    motos.push({ lote, marca, modelo, ano, cor, condicao, lance, financeira, monta, patio, cilindrada: extractCilindrada(marcaRaw, modeloRaw), data_leilao: dataLeilao, hora_leilao: horaLeilao });
+    const cilindrada = extractCilindrada(marcaRaw, modeloRaw);
+    if (!monta && cilindrada) monta = cilindrada <= 200 ? 'pequena' : cilindrada <= 500 ? 'media' : 'grande';
+    motos.push({ lote, marca, modelo, ano, cor, condicao, lance, financeira, monta, patio, cilindrada, data_leilao: dataLeilao, hora_leilao: horaLeilao });
   }
   return motos;
 }
@@ -1979,7 +1981,9 @@ function parseSodre(texto) {
     if (!financeira) financeira = 'Particular/Empresa';
 
     seen.add(key);
-    motos.push({ lote, marca, modelo, ano, cor, condicao, lance, financeira, monta, patio, cilindrada: extractCilindrada(marca, modelo), data_leilao: dataLeilao, hora_leilao: horaLeilao, numero_leilao: lotNumeroLeilao });
+    const cilindrada = extractCilindrada(marca, modelo);
+    if (!monta && cilindrada) monta = cilindrada <= 200 ? 'pequena' : cilindrada <= 500 ? 'media' : 'grande';
+    motos.push({ lote, marca, modelo, ano, cor, condicao, lance, financeira, monta, patio, cilindrada, data_leilao: dataLeilao, hora_leilao: horaLeilao, numero_leilao: lotNumeroLeilao });
   }
   return motos;
 }
@@ -2131,7 +2135,9 @@ function parseSuperbid(texto) {
     const key = `${lote}|${marca}|${modelo}|${ano}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    motos.push({ lote, marca, modelo, ano, cor, condicao, lance, financeira, monta, patio, cilindrada: extractCilindrada(marca, modelo), data_leilao: dataLeilao, hora_leilao: horaLeilao });
+    const cilindrada = extractCilindrada(marca, modelo);
+    if (!monta && cilindrada) monta = cilindrada <= 200 ? 'pequena' : cilindrada <= 500 ? 'media' : 'grande';
+    motos.push({ lote, marca, modelo, ano, cor, condicao, lance, financeira, monta, patio, cilindrada, data_leilao: dataLeilao, hora_leilao: horaLeilao });
   }
   return motos;
 }
@@ -2221,7 +2227,9 @@ function parseVip(texto) {
     const key = `${lote}|${marca}|${modeloNome}|${ano}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    motos.push({ lote, marca, modelo: modeloNome, ano, cor, condicao, lance, financeira, monta, patio, cilindrada: extractCilindrada(marca, modeloNome), data_leilao: dataLeilao, hora_leilao: horaLeilao });
+    const cilindrada = extractCilindrada(marca, modeloNome);
+    if (!monta && cilindrada) monta = cilindrada <= 200 ? 'pequena' : cilindrada <= 500 ? 'media' : 'grande';
+    motos.push({ lote, marca, modelo: modeloNome, ano, cor, condicao, lance, financeira, monta, patio, cilindrada, data_leilao: dataLeilao, hora_leilao: horaLeilao });
   }
   return motos;
 }
@@ -2261,13 +2269,6 @@ function parseCopart(texto) {
   let headerIdx = linhas.findIndex(l => l.includes('Marca') && l.includes('Modelo') && l.includes('Lote'));
   if (headerIdx < 0) headerIdx = 0;
   const sep = linhas[headerIdx].includes(';') ? ';' : linhas[headerIdx].includes('\t') ? '\t' : ',';
-  // DIAGNÓSTICO TEMPORÁRIO — remover após debug
-  console.log('[Copart] sep=', JSON.stringify(sep), '| linhas=', linhas.length, '| headerIdx=', headerIdx);
-  console.log('[Copart] primeira linha (raw):', JSON.stringify(linhas[headerIdx].slice(0, 200)));
-  if (linhas[headerIdx + 1]) {
-    const cols0 = splitCsvLine(linhas[headerIdx + 1], sep);
-    console.log('[Copart] linha 1 cols[0..5]:', cols0.slice(0, 6));
-  }
   const headers = splitCsvLine(linhas[headerIdx], sep).map(h => h.toLowerCase().replace(/["\uFEFF]/g, ''));
   const iAno         = headers.findIndex(h => h.includes('ano') && h.includes('fab'));
   const iAnoMod      = headers.findIndex(h => h.includes('ano') && h.includes('mod'));
