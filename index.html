@@ -1478,23 +1478,32 @@ async function salvarFipeNoBanco(m, marcaCodigo, modeloCodigo, dados, val) {
     const refMes = mesesPT.indexOf(partes[0]) + 1 || null;
     const refAno = partes[1] ? parseInt(partes[1]) : new Date().getFullYear();
     const anoFab = parseInt((m.ano || '').split('/')[0]) || null;
-    await supaFetch('fipe_valores', {
+    const payload = {
+      marca_codigo:   marcaCodigo,
+      modelo_codigo:  modeloCodigo,
+      ano_modelo:     anoFab,
+      combustivel:    dados.Combustivel  || null,
+      valor:          val,
+      mes_referencia: dados.MesReferencia || null,
+      codigo_fipe:    dados.CodigoFipe   || null,
+      lookup_key:     key,
+      marca_nome:     dados.Marca        || null,
+      modelo_nome:    dados.Modelo       || null,
+      referencia_mes: refMes,
+      referencia_ano: refAno,
+    };
+    // Backfill automático: preenche lookup_key em registros antigos que têm os
+    // mesmos códigos FIPE mas ainda não têm lookup_key (migração transparente)
+    if (anoFab && marcaCodigo && modeloCodigo) {
+      await supaFetch(
+        `fipe_valores?marca_codigo=eq.${marcaCodigo}&modelo_codigo=eq.${modeloCodigo}&ano_modelo=eq.${anoFab}&lookup_key=is.null`,
+        { method: 'PATCH', body: JSON.stringify({ lookup_key: key, codigo_fipe: dados.CodigoFipe || null }) }
+      );
+    }
+    await supaFetch('fipe_valores?on_conflict=lookup_key', {
       method: 'POST',
       prefer: 'resolution=merge-duplicates,return=minimal',
-      body: JSON.stringify({
-        marca_codigo:   marcaCodigo,
-        modelo_codigo:  modeloCodigo,
-        ano_modelo:     anoFab,
-        combustivel:    dados.Combustivel  || null,
-        valor:          val,
-        mes_referencia: dados.MesReferencia || null,
-        codigo_fipe:    dados.CodigoFipe   || null,
-        lookup_key:     key,
-        marca_nome:     dados.Marca        || null,
-        modelo_nome:    dados.Modelo       || null,
-        referencia_mes: refMes,
-        referencia_ano: refAno,
-      })
+      body: JSON.stringify(payload)
     });
   } catch(e) {
     console.warn('salvarFipeNoBanco:', e.message);
@@ -2251,23 +2260,33 @@ function parseCopart(texto) {
   const seen = new Set();
   let headerIdx = linhas.findIndex(l => l.includes('Marca') && l.includes('Modelo') && l.includes('Lote'));
   if (headerIdx < 0) headerIdx = 0;
-  const sep = linhas[headerIdx].includes(';') ? ';' : ',';
+  const sep = linhas[headerIdx].includes(';') ? ';' : linhas[headerIdx].includes('\t') ? '\t' : ',';
+  // DIAGNÓSTICO TEMPORÁRIO — remover após debug
+  console.log('[Copart] sep=', JSON.stringify(sep), '| linhas=', linhas.length, '| headerIdx=', headerIdx);
+  console.log('[Copart] primeira linha (raw):', JSON.stringify(linhas[headerIdx].slice(0, 200)));
+  if (linhas[headerIdx + 1]) {
+    const cols0 = splitCsvLine(linhas[headerIdx + 1], sep);
+    console.log('[Copart] linha 1 cols[0..5]:', cols0.slice(0, 6));
+  }
   const headers = splitCsvLine(linhas[headerIdx], sep).map(h => h.toLowerCase().replace(/["\uFEFF]/g, ''));
   const iAno         = headers.findIndex(h => h.includes('ano') && h.includes('fab'));
   const iAnoMod      = headers.findIndex(h => h.includes('ano') && h.includes('mod'));
   const iMarca       = headers.findIndex(h => h.includes('marca'));
-  const iModelo      = headers.findIndex(h => h.includes('modelo'));
+  // Prefere coluna exatamente "modelo" para não pegar "código do modelo" ou colunas similares
+  const iModelo      = (() => { const e = headers.findIndex(h => /^modelo$/.test(h)); return e >= 0 ? e : headers.findIndex(h => h.includes('modelo') && !h.includes('cod') && !h.includes('link')); })();
   const iCor         = headers.findIndex(h => /^cor$/.test(h));
   const iCond        = headers.findIndex(h => h.includes('condi') && !h.includes('func'));
-  const iFinanceira  = headers.findIndex(h => h.includes('financ') || h.includes('credor'));
+  const iFinanceira  = headers.findIndex(h => h.includes('financ') || h.includes('credor') || h.includes('comitente'));
   const iLance       = headers.findIndex(h => h.includes('lance') && !h.includes('meu'));
   const iPatio       = headers.findIndex(h => (h.includes('pátio') || h.includes('patio')) && h.includes('veículo'));
-  const iLote        = headers.findIndex(h => h.includes('lote'));
+  // Prefere coluna exatamente "lote" ou "n° lote" para não pegar "link do lote" ou similares
+  const iLote        = (() => { const e = headers.findIndex(h => /^n[º°.]?\s*lote$|^lote$/.test(h.trim())); return e >= 0 ? e : headers.findIndex(h => h.includes('lote') && !h.includes('link') && !h.includes('url') && !h.includes('http')); })();
   const iFipe        = headers.findIndex(h => h.includes('fipe'));
   const iCilindrada  = (() => { const exact = headers.findIndex(h => /^cilindrada$/.test(h)); return exact >= 0 ? exact : headers.findIndex(h => h.includes('cilindrada')); })();
   const iData        = headers.findIndex(h => h.includes('data') && h.includes('leil'));
   const iPatioLeilao = headers.findIndex(h => (h.includes('pátio') || h.includes('patio')) && h.includes('leil'));
-  const iMontaCopart = headers.findIndex(h => h.includes('tipo') && h.includes('monta'));
+  // Aceita "tipo de monta", "tipo monta" ou simplesmente "monta"
+  const iMontaCopart = (() => { const e = headers.findIndex(h => h.includes('tipo') && h.includes('monta')); return e >= 0 ? e : headers.findIndex(h => /\bmonta\b/.test(h)); })();
 
   for (let i = headerIdx + 1; i < linhas.length; i++) {
     const cols = splitCsvLine(linhas[i], sep);
@@ -2291,7 +2310,8 @@ function parseCopart(texto) {
     const anoModMatch = anoModRaw.match(/(\d{4}|\d{2})/);
     const anoFabShort = anoFabMatch ? anoFabMatch[1].slice(-2) : '';
     const anoModShort = anoModMatch ? anoModMatch[1].slice(-2) : anoFabShort;
-    const ano = anoFabShort ? anoFabShort + '/' + anoModShort : '';
+    // Quando só existe "Ano Modelo" (sem "Ano Fab"), usa o mesmo valor para os dois lados
+    const ano = anoFabShort ? anoFabShort + '/' + anoModShort : anoModShort ? anoModShort + '/' + anoModShort : '';
 
     const condRaw = (cols[iCond] || '').toUpperCase();
     let condicao = 'financiada';
@@ -2303,7 +2323,14 @@ function parseCopart(texto) {
     const fipeVal = parseFloat(String(fipeRaw).replace(/\./g,'').replace(',','.').replace(/[^\d.]/g,'')) || null;
     const patio   = toTitle(cols[iPatio] || '');
     const loteRaw = cols[iLote] || '';
-    const lote    = loteRaw.includes('/') && /^\d+$/.test(loteRaw.split('/')[0]) ? loteRaw.split('/')[0] : loteRaw;
+    let lote = loteRaw;
+    if (/^https?:\/\//i.test(loteRaw)) {
+      // URL do lote (ex: https://copart.com.br/lot/12345/...) — extrai número
+      const m = loteRaw.match(/[/=](\d{4,8})(?:[/?]|$)/);
+      lote = m ? m[1] : loteRaw;
+    } else if (loteRaw.includes('/') && /^\d+$/.test(loteRaw.split('/')[0])) {
+      lote = loteRaw.split('/')[0];
+    }
 
     // Data do leilão: "12.03.2026 18:30", "12/03/2026 18:30" ou "12-03-2026 18:30"
     let dataLeilao = '', horaLeilao = '';
@@ -2312,14 +2339,16 @@ function parseCopart(texto) {
     if (dmatch) { dataLeilao = `${dmatch[3]}-${dmatch[2]}-${dmatch[1]}`; horaLeilao = dmatch[4]; }
     if (!dataLeilao) continue;
 
-    const patioLeilao = iPatioLeilao >= 0 ? toTitle(cols[iPatioLeilao] || '') : '';
-    const montaRaw    = iMontaCopart >= 0 ? (cols[iMontaCopart] || '').toLowerCase() : '';
-    const monta       = montaRaw.includes('pequena') ? 'pequena' : montaRaw.includes('média') || montaRaw.includes('media') ? 'media' : montaRaw.includes('grande') ? 'grande' : null;
-    const cor         = iCor >= 0 ? toTitle(cols[iCor] || '') : '';
+    const patioLeilao   = iPatioLeilao >= 0 ? toTitle(cols[iPatioLeilao] || '') : '';
+    const cor           = iCor >= 0 ? toTitle(cols[iCor] || '') : '';
     const financeiraRaw = iFinanceira >= 0 ? (cols[iFinanceira] || '').trim() : '';
-    const financeira  = financeiraRaw || 'Particular/Empresa';
+    const financeira    = financeiraRaw || 'Particular/Empresa';
     const cilindradaCSV = iCilindrada >= 0 ? parseInt(cols[iCilindrada] || '') || null : null;
-    const cilindrada  = cilindradaCSV || extractCilindrada(marca, modelo);
+    const cilindrada    = cilindradaCSV || extractCilindrada(marca, modelo);
+    const montaRaw      = iMontaCopart >= 0 ? (cols[iMontaCopart] || '').toLowerCase() : '';
+    let   monta         = montaRaw.includes('pequena') ? 'pequena' : montaRaw.includes('média') || montaRaw.includes('media') ? 'media' : montaRaw.includes('grande') ? 'grande' : null;
+    // Fallback: derivar da cilindrada quando a coluna de monta não existe ou não bate
+    if (!monta && cilindrada) monta = cilindrada <= 200 ? 'pequena' : cilindrada <= 500 ? 'media' : 'grande';
 
     const key = lote + '|' + marca + '|' + modelo;
     if (seen.has(key)) continue;
