@@ -1415,6 +1415,7 @@ async function buscarFipe(m, forcedRefresh = false) {
     }
 
     let modeloObj = null;
+    let altCandidatos = []; // candidatos alternativos para desambiguação por ano
     for(const tentativa of tentativas) {
       const scored = modelos
         .map(x => ({ x, score: scoreModelo(x.nome, tentativa) }))
@@ -1425,6 +1426,8 @@ async function buscarFipe(m, forcedRefresh = false) {
       const minScore = nTokens <= 1 ? 15 : nTokens === 2 ? 22 : 30;
       if(scored.length && scored[0].score >= minScore) {
         modeloObj = scored[0].x;
+        // guarda alternativas com score próximo (até 30% abaixo do melhor) para desambiguação por ano
+        altCandidatos = scored.slice(1).filter(x => x.score >= scored[0].score * 0.7 && x.score >= minScore).map(x => x.x);
         break;
       }
     }
@@ -1433,8 +1436,24 @@ async function buscarFipe(m, forcedRefresh = false) {
     // Ano: tenta fab, depois modelo, depois ano mais próximo (tolerância 3 anos), depois primeiro disponível
     const anoFab = (m.ano||'').split('/')[0].replace(/\D/g,'');
     const anoMod = (m.ano||'').split('/')[1]?.replace(/\D/g,'');
-    const anos = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos/${modeloObj.codigo}/anos`);
+    let anos = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos/${modeloObj.codigo}/anos`);
     if(!anos || !anos.length) { console.warn('FIPE: sem anos disponíveis:', m.marca, m.modelo); return null; }
+
+    // Desambiguação por ano: se o modelo escolhido não tem o ano da moto mas há alternativas, testa-as
+    if(anoFab && altCandidatos.length) {
+      const temAno = anos.some(a => a.nome.startsWith(anoFab) || a.nome.includes(anoFab));
+      if(!temAno) {
+        for(const alt of altCandidatos) {
+          const anosAlt = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos/${alt.codigo}/anos`);
+          if(anosAlt && anosAlt.some(a => a.nome.startsWith(anoFab) || a.nome.includes(anoFab))) {
+            console.info('FIPE: desambiguação por ano:', modeloObj.nome, '→', alt.nome, '(ano', anoFab, ')');
+            modeloObj = alt;
+            anos = anosAlt;
+            break;
+          }
+        }
+      }
+    }
 
     let anoObj = anos.find(a => a.nome.startsWith(anoFab))
       || anos.find(a => a.nome.includes(anoFab))
