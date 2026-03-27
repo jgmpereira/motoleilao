@@ -25,7 +25,7 @@ console.log(`🔧 SUPABASE_URL env raw : "${process.env.SUPABASE_URL ?? '(não d
 console.log(`🔧 SUPA_URL final       : "${SUPA_URL}"`);
 const SODRE_URL = 'https://www.sodresantoro.com.br/veiculos/lotes?lot_category=motos&sort=auction_date_init_asc';
 // Quantos lotes esperar no máximo; aumentar se o site tiver paginação com load-more
-const MAX_SCROLL_ROUNDS = 8;
+const MAX_SCROLL_ROUNDS = 50;
 
 if (!SUPA_KEY) {
   console.error('❌  SUPABASE_KEY não definido');
