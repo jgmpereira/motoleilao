@@ -538,6 +538,8 @@ async function main() {
         cilindrada,
         monta,
         fipe_csv:     null,
+        url:           lot.lot_id ? `https://www.sodresantoro.com.br/veiculos/lotes/${lot.lot_id}` : null,
+      foto:          (lot.lot_pictures && lot.lot_pictures[0]) ? lot.lot_pictures[0] : null,
       });
     }
 
