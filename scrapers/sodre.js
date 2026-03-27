@@ -18,7 +18,9 @@
 const { chromium } = require('playwright');
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const SUPA_URL  = process.env.SUPABASE_URL || 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
+let _supaUrl = process.env.SUPABASE_URL || 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
+if (_supaUrl && !_supaUrl.startsWith('http')) _supaUrl = 'https://' + _supaUrl;
+const SUPA_URL  = _supaUrl;
 const SUPA_KEY  = process.env.SUPABASE_KEY;
 const SODRE_URL = 'https://www.sodresantoro.com.br/veiculos/lotes?lot_category=motos&sort=auction_date_init_asc';
 // Quantos lotes esperar no máximo; aumentar se o site tiver paginação com load-more
@@ -412,6 +414,11 @@ async function main() {
     }
 
     console.log(`\n📊 Total lotes via API: ${capturedLots.length}`);
+    if (capturedLots.length > 0) {
+      console.log('\n🔍 JSON do primeiro lote (para debug de campos):');
+      console.log(JSON.stringify(capturedLots[0], null, 2));
+      console.log('─────────────────────────────────────────────\n');
+    }
 
     // ── 3. Fallback: DOM scraping ─────────────────────────────────────────────
     if (capturedLots.length === 0) {
