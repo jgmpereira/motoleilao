@@ -50,7 +50,9 @@ async function supaFetch(path, opts = {}) {
     throw new Error(`Supabase ${method} /${path} → ${res.status}: ${txt}`);
   }
   if (res.status === 204) return null;
-  return res.json();
+  const text = await res.text();
+  if (!text || !text.trim()) return null;
+  return JSON.parse(text);
 }
 
 // ── Utilities (portadas do index.html) ───────────────────────────────────────
