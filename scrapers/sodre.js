@@ -22,6 +22,9 @@ let _supaUrl = process.env.SUPABASE_URL || 'https://ntlwhwmtsyniinbkwjgg.supabas
 if (_supaUrl && !_supaUrl.startsWith('http')) _supaUrl = 'https://' + _supaUrl;
 const SUPA_URL  = _supaUrl;
 const SUPA_KEY  = process.env.SUPABASE_KEY;
+// Diagnóstico — imprime antes de qualquer coisa para ver o valor real
+console.log(`🔧 SUPABASE_URL env raw : "${process.env.SUPABASE_URL ?? '(não definido)'}"`);
+console.log(`🔧 SUPA_URL final       : "${SUPA_URL}"`);
 const SODRE_URL = 'https://www.sodresantoro.com.br/veiculos/lotes?lot_category=motos&sort=auction_date_init_asc';
 // Quantos lotes esperar no máximo; aumentar se o site tiver paginação com load-more
 const MAX_SCROLL_ROUNDS = 8;
@@ -294,10 +297,24 @@ function extractLotData(lot) {
 }
 
 // ── Detecta se resposta API contém array de lotes ─────────────────────────────
+// Campos que só existem em lotes reais (não em categorias/segmentos)
+const LOT_FIELDS = ['lot_number','numero_lote','lote','number','start_value','lance_inicial',
+  'initial_bid','valor_inicial','current_bid','auction_date_init','auction_date','start_date',
+  'vehicle_name','vehicle_description','slug'];
+
+function pareceArrayDeLotes(arr) {
+  if (!Array.isArray(arr) || arr.length === 0) return false;
+  const sample = arr[0];
+  // Rejeita explicitamente objetos de categoria/segmento
+  if (sample.categories || sample.segments || sample.subcategories) return false;
+  // Aceita se o primeiro item tiver pelo menos um campo típico de lote
+  return LOT_FIELDS.some(f => sample[f] != null);
+}
+
 function extrairLotesDeResposta(json) {
-  if (Array.isArray(json) && json.length > 0 && (json[0].title || json[0].description || json[0].lot_number)) return json;
+  if (pareceArrayDeLotes(json)) return json;
   for (const key of ['data', 'lots', 'lotes', 'items', 'results', 'vehicles', 'veiculos']) {
-    if (Array.isArray(json[key]) && json[key].length > 0) return json[key];
+    if (pareceArrayDeLotes(json[key])) return json[key];
   }
   return null;
 }
@@ -355,18 +372,19 @@ async function main() {
     const url = response.url();
     const ct  = response.headers()['content-type'] ?? '';
     if (!ct.includes('application/json')) return;
-    if (!url.includes('sodresantoro') && !url.includes('/api/') && !url.includes('/lotes') && !url.includes('/lots')) return;
+    // Loga TODAS as chamadas JSON do domínio para descobrir a URL correta dos lotes
+    if (!url.includes('sodresantoro')) return;
     if (/\.(js|css|woff|png|jpg)/.test(url)) return;
 
     try {
       const json = await response.json();
       const lots = extrairLotesDeResposta(json);
       if (lots && lots.length > 0) {
-        console.log(`  📡 API [${response.status()}] ${url} → ${lots.length} itens`);
+        console.log(`  📡 LOTES [${response.status()}] ${url} → ${lots.length} itens`);
         capturedLots.push(...lots);
       } else {
-        // Log na íntegra apenas para debug (primeiros 300 chars)
-        console.log(`  📡 API [${response.status()}] ${url} — sem array detectado: ${JSON.stringify(json).slice(0, 300)}`);
+        // Log de todas as outras chamadas para descobrir onde ficam os lotes
+        console.log(`  📡 JSON  [${response.status()}] ${url} — não são lotes: ${JSON.stringify(json).slice(0, 200)}`);
       }
     } catch {
       // body não é JSON puro — ignora
