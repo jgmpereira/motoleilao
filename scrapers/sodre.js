@@ -247,7 +247,8 @@ function extractLotData(lot) {
       // hora no fuso de SP (UTC-3)
       const h = new Date(dateRaw);
       h.setMinutes(h.getMinutes() - h.getTimezoneOffset() - (-180));
-      hora = dateRaw.includes('T') ? dateRaw.slice(11, 16) : '';
+      const dateStr = String(dateRaw);
+      hora = dateStr.includes('T') ? dateStr.slice(11, 16) : '';
     }
   }
 
@@ -257,8 +258,8 @@ function extractLotData(lot) {
   ).replace(/^0+/, '') || null;
 
   // Descrição (marca/modelo)
-  const descricao = lot.title ?? lot.description ?? lot.titulo ?? lot.descricao ??
-    lot.name ?? lot.vehicle_name ?? lot.vehicle_description ?? '';
+  const descricao = String(lot.title ?? lot.description ?? lot.titulo ?? lot.descricao ??
+    lot.name ?? lot.vehicle_name ?? lot.vehicle_description ?? '');
 
   // Lance inicial
   const lance = parseFloat(
@@ -266,11 +267,11 @@ function extractLotData(lot) {
   ) || null;
 
   // Condição bruta
-  const condicaoBruta = lot.lot_condition ?? lot.condition ?? lot.condicao ??
-    lot.vehicle_type ?? lot.status_text ?? lot.type ?? '';
+  const condicaoBruta = String(lot.lot_condition ?? lot.condition ?? lot.condicao ??
+    lot.vehicle_type ?? lot.status_text ?? lot.type ?? '');
 
   // Pátio / localização
-  const patio = lot.location ?? lot.patio ?? lot.yard ?? lot.storage ?? '';
+  const patio = String(lot.location ?? lot.patio ?? lot.yard ?? lot.storage ?? '');
 
   // Financeira
   let financeira = 'Particular/Empresa';
@@ -305,8 +306,8 @@ const MARCAS_MOTO = new Set(['honda','yamaha','kawasaki','suzuki','bmw','harley'
   'benelli','aprilia','mv agusta','indian','zero']);
 
 function isMoto(lot) {
-  const cat  = (lot.category ?? lot.lot_category ?? lot.categoria ?? lot.type ?? '').toLowerCase();
-  const desc = (lot.title ?? lot.description ?? lot.titulo ?? lot.name ?? '').toLowerCase();
+  const cat  = String(lot.category ?? lot.lot_category ?? lot.categoria ?? lot.type ?? '').toLowerCase();
+  const desc = String(lot.title ?? lot.description ?? lot.titulo ?? lot.name ?? '').toLowerCase();
   // Se a categoria diz explicitamente que não é moto, descarta
   if (cat && !cat.includes('moto') && !cat.includes('motorcycle') && !cat.includes('bike') && cat !== 'veiculo' && cat !== 'vehicle') return false;
   // Verifica se a descrição menciona uma marca de moto conhecida
