@@ -419,26 +419,28 @@ async function main() {
     await page.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => {});
     await page.waitForTimeout(3_000);
 
-    // ── 2. Scroll para carregar lotes com lazy-loading ────────────────────────
-    console.log('📜 Fazendo scroll para carregar todos os lotes...');
-    let prevCount = 0;
-    for (let i = 0; i < MAX_SCROLL_ROUNDS; i++) {
-      await page.evaluate(() => window.scrollBy(0, 1200));
-      await page.waitForTimeout(1_500);
-
-      // Verifica se o botão "Carregar mais" existe e clica
-      const loadMoreSel = 'button:text-matches("(ver mais|load more|carregar mais|próxima|próximo)", "i")';
-      const loadMore = page.locator(loadMoreSel).first();
-      if (await loadMore.isVisible({ timeout: 1_000 }).catch(() => false)) {
-        await loadMore.click();
-        await page.waitForTimeout(2_000);
-      }
-
-      if (capturedLots.length > prevCount) {
-        console.log(`   Round ${i + 1}: ${capturedLots.length} lotes acumulados`);
-        prevCount = capturedLots.length;
-      }
+    // — 2. Navega pelas páginas para carregar todos os lotes
+  let pageNum = 1;
+  while (true) {
+    if (pageNum > 1) {
+      const pageUrl = SODRE_URL + '&page=' + pageNum;
+      console.log(`  Navegando para página ${pageNum}: ${pageUrl}`);
+      await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 90_000 });
+      await page.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => {});
+      await page.waitForTimeout(3_000);
     }
+    const beforeCount = capturedLots.length;
+    await page.waitForTimeout(2_000);
+    console.log(`  Página ${pageNum}: ${capturedLots.length} lotes acumulados`);
+    if (capturedLots.length === beforeCount && pageNum > 1) {
+      console.log(`  Página ${pageNum}: sem novos lotes, encerrando.`);
+      break;
+    }
+    const nextBtn = page.locator('a[aria-label="Next"], [class*="next"]:not([disabled])').first();
+    const hasNext = await nextBtn.isVisible({ timeout: 2_000 }).catch(() => false);
+    if (!hasNext) { console.log('  Sem próxima página, encerrando.'); break; }
+    pageNum++;
+  }
 
     console.log(`\n📊 Total lotes via API: ${capturedLots.length}`);
     if (capturedLots.length > 0) {
