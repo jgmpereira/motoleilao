@@ -18,9 +18,7 @@
 const { chromium } = require('playwright');
 
 // ── Config ────────────────────────────────────────────────────────────────────
-let _supaUrl = (process.env.SUPABASE_URL || 'https://ntlwhwmtsyniinbkwjgg.supabase.co').trim();
-if (_supaUrl && !_supaUrl.startsWith('http')) _supaUrl = 'https://' + _supaUrl;
-const SUPA_URL  = _supaUrl;
+const SUPA_URL = (process.env.SUPABASE_URL || '').trim().replace(/^(?!https?:\/\/)/, 'https://') || 'https://ntlwhumtsyniinbkwjgg.supabase.co';
 const SUPA_KEY  = process.env.SUPABASE_KEY;
 // Diagnóstico — imprime antes de qualquer coisa para ver o valor real
 console.log(`🔧 SUPABASE_URL env raw : "${process.env.SUPABASE_URL ?? '(não definido)'}"`);
