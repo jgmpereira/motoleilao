@@ -3348,7 +3348,7 @@ function renderMotos() {
           style="width:15px;height:15px;cursor:pointer;accent-color:var(--accent);">
       </td>
       <td class="td-lote">${m.lote||'—'}</td>
-      <td class="td-modelo"><strong>${m.marca} ${m.modelo}</strong>${m.financeira?`<br><span style="font-size:10px;color:var(--muted);">${m.financeira}</span>`:''}</td>
+      <td class="td-modelo">${m.foto?`<img src="${m.foto}" style="width:100%;max-height:72px;object-fit:cover;border-radius:4px;margin-bottom:4px;display:block;" onerror="this.style.display='none'" loading="lazy">`:''}<strong>${m.marca} ${m.modelo}</strong>${m.financeira?`<br><span style="font-size:10px;color:var(--muted);">${m.financeira}</span>`:''}</td>
       <td class="td-ano">${m.ano||'—'}</td>
       <td>${(()=>{
         const pl = getPorteLabel(m.cilindrada);
@@ -3378,6 +3378,7 @@ function renderMotos() {
       <td><span class="${ind.cls}">${ind.text}</span></td>
       <td style="white-space:nowrap;text-align:center;">
         <span class="td-hist" onclick="verHistModelo('${m.marca}','${m.modelo}')" title="Histórico do modelo">ver</span>
+        ${m.url?`<span style="color:var(--border);margin:0 4px;">|</span><a href="${m.url}" target="_blank" rel="noopener" title="Ver lote no site" style="color:var(--accent);text-decoration:none;font-size:13px;">🔗</a>`:''}
         <span style="color:var(--border);margin:0 4px;">|</span>
         <span onclick="excluirMoto(${m.id},'${(m.marca+' '+m.modelo).replace(/'/g,"\\'")}',${!!ARREMATADOS[m.id]})"
           title="Remover moto do leilão"
