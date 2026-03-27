@@ -1,0 +1,14 @@
+{
+  "name": "motoleilao-scrapers",
+  "version": "1.0.0",
+  "description": "Scrapers automáticos para MotoLeilão",
+  "scripts": {
+    "sodre": "node sodre.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "playwright": "^1.41.0"
+  }
+}
