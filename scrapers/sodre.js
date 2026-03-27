@@ -18,7 +18,7 @@
 const { chromium } = require('playwright');
 
 // ── Config ────────────────────────────────────────────────────────────────────
-let _supaUrl = process.env.SUPABASE_URL || 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
+let _supaUrl = (process.env.SUPABASE_URL || 'https://ntlwhwmtsyniinbkwjgg.supabase.co').trim();
 if (_supaUrl && !_supaUrl.startsWith('http')) _supaUrl = 'https://' + _supaUrl;
 const SUPA_URL  = _supaUrl;
 const SUPA_KEY  = process.env.SUPABASE_KEY;
@@ -237,70 +237,80 @@ function mapCondicao(condicaoTexto, condicaoExtra) {
 }
 
 // ── Extrai dados estruturados de um objeto de lote cru ────────────────────────
-// Tenta vários nomes de campo porque não sabemos o schema exato da API do Sodré
+// Campos confirmados pela API real do Sodré Santoro:
+//   lot_title, lot_brand, lot_model, lot_year_model, auction_date_init,
+//   lot_category, lot_sinister, lot_location, bid_initial,
+//   lot_number, auction_id, auction_name, lot_id
 function extractLotData(lot) {
-  // Data do leilão
-  const dateRaw = lot.auction_date_init ?? lot.auction_date ?? lot.data_leilao ??
-    lot.start_date ?? lot.date ?? lot.auction?.auction_date_init ?? lot.auction?.start_date ??
-    lot.auction?.date ?? null;
-
+  // Data do leilão — "2026-03-30 09:30:00" (horário de SP, sem fuso)
+  const dateRaw = String(lot.auction_date_init ?? lot.auction_date ?? lot.start_date ?? '').trim();
   let dataISO = null, hora = '';
   if (dateRaw) {
-    const d = new Date(dateRaw);
-    if (!isNaN(d)) {
-      dataISO = d.toISOString().slice(0, 10);
-      // hora no fuso de SP (UTC-3)
-      const h = new Date(dateRaw);
-      h.setMinutes(h.getMinutes() - h.getTimezoneOffset() - (-180));
-      const dateStr = String(dateRaw);
-      hora = dateStr.includes('T') ? dateStr.slice(11, 16) : '';
-    }
+    dataISO = dateRaw.slice(0, 10);   // "2026-03-30"
+    hora    = dateRaw.slice(11, 16);  // "09:30"
+    if (isNaN(new Date(dataISO))) dataISO = null;
   }
 
-  // Número do lote
-  const loteNum = String(
-    lot.lot_number ?? lot.numero_lote ?? lot.lote ?? lot.number ?? lot.lot ?? ''
-  ).replace(/^0+/, '') || null;
+  // Número do lote — "0015" → "15"
+  const loteNum = String(lot.lot_number ?? lot.numero_lote ?? lot.lote ?? '').replace(/^0+/, '') || null;
 
-  // Descrição (marca/modelo)
-  const descricao = String(lot.title ?? lot.description ?? lot.titulo ?? lot.descricao ??
-    lot.name ?? lot.vehicle_name ?? lot.vehicle_description ?? '');
+  // Marca e modelo — campos separados confirmados
+  const marcaRaw  = String(lot.lot_brand  ?? lot.brand  ?? '').trim();
+  const modeloRaw = String(lot.lot_model  ?? lot.model  ?? '').trim();
+  const marca  = marcaRaw  ? (normalizarMarca(marcaRaw)  || toTitle(marcaRaw))  : null;
+  const modelo = modeloRaw ? toTitle(modeloRaw) : null;
 
-  // Lance inicial
-  const lance = parseFloat(
-    lot.start_value ?? lot.lance_inicial ?? lot.initial_bid ?? lot.valor_inicial ?? lot.current_bid ?? 0
-  ) || null;
+  // Ano — lot_year_model: 2024 → "24/24"
+  const anoNum = lot.lot_year_model ?? lot.year_model ?? null;
+  let ano = null;
+  if (anoNum) {
+    const y = String(anoNum).slice(-2);
+    ano = `${y}/${y}`;
+  }
 
-  // Condição bruta
-  const condicaoBruta = String(lot.lot_condition ?? lot.condition ?? lot.condicao ??
-    lot.vehicle_type ?? lot.status_text ?? lot.type ?? '');
+  // Lance inicial — bid_initial: "0.00"
+  const lanceRaw = parseFloat(lot.bid_initial ?? lot.start_value ?? lot.lance_inicial ?? lot.initial_bid ?? 0);
+  const lance = lanceRaw > 0 ? lanceRaw : null;
 
-  // Pátio / localização
-  const patio = String(lot.location ?? lot.patio ?? lot.yard ?? lot.storage ?? '');
+  // Monta — lot_sinister: "média monta" (classificação por porte)
+  let monta = null;
+  const sinisterRaw = String(lot.lot_sinister ?? '').toLowerCase();
+  if      (sinisterRaw.includes('pequena'))                          monta = 'pequena';
+  else if (sinisterRaw.includes('média') || sinisterRaw.includes('media')) monta = 'media';
+  else if (sinisterRaw.includes('grande'))                           monta = 'grande';
 
-  // Financeira
+  // Condição — inferida do título e outros campos
+  const titleLow = String(lot.lot_title ?? lot.lot_brand ?? '').toLowerCase();
+  let condicao = 'financiada';
+  if (titleLow.includes('sucata')) condicao = 'sucata';
+  else if (titleLow.includes('sinistro') || titleLow.includes('colisão') ||
+           titleLow.includes('roubo')    || titleLow.includes('furto'))   condicao = 'sinistro';
+
+  // Financeira — auction_name: "BANCO, SEGURADORAS, ETC"
+  const auctionName = String(lot.auction_name ?? '').toLowerCase();
   let financeira = 'Particular/Empresa';
-  const cb = condicaoBruta.toLowerCase();
-  if (cb.includes('seguro') || cb.includes('seguradora')) financeira = 'Seguradora';
-  else if (cb.includes('financ')) financeira = 'Financeira';
+  if (auctionName.includes('segur'))                       financeira = 'Seguradora';
+  else if (auctionName.includes('banco') || auctionName.includes('financ') ||
+           auctionName.includes('bv ')   || auctionName.includes('itau')   ||
+           auctionName.includes('bradesco') || auctionName.includes('santander') ||
+           auctionName.includes('porto'))                  financeira = 'Financeira';
 
-  // Link para o lote
-  const link = lot.url ?? lot.link ?? lot.permalink ??
-    (lot.slug ? `https://www.sodresantoro.com.br/veiculos/lotes/${lot.slug}` : '') ??
-    (lot.id   ? `https://www.sodresantoro.com.br/veiculos/lotes/${lot.id}`   : '') ?? '';
+  // Pátio — lot_location: "guarulhos iii/sp"
+  const patio = String(lot.lot_location ?? lot.location ?? '').trim() || null;
 
-  // Link do leilão (para o objeto leilão)
-  const leilaoLink = lot.auction?.url ?? lot.auction?.link ??
-    (lot.auction?.id ? `https://www.sodresantoro.com.br/leilao/${lot.auction.id}` : '') ?? link;
+  // Link do leilão — auction_id: 28242
+  const leilaoLink = lot.auction_id
+    ? `https://www.sodresantoro.com.br/leilao/${lot.auction_id}`
+    : (lot.lot_id ? `https://www.sodresantoro.com.br/veiculos/lotes/${lot.lot_id}` : '');
 
-  return { dataISO, hora, leilaoLink, loteNum, descricao, lance, condicaoBruta, patio, financeira };
+  return { dataISO, hora, leilaoLink, loteNum, marca, modelo, ano, monta, lance, condicao, financeira, patio };
 }
 
 // ── Detecta se resposta API contém array de lotes ─────────────────────────────
 // Campos que só existem em lotes reais (não em categorias/segmentos)
-const LOT_FIELDS = ['lot_number','numero_lote','lote','number','start_value','lance_inicial',
-  'initial_bid','valor_inicial','current_bid','auction_date_init','auction_date','start_date',
-  'vehicle_name','vehicle_description','slug'];
+const LOT_FIELDS = ['lot_number','lot_brand','lot_id','bid_initial','lot_year_model',
+  'auction_date_init','auction_date','start_date','start_value','lance_inicial',
+  'initial_bid','vehicle_name','vehicle_description','slug'];
 
 function pareceArrayDeLotes(arr) {
   if (!Array.isArray(arr) || arr.length === 0) return false;
@@ -325,15 +335,14 @@ const MARCAS_MOTO = new Set(['honda','yamaha','kawasaki','suzuki','bmw','harley'
   'benelli','aprilia','mv agusta','indian','zero']);
 
 function isMoto(lot) {
-  const cat  = String(lot.category ?? lot.lot_category ?? lot.categoria ?? lot.type ?? '').toLowerCase();
-  const desc = String(lot.title ?? lot.description ?? lot.titulo ?? lot.name ?? '').toLowerCase();
-  // Se a categoria diz explicitamente que não é moto, descarta
-  if (cat && !cat.includes('moto') && !cat.includes('motorcycle') && !cat.includes('bike') && cat !== 'veiculo' && cat !== 'vehicle') return false;
-  // Verifica se a descrição menciona uma marca de moto conhecida
+  // lot_category é o campo confirmado da API do Sodré
+  const cat = String(lot.lot_category ?? lot.category ?? lot.categoria ?? '').toLowerCase();
+  if (cat === 'motos' || cat === 'moto' || cat.includes('moto')) return true;
+  if (cat && cat !== 'veiculo' && cat !== 'vehicle') return false;
+  // Fallback para lotes vindos do DOM scraping
+  const desc = String(lot.lot_title ?? lot.title ?? lot.description ?? lot.name ?? '').toLowerCase();
   if (MARCAS_MOTO.has(desc.split(' ')[0])) return true;
-  // Se tiver o padrão "Marca Modelo AA/AA", provavelmente é moto
-  if (/\b\d{2}\/\d{2}\b/.test(desc)) return true;
-  return true; // assume moto por default (já filtramos lot_category=motos na URL)
+  return true; // já filtramos lot_category=motos na URL
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -483,19 +492,23 @@ async function main() {
     for (const lot of capturedLots) {
       if (!isMoto(lot)) continue;
 
-      const { dataISO, hora, leilaoLink, loteNum, descricao, lance, condicaoBruta, patio, financeira } = extractLotData(lot);
+      const { dataISO, hora, leilaoLink, loteNum, marca, modelo, ano, monta: montaAPI,
+              lance, condicao, financeira, patio } = extractLotData(lot);
 
-      if (!dataISO) { skipped++; continue; }
+      if (!dataISO || !marca || !modelo) {
+        console.log(`   ⚠️  Incompleto: marca="${marca}" modelo="${modelo}" data="${dataISO}"`);
+        skipped++;
+        continue;
+      }
 
       // Filtra datas passadas (leilões já encerrados)
       const hoje = new Date().toISOString().slice(0, 10);
       if (dataISO < hoje) {
-        // Mantemos leilões dos últimos 3 dias por segurança
         const diffDias = (Date.now() - new Date(dataISO + 'T12:00:00').getTime()) / 86_400_000;
         if (diffDias > 3) continue;
       }
 
-      const dedupeKey = `${dataISO}|${loteNum}|${descricao}`;
+      const dedupeKey = `${dataISO}|${loteNum}|${lot.lot_id ?? marca + modelo}`;
       if (lotesSeen.has(dedupeKey)) continue;
       lotesSeen.add(dedupeKey);
 
@@ -505,16 +518,9 @@ async function main() {
         motosPorLeilao[lid] = [];
       }
 
-      const parsed = parseLoteDescricao(descricao);
-      if (!parsed) {
-        console.log(`   ⚠️  Sem parse: "${descricao}"`);
-        skipped++;
-        continue;
-      }
-
-      const { marca, modelo, ano, cor, condicaoExtra } = parsed;
       const cilindrada = extractCilindrada(marca, modelo);
-      const monta      = cilindrada == null ? null : cilindrada <= 200 ? 'pequena' : cilindrada <= 500 ? 'media' : 'grande';
+      // Usa monta da API se disponível; senão deriva da cilindrada
+      const monta = montaAPI ?? (cilindrada == null ? null : cilindrada <= 200 ? 'pequena' : cilindrada <= 500 ? 'media' : 'grande');
 
       motosPorLeilao[lid].push({
         leilao_id:    lid,
@@ -522,8 +528,8 @@ async function main() {
         marca,
         modelo,
         ano,
-        cor,
-        condicao:     mapCondicao(condicaoBruta, condicaoExtra),
+        cor:          null,  // Sodré não fornece cor na API
+        condicao,
         lance_inicial: lance,
         financeira,
         patio:        patio || null,
