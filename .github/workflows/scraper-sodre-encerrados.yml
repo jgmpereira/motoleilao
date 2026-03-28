@@ -19,9 +19,6 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Instalar dependências
-        run: npm ci
-
       - name: Executar scraper
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
