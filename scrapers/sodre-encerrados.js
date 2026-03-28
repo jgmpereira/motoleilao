@@ -87,13 +87,26 @@ async function main() {
   for (const leilao of leiloes) {
     console.log(`\n  Leilão: ${leilao.id} (${leilao.data})`);
 
-    // 2. Extrai auction_id do link do leilão
-    const match = (leilao.link || '').match(/\/leilao\/(\d+)/);
-    if (!match) {
-      console.log(`  ⚠️ Não foi possível extrair auction_id do link: ${leilao.link}`);
+    // 2. Extrai auction_id do link do leilão ou das motos
+    let auctionId = null;
+    const matchLink = (leilao.link || '').match(/\/leilao\/(\d+)/);
+    if (matchLink) {
+      auctionId = matchLink[1];
+    } else {
+      // Tenta extrair auction_id da URL de uma moto desse leilão
+      const motosUrl = await supaFetch(
+        `motos?leilao_id=eq.${leilao.id}&url=not.is.null&select=url&limit=1`,
+        { prefer: 'return=representation' }
+      );
+      if (motosUrl && motosUrl[0]?.url) {
+        const matchMoto = motosUrl[0].url.match(/\/leilao\/(\d+)/);
+        if (matchMoto) auctionId = matchMoto[1];
+      }
+    }
+    if (!auctionId) {
+      console.log(`  ⚠️ Não foi possível extrair auction_id para: ${leilao.id}`);
       continue;
     }
-    const auctionId = match[1];
     console.log(`  auction_id: ${auctionId}`);
 
     // 3. Busca lotes encerrados da API
