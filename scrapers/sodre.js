@@ -299,10 +299,9 @@ function extractLotData(lot) {
   const patio = String(lot.lot_location ?? lot.location ?? '').trim() || null;
 
   // Link do leilão — auction_id: 28242
-  const leilaoLink = lot.auction_id
-    ? `https://www.sodresantoro.com.br/leilao/${lot.auction_id}`
-    : (lot.lot_id ? `https://www.sodresantoro.com.br/veiculos/lotes/${lot.lot_id}` : '');
-
+  const leilaoLink = (lot.auction_id && lot.lot_id)
+    ? `https://leilao.sodresantoro.com.br/leilao/${lot.auction_id}/lote/${lot.lot_id}/`
+    : '';
   return { dataISO, hora, leilaoLink, loteNum, marca, modelo, ano, monta, lance, condicao, financeira, patio };
 }
 
@@ -538,7 +537,7 @@ async function main() {
         cilindrada,
         monta,
         fipe_csv:     null,
-        url:           lot.lot_id ? `https://www.sodresantoro.com.br/veiculos/lotes/${lot.lot_id}` : null,
+       url:           (lot.auction_id && lot.lot_id) ? `https://leilao.sodresantoro.com.br/leilao/${lot.auction_id}/lote/${lot.lot_id}/` : null,
       foto:          (lot.lot_pictures && lot.lot_pictures[0]) ? lot.lot_pictures[0] : null,
       });
     }
