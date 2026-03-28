@@ -1,0 +1,29 @@
+name: Scraper — Sodré Encerrados
+
+on:
+  schedule:
+    - cron: '0 14 * * *'  # 11h BRT (14h UTC) todo dia
+  workflow_dispatch:
+
+jobs:
+  raspar:
+    runs-on: ubuntu-latest
+    name: Atualizar arrematados Sodré
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Executar scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: node scrapers/sodre-encerrados.js
