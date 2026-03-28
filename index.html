@@ -3348,7 +3348,7 @@ function renderMotos() {
           style="width:15px;height:15px;cursor:pointer;accent-color:var(--accent);">
       </td>
       <td class="td-lote">${m.lote||'—'}</td>
-      <td class="td-modelo"><div style="display:flex;align-items:center;gap:8px;">${m.foto?`<img src="${m.foto}" style="width:100px;height:70px;object-fit:cover;border-radius:4px;flex-shrink:0;" onerror="this.remove()" loading="lazy">`:''}<div><strong>${m.marca} ${m.modelo}</strong>${m.financeira?`<br><span style="font-size:10px;color:var(--muted);">${m.financeira}</span>`:''}</div></div></td>
+      <td class="td-modelo"><div style="display:flex;align-items:center;gap:8px;">${m.foto?`<a href="${m.url||'#'}" target="_blank" rel="noopener" style="flex-shrink:0;${m.url?'cursor:pointer;':'cursor:default;'}"><img src="${m.foto}" style="width:120px;height:80px;object-fit:cover;border-radius:4px;display:block;opacity:1;transition:opacity .15s;" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'" onerror="this.parentElement.remove()" loading="lazy"></a>`:''}<div><strong>${m.marca} ${m.modelo}</strong>${m.financeira?`<br><span style="font-size:10px;color:var(--muted);">${m.financeira}</span>`:''}</div></div></td>
       <td class="td-ano">${m.ano||'—'}</td>
       <td>${(()=>{
         const pl = getPorteLabel(m.cilindrada);
