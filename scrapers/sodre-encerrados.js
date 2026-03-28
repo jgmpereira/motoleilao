@@ -53,7 +53,7 @@ async function fetchLotesEncerrados(auctionId) {
       }
     });
     if (!res.ok) {
-      console.log(`  ⚠️ API lots-finished status ${res.status} para auction ${auctionId}`);
+      console.log(`  ⚠️ API lots-finished status ${res.status} para auction ${auctionId} — dados indisponíveis`);
       break;
     }
     const json = await res.json();
@@ -104,7 +104,11 @@ async function main() {
       }
     }
     if (!auctionId) {
-      console.log(`  ⚠️ Não foi possível extrair auction_id para: ${leilao.id}`);
+      console.log(`  ⚠️ Sem auction_id — marcando como encerrado: ${leilao.id}`);
+      await supaFetch(`leiloes?id=eq.${leilao.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ encerrado: true }),
+      });
       continue;
     }
     console.log(`  auction_id: ${auctionId}`);

@@ -2,7 +2,7 @@ name: Scraper — Sodré Encerrados
 
 on:
   schedule:
-    - cron: '0 14 * * *'  # 11h BRT (14h UTC) todo dia
+    - cron: '0 3 * * *'   # 00h BRT (3h UTC) todo dia
   workflow_dispatch:
 
 jobs:
