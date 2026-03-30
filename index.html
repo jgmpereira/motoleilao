@@ -710,6 +710,12 @@ async function carregarDados() {
 
     // Se estava em leilão específico, re-renderiza
     if(currentLeilao) renderMotos();
+
+    // Navega para o hash inicial somente na primeira carga
+    if(!_initialHashHandled) {
+      _initialHashHandled = true;
+      if(location.hash && location.hash !== '#') navigateToHash(location.hash);
+    }
     // FIPE é buscada só quando usuário abre um leilão (evita rate limit da API)
   } catch(err) {
     hideLoading();
@@ -755,7 +761,7 @@ function getBadgeLeilao(l) {
 }
 
 // ===================== NAVEGAÇÃO =====================
-function showPage(page, btn) {
+function showPage(page, btn, skipHash) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
@@ -763,7 +769,29 @@ function showPage(page, btn) {
   else { const t = document.getElementById('tab-'+page); if(t) t.classList.add('active'); }
   if(page === 'analise') { renderAnalise(); atualizarLabelFipeMensal(); }
   if(page === 'historico') renderHistoricoGeral();
+  if(!skipHash) {
+    const hash = {leiloes:'#leiloes', analise:'#fipe', historico:'#historico', motos:'#motos'}[page] || '#'+page;
+    if(location.hash !== hash) history.pushState(null, '', hash);
+  }
 }
+
+// ===================== HASH ROUTING =====================
+const HASH_TO_PAGE = {'#leiloes':'leiloes','#fipe':'analise','#historico':'historico'};
+let _initialHashHandled = false;
+
+function navigateToHash(hash) {
+  if(!hash || hash === '#' || hash === '') { showPage('leiloes', null, true); return; }
+  if(hash.startsWith('#motos-')) {
+    const id = parseInt(hash.slice(7));
+    const leilao = LEILOES.find(l => l.id === id);
+    if(leilao) { abrirLeilao(leilao.id, true); return; }
+  }
+  const page = HASH_TO_PAGE[hash];
+  if(page) showPage(page, null, true);
+  else showPage('leiloes', null, true);
+}
+
+window.addEventListener('hashchange', () => navigateToHash(location.hash));
 
 // ===================== LEILÕES =====================
 function renderLeiloes() {
@@ -989,7 +1017,7 @@ async function deletarLeilao(id, nome) {
   }
 }
 
-function abrirLeilao(id) {
+function abrirLeilao(id, skipHash) {
   currentLeilao = LEILOES.find(l => l.id === id);
   if(!currentLeilao) return;
   filtroMoto = 'todos';
@@ -1004,8 +1032,9 @@ function abrirLeilao(id) {
   document.getElementById('motos-title').textContent = currentLeilao.nome.toUpperCase();
   const tabMotos = document.getElementById('tab-motos');
   tabMotos.style.display = '';
-  tabMotos.onclick = () => { showPage('motos', tabMotos); };
-  showPage('motos', tabMotos);
+  tabMotos.onclick = () => { showPage('motos', tabMotos, true); history.pushState(null, '', `#motos-${currentLeilao.id}`); };
+  showPage('motos', tabMotos, true);
+  if(!skipHash) history.pushState(null, '', `#motos-${id}`);
   renderMotos();
   // Auto-busca FIPE só se houver poucas motos sem valor (evita flood 429)
   const semFipe = MOTOS.filter(m => m.leilao_id === currentLeilao.id && !m.fipe_csv && !fipeCache[fipeKey(m)]);
