@@ -330,7 +330,7 @@ tbody tr:hover{background:var(--s2);}
       <button class="ftab" onclick="setFiltroMonta('pequena',this)" style="color:#1a7bbf;">Peq.</button>
       <button class="ftab" onclick="setFiltroMonta('media',this)" style="color:#b07a00;">Méd.</button>
       <button class="ftab" onclick="setFiltroMonta('grande',this)" style="color:var(--red);">Grande</button>
-      <button class="btn btn-accent btn-sm" onclick="buscarFipeLeilao()">⚡ Buscar FIPE</button>
+      <button class="btn btn-accent btn-sm" onclick="buscarFipeLeilao()" style="display:none">⚡ Buscar FIPE</button>
       <button class="btn btn-ghost btn-sm" onclick="limparCacheFipe()" title="Limpar cache FIPE e rebuscar">🗑 Cache</button>
       <div style="width:1px;height:20px;background:var(--border);margin:0 4px;"></div>
       <button class="btn btn-green btn-sm" onclick="abrirModalMoto()" title="Adicionar moto ao leilão" style="font-weight:700;">＋ Incluir Moto</button>
@@ -1037,17 +1037,7 @@ function abrirLeilao(id, skipHash) {
   showPage('motos', tabMotos, true);
   if(!skipHash) history.pushState(null, '', `#motos-${id}`);
   renderMotos();
-  // Auto-busca FIPE só se houver poucas motos sem valor (evita flood 429)
-  const semFipe = MOTOS.filter(m => m.leilao_id === currentLeilao.id && !m.fipe_csv && !fipeCache[fipeKey(m)]);
-  const el = document.getElementById('fipe-global-status');
-  if(semFipe.length === 0) {
-    el.className = 'fipe-status ok'; el.textContent = '✓ FIPE completa';
-  } else if(semFipe.length <= 8) {
-    buscarFipeLeilao(); // pequeno lote, dispara automático
-  } else {
-    el.className = 'fipe-status';
-    el.textContent = `${semFipe.length} sem FIPE — clique ⚡ para buscar`;
-  }
+  buscarFipeLeilao(); // dispara automaticamente para todas as motos
 }
 
 // ===================== FIPE API =====================
@@ -3116,12 +3106,16 @@ async function buscarFipeBackground(forcar = false) {
   }
 }
 
+let _fipeLeilaoGen = 0; // geração atual — incrementa ao abrir novo leilão, cancela busca anterior
+
 async function buscarFipeLeilao() {
   if(!currentLeilao) return;
-  const motos = MOTOS.filter(m => m.leilao_id === currentLeilao.id && !m.fipe_csv && !fipeCache[fipeKey(m)]);
+  const gen = ++_fipeLeilaoGen;
+  const leilaoId = currentLeilao.id;
 
-  const el  = document.getElementById('fipe-global-status');
-  const btn = document.querySelector('.btn-accent[onclick="buscarFipeLeilao()"]');
+  const motos = MOTOS.filter(m => m.leilao_id === leilaoId && !m.fipe_csv && !fipeCache[fipeKey(m)]);
+
+  const el = document.getElementById('fipe-global-status');
 
   if(!motos.length) {
     el.className = 'fipe-status ok';
@@ -3129,20 +3123,19 @@ async function buscarFipeLeilao() {
     return;
   }
 
-  // Travar botão durante busca
-  if(btn) { btn.disabled = true; btn.textContent = '⏳ Buscando...'; }
   el.className = 'fipe-status';
   el.textContent = `⚡ 0/${motos.length}`;
 
   const delay = ms => new Promise(r => setTimeout(r, ms));
+  const stale = () => _fipeLeilaoGen !== gen; // retorna true se usuário abriu outro leilão
 
   // 1. Carregar lista de marcas
   if(!Array.isArray(window._fipeMarcas)) {
     el.textContent = '⚡ carregando marcas...';
     const r = await fipeFetch('https://parallelum.com.br/fipe/api/v1/motos/marcas');
+    if(stale()) return;
     if(!Array.isArray(r)) {
       el.textContent = '⚠️ API indisponível — tente novamente';
-      if(btn) { btn.disabled = false; btn.textContent = '⚡ Buscar FIPE'; }
       return;
     }
     window._fipeMarcas = r;
@@ -3156,6 +3149,7 @@ async function buscarFipeLeilao() {
   }))];
   let marcaIdx = 0;
   for(const marcaNorm of marcasLeilao) {
+    if(stale()) return;
     marcaIdx++;
     const marcaObj = window._fipeMarcas.find(x => normFipe(x.nome) === marcaNorm)
       || window._fipeMarcas.find(x => normFipe(x.nome).includes(marcaNorm))
@@ -3165,6 +3159,7 @@ async function buscarFipeLeilao() {
     if(!window[ck]) {
       el.textContent = `⚡ marcas ${marcaIdx}/${marcasLeilao.length}...`;
       const r = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos`);
+      if(stale()) return;
       window[ck] = (r && r.modelos) ? r.modelos : [];
       await delay(700);
     }
@@ -3173,6 +3168,7 @@ async function buscarFipeLeilao() {
   // 3. Buscar FIPE moto a moto
   let ok = 0, falhas = 0;
   for(let i = 0; i < motos.length; i++) {
+    if(stale()) return;
     const m = motos[i];
     el.textContent = `⚡ ${i+1}/${motos.length}`;
     try {
@@ -3180,14 +3176,12 @@ async function buscarFipeLeilao() {
       if(v) { ok++; renderMotos(); }
       else falhas++;
     } catch(e) { falhas++; }
-    // Salvar cache a cada 10 motos
     if((i+1) % 10 === 0) saveFipeCache();
     await delay(700);
   }
 
   el.className = 'fipe-status ok';
   el.textContent = falhas > 0 ? `✓ ${ok}/${motos.length} (${falhas} sem match)` : `✓ ${ok}/${motos.length} FIPE`;
-  if(btn) { btn.disabled = false; btn.textContent = '⚡ Buscar FIPE'; }
   saveFipeCache();
   updateStats();
 }
