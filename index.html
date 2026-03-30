@@ -667,6 +667,7 @@ let fipeCache = {};
 try { fipeCache = JSON.parse(localStorage.getItem('fipeCache') || '{}'); } catch(e){}
 let fipeModelosCache = {};
 try { fipeModelosCache = JSON.parse(localStorage.getItem('fipeModelosCache') || '{}'); } catch(e){}
+const _fipeAnosCache = {}; // cache em memória: `${marcaCodigo}_${modeloCodigo}` → array de anos
 
 let currentLeilao = null;
 let filtroMoto = 'todos';
@@ -1109,6 +1110,9 @@ const FIPE_SINONIMOS = {
   'honda|xre 195 adv':      'XRE 195 ADV',
   'honda|xre 190':          'XRE 190',
   // Honda outros
+  'honda|elite':            'ELITE 125',
+  'honda|xre sahara 300':   'XRE 300',
+  'honda|xre sahara':       'XRE 300',
   'honda|biz 125':          'BIZ 125',
   'honda|biz 125 es':       'BIZ 125 ES',
   'honda|biz es 25':        'BIZ 125 ES',
@@ -1226,6 +1230,7 @@ const FIPE_SINONIMOS = {
   // Triumph
   'triumph|speed 400':       'SPEED 400',
   // Royal Enfield
+  'royal enfield|classic':   'CLASSIC 350',
   'royal enfield|int 650':   'INTERCEPTOR 650',
   // Kawasaki
   'kawasaki|versys-x 300 tr':'VERSYS-X 300 TOURER',
@@ -1328,6 +1333,8 @@ function normFipe(s) {
   return s.toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[-./]/g, ' ')
+    .replace(/([a-z])(\d)/g, '$1 $2')   // "250f" → "250 f", "cg160" → "cg 160"
+    .replace(/(\d)([a-z])/g, '$1 $2')   // "160cg" → "160 cg"
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -1337,8 +1344,10 @@ function scoreModelo(fipeNome, termo) {
   const fn = normFipe(fipeNome);
   const mn = normFipe(termo);
   if(fn === mn) return 1000;
-  if(fn.includes(mn)) return 800;
-  if(mn.includes(fn)) return 700;
+  // Tiebreak por tamanho: modelo FIPE mais curto (menos tokens extras) ganha
+  const tokensFipeLen = fn.split(/\s+/).filter(p => p.length > 0).length;
+  if(fn.includes(mn)) return 800 - tokensFipeLen;
+  if(mn.includes(fn)) return 700 - tokensFipeLen;
 
   const tokensQuery = mn.split(/\s+/).filter(p => p.length > 0);
   const tokensFipe  = fn.split(/\s+/).filter(p => p.length > 0);
@@ -1461,13 +1470,23 @@ async function buscarFipe(m, forcedRefresh = false) {
       if(prefixo) tentativas.push(`${prefixo[1]} ${soNum[1]}`);
     }
 
+    // Fallback 4: primeira sigla/palavra + qualquer número de 2-4 dígitos no modelo
+    // Ex: "Xre Sahara 300" → "xre 300", "Bros 160 Adventure" → "bros 160"
+    const fb4Sigla = normFipe(m.modelo).match(/^([a-z]{2,})/);
+    const fb4Num   = normFipe(m.modelo).match(/\b(\d{2,4})\b/);
+    if(fb4Sigla && fb4Num) {
+      const fb4 = `${fb4Sigla[1]} ${fb4Num[1]}`;
+      if(!tentativas.some(t => normFipe(t) === fb4)) tentativas.push(fb4);
+    }
+
     let modeloObj = null;
     let altCandidatos = []; // candidatos alternativos para desambiguação por ano
     for(const tentativa of tentativas) {
       const scored = modelos
         .map(x => ({ x, score: scoreModelo(x.nome, tentativa) }))
         .filter(x => x.score > 0)
-        .sort((a,b) => b.score - a.score);
+        .sort((a,b) => b.score - a.score
+          || normFipe(a.x.nome).split(/\s+/).length - normFipe(b.x.nome).split(/\s+/).length);
       // Score mínimo dinâmico: modelos curtos exigem menos pontos
       const nTokens = normFipe(tentativa).split(/\s+/).filter(p => p.length > 0).length;
       const minScore = nTokens <= 1 ? 15 : nTokens === 2 ? 22 : 30;
@@ -1483,7 +1502,11 @@ async function buscarFipe(m, forcedRefresh = false) {
     // Ano: tenta fab, depois modelo, depois ano mais próximo (tolerância 3 anos), depois primeiro disponível
     const anoFab = (m.ano||'').split('/')[0].replace(/\D/g,'');
     const anoMod = (m.ano||'').split('/')[1]?.replace(/\D/g,'');
-    let anos = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos/${modeloObj.codigo}/anos`);
+    const anosKey = `${marcaObj.codigo}_${modeloObj.codigo}`;
+    if(!_fipeAnosCache[anosKey]) {
+      _fipeAnosCache[anosKey] = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos/${modeloObj.codigo}/anos`);
+    }
+    let anos = _fipeAnosCache[anosKey];
     if(!anos || !anos.length) { console.warn('FIPE: sem anos disponíveis:', m.marca, m.modelo); return null; }
 
     // Desambiguação por ano: se o modelo escolhido não tem o ano da moto mas há alternativas, testa-as
@@ -1491,7 +1514,11 @@ async function buscarFipe(m, forcedRefresh = false) {
       const temAno = anos.some(a => a.nome.startsWith(anoFab) || a.nome.includes(anoFab));
       if(!temAno) {
         for(const alt of altCandidatos) {
-          const anosAlt = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos/${alt.codigo}/anos`);
+          const altAnosKey = `${marcaObj.codigo}_${alt.codigo}`;
+          if(!_fipeAnosCache[altAnosKey]) {
+            _fipeAnosCache[altAnosKey] = await fipeFetch(`https://parallelum.com.br/fipe/api/v1/motos/marcas/${marcaObj.codigo}/modelos/${alt.codigo}/anos`);
+          }
+          const anosAlt = _fipeAnosCache[altAnosKey];
           if(anosAlt && anosAlt.some(a => a.nome.startsWith(anoFab) || a.nome.includes(anoFab))) {
             console.info('FIPE: desambiguação por ano:', modeloObj.nome, '→', alt.nome, '(ano', anoFab, ')');
             modeloObj = alt;
@@ -2969,6 +2996,7 @@ async function limparCacheFipe() {
   fipeModelosCache = {};
   window._fipeMarcas = null;
   Object.keys(window).filter(k => k.startsWith('_fipeModelos_')).forEach(k => { delete window[k]; });
+  Object.keys(_fipeAnosCache).forEach(k => { delete _fipeAnosCache[k]; });
   try { localStorage.removeItem('fipeCache'); } catch(e){}
   try { localStorage.removeItem('fipeMarcasCache'); } catch(e){}
   try { localStorage.removeItem('fipeModelosCache'); } catch(e){}
