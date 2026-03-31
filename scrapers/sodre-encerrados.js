@@ -158,6 +158,7 @@ async function main() {
       inserts.push({
         moto_id: motoId,
         valor:   parseFloat(lote.bid_actual),
+        status_arrematado: lote.lot_status,
       });
       inseridos++;
     }
