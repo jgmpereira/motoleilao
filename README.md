@@ -98,6 +98,14 @@ Dashboard de monitoramento de leilões de moto.
 - **Agendamento:** Dia 1 de cada mês às 7h BRT
 - **Workflow:** `.github/workflows/fipe-mensal.yml`
 
+### `scripts/backup-supabase.js` — Backup diário
+- **O que faz:** Exporta todas as tabelas críticas como JSON para `backups/YYYY-MM-DD/`
+- **Tabelas:** `leiloes`, `motos`, `arrematados`, `fipe_valores`
+- **Paginação:** Busca em lotes de 1.000 registros para tabelas grandes
+- **Retenção:** Apaga automaticamente backups com mais de 30 dias
+- **Agendamento:** Todo dia às 3h BRT
+- **Workflow:** `.github/workflows/backup-supabase.yml`
+
 ---
 
 ## GitHub Actions Workflows
@@ -107,6 +115,7 @@ Dashboard de monitoramento de leilões de moto.
 | `scraper-sodre.yml` | Scraper leilões ativos | 8h diário |
 | `scraper-sodre-encerrados.yml` | Scraper encerrados | 0h diário |
 | `fipe-mensal.yml` | Atualização FIPE | 7h dia 1 do mês |
+| `backup-supabase.yml` | Backup das tabelas do Supabase | 3h diário |
 
 ---
 
@@ -242,6 +251,7 @@ localStorage → Supabase (fipe_valores) → API externa
 - Atualização mensal FIPE (dia 1)
 - Hash routing em todas as abas
 - Importação manual de múltiplas plataformas
+- Backup automático diário do Supabase (pasta `backups/YYYY-MM-DD/`, retém 30 dias)
 
 ### 🔧 Pontos de atenção
 - Arrematados inseridos antes de Mar/2026 não têm `status_arrematado` (coluna era nula)
