@@ -45,7 +45,7 @@ async function fetchLotesEncerrados(auctionId) {
   const lotes = [];
   let page = 1;
   while (true) {
-    const url = `https://www.sodresantoro.com.br/api/lots-finished?auctionId=${auctionId}&page=${page}`;
+    const url = `https://prd-api.sodresantoro.com.br/api/v1/lots-finished?auctionId=${auctionId}&page=${page}`;
     const res = await fetch(url, {
       headers: {
         'Accept': 'application/json',
