@@ -3728,7 +3728,7 @@ function renderHistoricoGeral() {
         <td>${(()=>{ const pl=getPorteLabel(m.cilindrada); return pl?`<span class="porte-tag ${pl.cls}">${pl.label}</span>`:'<span style="color:var(--muted);font-size:11px;">—</span>'; })()}</td>
         <td><span class="cond-tag ${condClass[m.condicao]||''}">${m.condicao||'—'}</span></td>
         <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);">${m.lance_inicial?'R$'+Number(m.lance_inicial).toLocaleString('pt-BR'):'—'}</td>
-        <td style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--green);">R$${Number(arr.valor).toLocaleString('pt-BR')}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--green);">R$${Number(arr.valor).toLocaleString('pt-BR')}<br><span style="font-size:10px;font-family:sans-serif;padding:1px 5px;border-radius:4px;background:${arr.status_arrematado==='condicional'?'rgba(255,165,0,.15)':'rgba(26,158,92,.12)'};color:${arr.status_arrematado==='condicional'?'#e67e00':'var(--green)'};">${arr.status_arrematado==='condicional'?'⏳ condicional':'✔ vendido'}</span></td>
         <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);">${fipe?'R$'+Number(fipe).toLocaleString('pt-BR'):'—'}</td>
         <td>${pct?`<span class="pct-tag ${pctC}">${pct}%</span>`:'—'}</td>
         <td><span class="${ind.cls}">${ind.text}</span></td>
