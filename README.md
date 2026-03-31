@@ -113,7 +113,7 @@ Dashboard de monitoramento de leilões de moto.
 | Arquivo | Descrição | Horário (BRT) |
 |---|---|---|
 | `scraper-sodre.yml` | Scraper leilões ativos | 8h diário |
-| `scraper-sodre-encerrados.yml` | Scraper encerrados | 0h diário |
+| `scraper-sodre-encerrados.yml` | Scraper encerrados | 20h diário |
 | `fipe-mensal.yml` | Atualização FIPE | 7h dia 1 do mês |
 | `backup-supabase.yml` | Backup das tabelas do Supabase | 3h diário |
 
@@ -246,17 +246,23 @@ localStorage → Supabase (fipe_valores) → API externa
 ### ✅ Funcionando
 - Scraper Sodré ativo (70+ lotes por leilão)
 - Scraper encerrados com URL correta (`prd-api.sodresantoro.com.br/api/v1`)
+- Scraper encerrados roda às 20h BRT e já pega leilões do mesmo dia (`data=lte`)
 - Badge `vendido` / `condicional` na listagem, card e histórico
 - FIPE automático ao abrir leilão
 - Atualização mensal FIPE (dia 1)
+- Fix `popular-fipe.js`: erro 409 no cache não impede salvar `fipe_csv`
 - Hash routing em todas as abas
 - Importação manual de múltiplas plataformas
 - Backup automático diário do Supabase (pasta `backups/YYYY-MM-DD/`, retém 30 dias)
+- Cards do dashboard exibem dia/mês a partir do campo `data` quando `dia`/`mes` são nulos
+- Scraper remove lixo `ipva2026` do nome do modelo automaticamente
 
 ### 🔧 Pontos de atenção
 - Arrematados inseridos antes de Mar/2026 não têm `status_arrematado` (coluna era nula)
 - Se a Sodré mudar a URL da API novamente, o scraper vai retornar 404 silencioso
 - O scraper de encerrados só reprocessa leilões com `encerrado=false` — se precisar reprocessar um já encerrado, é necessário setar `encerrado=false` no Supabase manualmente
+- Motos de marcas chinesas sem cobertura FIPE (JTZ, Haojian) sempre retornam "não encontrado"
+- Arquivo `.env` com `SUPABASE_KEY` precisa ser recriado se o Codespaces for resetado
 
 ---
 
