@@ -3425,6 +3425,7 @@ function renderMotos() {
           class="${arr?'saved':''}"
           onchange="salvarArrematado(${m.id}, this.value, this)"
           onkeydown="if(event.key==='Enter')salvarArrematado(${m.id},this.value,this)">
+        ${arr&&arr.status_arrematado?`<span style="font-size:10px;padding:2px 6px;border-radius:4px;margin-top:3px;display:inline-block;background:${arr.status_arrematado==='vendido'?'rgba(26,158,92,.12)':'rgba(255,165,0,.15)'};color:${arr.status_arrematado==='vendido'?'var(--green)':'#e67e00'};font-weight:600;">${arr.status_arrematado==='vendido'?'✔ vendido':'⏳ condicional'}</span>`:''}
       </td>
       <td><span class="${ind.cls}">${ind.text}</span></td>
       <td style="white-space:nowrap;text-align:center;">
@@ -3834,7 +3835,7 @@ function buscaGlobal() {
           <div style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--a2);">
             ${m.lance_inicial ? 'Lance: R$'+Number(m.lance_inicial).toLocaleString('pt-BR') : 'Lance: —'}
           </div>
-          ${arr ? `<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);">✅ R$${Number(arr.valor).toLocaleString('pt-BR')}</div>` : '<div style="font-size:10px;color:var(--muted);">não arrematado</div>'}
+          ${arr ? `<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);">✅ R$${Number(arr.valor).toLocaleString('pt-BR')}</div><div style="font-size:10px;padding:2px 6px;border-radius:4px;margin-top:2px;display:inline-block;background:${arr.status_arrematado==='condicional'?'rgba(255,165,0,.15)':'rgba(26,158,92,.12)'};color:${arr.status_arrematado==='condicional'?'#e67e00':'var(--green)'};">${arr.status_arrematado==='condicional'?'⏳ condicional':'✔ vendido'}</div>` : '<div style="font-size:10px;color:var(--muted);">não arrematado</div>'}
           ${pct ? `<div style="font-size:10px;color:var(--muted);">${pct}% FIPE</div>` : ''}
         </div>
       </div>`;
