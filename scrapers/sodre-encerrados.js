@@ -73,7 +73,7 @@ async function main() {
   // 1. Busca leilões do Sodré não encerrados com data passada
   const hoje = new Date().toISOString().slice(0, 10);
   const leiloes = await supaFetch(
-    `leiloes?plataforma=eq.Sodré Santoro&encerrado=eq.false&data=lt.${hoje}&select=id,link,data`,
+    `leiloes?plataforma=eq.Sodré Santoro&encerrado=eq.false&data=lte.${hoje}&select=id,link,data`,
     { prefer: 'return=representation' }
   );
 
