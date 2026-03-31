@@ -256,7 +256,7 @@ function extractLotData(lot) {
 
   // Marca e modelo — campos separados confirmados
   const marcaRaw  = String(lot.lot_brand  ?? lot.brand  ?? '').trim();
-  const modeloRaw = String(lot.lot_model  ?? lot.model  ?? '').trim();
+  const modeloRaw = String(lot.lot_model  ?? lot.model  ?? '').trim().replace(/ipva\d{4}/gi, '').trim();
   const marca  = marcaRaw  ? (normalizarMarca(marcaRaw)  || toTitle(marcaRaw))  : null;
   const modelo = modeloRaw ? toTitle(modeloRaw) : null;
 
