@@ -886,8 +886,8 @@ function renderLeiloes() {
       ${badgeHTML}
       <div class="lcard-header">
         <div class="lcard-date">
-          <div class="lcard-day">${l.dia}</div>
-          <div class="lcard-month">${l.mes}</div>
+          <div class="lcard-day">${l.dia || (l.data ? new Date(l.data + 'T12:00:00').getDate() : 'NULL')}</div>
+          <div class="lcard-month">${l.mes || (l.data ? new Date(l.data + 'T12:00:00').toLocaleString('pt-BR', {month:'short'}).toUpperCase().replace('.','') : 'NULL')}</div>
         </div>
         <div class="lcard-plat">${l.plataforma||''}</div>
         <div class="lcard-nome">${l.nome}</div>
