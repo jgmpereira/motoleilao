@@ -266,6 +266,30 @@ localStorage → Supabase (fipe_valores) → API externa
 
 ---
 
+## Novo Layout (branch `nova-home`)
+
+Redesign completo da interface em andamento na branch `nova-home`.
+
+### O que já foi feito
+- ✅ Aba **Agenda** criada — lista de leilões com filtros de período, plataforma e status
+- ✅ Aba **Motos** renomeada (era "Leilões") — será o novo grid de motos
+- ✅ Hash routing `#agenda` funcionando
+- ✅ Botão limpar filtros na Agenda
+
+### Próximo passo
+- 🔲 Aba **Motos** — grid de motos com foto, filtros na sidebar esquerda e ficha ao clicar
+- 🔲 Ficha da moto com indicador histórico (menor/média/limite caro)
+- 🔲 Clique na foto → abre anúncio no site da leiloeira
+- 🔲 Clique no card → abre ficha com histórico
+
+### Comportamento definido
+- Foto do card → abre anúncio na leiloeira (nova aba)
+- Resto do card → abre ficha da moto com histórico de arrematações
+- Agenda → clicar no leilão abre página de detalhe do leilão (como hoje)
+- Ficha da moto → indicador inteligente baseado no histórico (menor, média, limite caro)
+
+---
+
 ## Como usar este README em nova conversa
 
 Cole no início do chat:
