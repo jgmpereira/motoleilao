@@ -272,15 +272,19 @@ Redesign completo da interface em andamento na branch `nova-home`.
 
 ### O que já foi feito
 - ✅ Aba **Agenda** criada — lista de leilões com filtros de período, plataforma e status
-- ✅ Aba **Motos** renomeada (era "Leilões") — será o novo grid de motos
+- ✅ Aba **Motos** renomeada (era "Leilões") — grid de motos com sidebar de filtros
+- ✅ Grid de motos com foto, badge condição, % FIPE, porte, monta, lance inicial
+- ✅ Filtros: busca, período, condição, porte, % FIPE, marca, plataforma
+- ✅ Ordenação: data, % FIPE, lance, marca
+- ✅ Foto clicável → abre anúncio no site da leiloeira
+- ✅ Card clicável → abre ficha da moto (`abrirFichaMoto`)
 - ✅ Hash routing `#agenda` funcionando
-- ✅ Botão limpar filtros na Agenda
+- ✅ Botão limpar filtros na Agenda e no grid de motos
 
 ### Próximo passo
-- 🔲 Aba **Motos** — grid de motos com foto, filtros na sidebar esquerda e ficha ao clicar
-- 🔲 Ficha da moto com indicador histórico (menor/média/limite caro)
-- 🔲 Clique na foto → abre anúncio no site da leiloeira
-- 🔲 Clique no card → abre ficha com histórico
+- 🔲 Testar grid de motos no site e ajustar visual se necessário
+- 🔲 Ficha da moto — adicionar indicador histórico (menor/média/limite caro)
+- 🔲 Ajustar ficha para mostrar infos em destaque (condição, porte, monta)
 
 ### Comportamento definido
 - Foto do card → abre anúncio na leiloeira (nova aba)
