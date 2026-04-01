@@ -254,59 +254,97 @@ tbody tr:hover{background:var(--s2);}
 
 <!-- PAGE LEILÕES -->
 <div id="page-leiloes" class="page active">
-  <!-- Filtros rápidos -->
-  <div id="home-filters" style="padding:10px 28px;border-bottom:1px solid var(--border);background:var(--s1);display:flex;flex-direction:column;gap:8px;">
-    <!-- Linha 1: selects + condição + limpar -->
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <span class="hf-label">Filtrar:</span>
-      <select class="hf-select" id="hf-marca" onchange="aplicarFiltrosHome()">
-        <option value="">🏍 Todas as marcas</option>
-      </select>
-      <select class="hf-select" id="hf-leilao" onchange="aplicarFiltrosHome()" style="max-width:200px;">
-        <option value="">📋 Todas as leiloeiras</option>
-      </select>
-      <select class="hf-select" id="hf-cidade" onchange="aplicarFiltrosHome()" style="max-width:180px;">
-        <option value="">📍 Todas as cidades</option>
-      </select>
-      <div class="hf-divider"></div>
-      <span class="hf-label">Condição:</span>
-      <button class="hf-chip active" data-cond="" onclick="setFiltroHomeCond('',this)">Todas</button>
-      <button class="hf-chip" data-cond="financiada" onclick="setFiltroHomeCond('financiada',this)">Financiada</button>
-      <button class="hf-chip" data-cond="sinistro" onclick="setFiltroHomeCond('sinistro',this)">Sinistro</button>
-      <button class="hf-chip" data-cond="sucata" onclick="setFiltroHomeCond('sucata',this)">Sucata</button>
-      <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
-        <span style="font-size:11px;color:var(--muted);" id="hf-count"></span>
-        <button id="hf-clear" onclick="limparFiltrosHome()"
-          style="display:flex;align-items:center;gap:5px;background:rgba(255,77,0,.08);border:1px solid rgba(255,77,0,.25);color:var(--accent);font-size:11px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .2s;white-space:nowrap;"
-          onmouseover="this.style.background='rgba(255,77,0,.18)'" onmouseout="this.style.background='rgba(255,77,0,.08)'">
-          ✕ Limpar filtros
-        </button>
+  <div style="display:flex;height:calc(100vh - 120px);">
+
+    <!-- SIDEBAR FILTROS -->
+    <div id="motos-sidebar" style="width:220px;min-width:220px;border-right:1px solid var(--border);padding:14px 12px;overflow-y:auto;background:var(--s1);display:flex;flex-direction:column;gap:0;">
+
+      <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🔍 Filtros</div>
+
+      <!-- Busca -->
+      <input id="gm-busca" placeholder="🔎 Marca, modelo..." oninput="renderGridMotos()"
+        style="width:100%;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;margin-bottom:10px;">
+
+      <!-- Stats -->
+      <div style="display:flex;flex-direction:column;gap:3px;padding:8px;background:var(--bg);border-radius:6px;margin-bottom:12px;font-size:11px;">
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted);">Motos</span><span style="color:var(--accent);font-weight:700;" id="gm-count">—</span></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted);">Leilões ativos</span><span style="color:var(--accent);font-weight:700;" id="gm-leiloes-count">—</span></div>
       </div>
+
+      <!-- Período -->
+      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px;">Período</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">
+        <button class="hf-chip active" onclick="setGmFiltro('per','',this)">Todos</button>
+        <button class="hf-chip" onclick="setGmFiltro('per','semana',this)">Esta semana</button>
+        <button class="hf-chip" onclick="setGmFiltro('per','proxima',this)">Próx. semana</button>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin:4px 0 12px;"></div>
+
+      <!-- Condição -->
+      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px;">Condição</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">
+        <button class="hf-chip active" onclick="setGmFiltro('cond','',this)">Todas</button>
+        <button class="hf-chip" onclick="setGmFiltro('cond','financiada',this)">Financiada</button>
+        <button class="hf-chip" onclick="setGmFiltro('cond','sinistro',this)">Sinistro</button>
+        <button class="hf-chip" onclick="setGmFiltro('cond','sucata',this)">Sucata</button>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin:4px 0 12px;"></div>
+
+      <!-- Porte -->
+      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px;">Porte</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">
+        <button class="hf-chip active" onclick="setGmFiltro('porte','',this)">Todos</button>
+        <button class="hf-chip" onclick="setGmFiltro('porte','pequena',this)" style="color:#1a7bbf;">🔵 Baixa CC</button>
+        <button class="hf-chip" onclick="setGmFiltro('porte','media',this)" style="color:#b07a00;">🟡 Média CC</button>
+        <button class="hf-chip" onclick="setGmFiltro('porte','alta',this)" style="color:var(--red);">🔴 Alta CC</button>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin:4px 0 12px;"></div>
+
+      <!-- % FIPE -->
+      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px;">% FIPE</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">
+        <button class="hf-chip active" onclick="setGmFiltro('fipe','',this)">Todos</button>
+        <button class="hf-chip" onclick="setGmFiltro('fipe','30',this)">🔥 &lt;30%</button>
+        <button class="hf-chip" onclick="setGmFiltro('fipe','50',this)">✅ &lt;50%</button>
+        <button class="hf-chip" onclick="setGmFiltro('fipe','70',this)">⚠️ &lt;70%</button>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin:4px 0 12px;"></div>
+
+      <!-- Marca -->
+      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px;">Marca</div>
+      <div id="gm-marcas" style="display:flex;flex-direction:column;gap:2px;margin-bottom:12px;"></div>
+
+      <div style="border-top:1px solid var(--border);margin:4px 0 12px;"></div>
+
+      <!-- Plataforma -->
+      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px;">Plataforma</div>
+      <div id="gm-plataformas" style="display:flex;flex-direction:column;gap:2px;margin-bottom:12px;"></div>
+
+      <div style="border-top:1px solid var(--border);margin:4px 0 12px;"></div>
+
+      <!-- Limpar -->
+      <button onclick="limparFiltrosGm()" style="width:100%;padding:7px;background:rgba(255,77,0,.08);border:1px solid rgba(255,77,0,.25);color:var(--accent);font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;" onmouseover="this.style.background='rgba(255,77,0,.18)'" onmouseout="this.style.background='rgba(255,77,0,.08)'">✕ Limpar filtros</button>
     </div>
-    <!-- Linha 2: porte + período -->
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <span class="hf-label">Porte:</span>
-      <button class="hf-chip active" data-porte="" onclick="setFiltroHomePorte('',this)">Todos</button>
-      <button class="hf-chip" data-porte="pequena" onclick="setFiltroHomePorte('pequena',this)" style="color:#1a7bbf;">🔵 Baixa CC</button>
-      <button class="hf-chip" data-porte="media" onclick="setFiltroHomePorte('media',this)" style="color:#b07a00;">🟡 Média CC</button>
-      <button class="hf-chip" data-porte="alta" onclick="setFiltroHomePorte('alta',this)" style="color:var(--red);">🔴 Alta CC</button>
-      <div class="hf-divider"></div>
-      <span class="hf-label">Monta:</span>
-      <button class="hf-chip active" data-monta="" onclick="setFiltroHomeMonta('',this)">Todas</button>
-      <button class="hf-chip" data-monta="pequena" onclick="setFiltroHomeMonta('pequena',this)" style="color:#1a7bbf;">Pequena</button>
-      <button class="hf-chip" data-monta="media" onclick="setFiltroHomeMonta('media',this)" style="color:#b07a00;">Média</button>
-      <button class="hf-chip" data-monta="grande" onclick="setFiltroHomeMonta('grande',this)" style="color:var(--red);">Grande</button>
-      <div class="hf-divider"></div>
-      <span class="hf-label">Período:</span>
-      <button class="hf-chip active" data-per="" onclick="setFiltroHomePer('',this)">Todos</button>
-      <button class="hf-chip" data-per="semana" onclick="setFiltroHomePer('semana',this)">Esta semana</button>
-      <button class="hf-chip" data-per="proxima" onclick="setFiltroHomePer('proxima',this)">Próxima semana</button>
+
+    <!-- GRID DE MOTOS -->
+    <div style="flex:1;overflow-y:auto;padding:14px 16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <span style="font-size:12px;color:var(--muted);" id="gm-result-label">Carregando...</span>
+        <select id="gm-sort" onchange="renderGridMotos()" style="background:var(--s1);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:6px;font-size:12px;">
+          <option value="data">📅 Data do leilão</option>
+          <option value="fipe">📊 % FIPE ↑</option>
+          <option value="lance">💰 Lance inicial ↑</option>
+          <option value="marca">🔤 Marca A→Z</option>
+        </select>
+      </div>
+      <div id="motos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:12px;"></div>
     </div>
+
   </div>
-  <div style="padding:12px 28px 0;display:flex;align-items:center;justify-content:space-between;">
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--muted);" id="semana-info"></div>
-  </div>
-  <div class="leiloes-grid" id="leiloes-grid"></div>
 </div>
 
 <!-- PAGE AGENDA -->
@@ -748,6 +786,7 @@ async function carregarDados() {
     hideLoading();
     updateStats();
     renderLeiloes();
+    renderGridMotos();
 
     // Se estava em leilão específico, re-renderiza
     if(currentLeilao) renderMotos();
@@ -811,6 +850,7 @@ function showPage(page, btn, skipHash) {
   if(page === 'analise') { renderAnalise(); atualizarLabelFipeMensal(); }
   if(page === 'historico') renderHistoricoGeral();
   if(page === 'agenda') renderAgenda();
+  if(page === 'leiloes') renderGridMotos();
   if(!skipHash) {
     const hash = {leiloes:'#leiloes', analise:'#fipe', historico:'#historico', motos:'#motos', agenda:'#agenda'}[page] || '#'+page;
     if(location.hash !== hash) history.pushState(null, '', hash);
@@ -991,6 +1031,174 @@ function renderLeiloes() {
 
 // ===================== AGENDA =====================
 const agendaFiltros = { per: '', status: '', plat: '' };
+
+// ===================== GRID DE MOTOS =====================
+const gmFiltros = { per: '', cond: '', porte: '', fipe: '', marca: '', plat: '' };
+
+function setGmFiltro(tipo, val, btn) {
+  gmFiltros[tipo] = val;
+  if (btn) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.hf-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  renderGridMotos();
+}
+
+function limparFiltrosGm() {
+  Object.keys(gmFiltros).forEach(k => gmFiltros[k] = '');
+  document.querySelectorAll('#motos-sidebar .hf-chip').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#motos-sidebar .hf-chip[onclick*="''"]').forEach(b => b.classList.add('active'));
+  document.getElementById('gm-busca').value = '';
+  const marcasEl = document.getElementById('gm-marcas');
+  const platEl = document.getElementById('gm-plataformas');
+  if (marcasEl) marcasEl.querySelectorAll('input').forEach(i => i.checked = true);
+  if (platEl) platEl.querySelectorAll('input').forEach(i => i.checked = true);
+  renderGridMotos();
+}
+
+function renderGridMotos() {
+  const grid = document.getElementById('motos-grid');
+  if (!grid) return;
+
+  // Popula marcas e plataformas na primeira vez
+  const marcasEl = document.getElementById('gm-marcas');
+  if (marcasEl && !marcasEl.dataset.populated) {
+    marcasEl.dataset.populated = '1';
+    const marcas = [...new Set(MOTOS.map(m => normalizarMarca(m.marca)).filter(Boolean))].sort();
+    marcasEl.innerHTML = marcas.slice(0, 15).map(m => `
+      <label style="display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;">
+        <input type="checkbox" checked style="accent-color:var(--accent);" onchange="renderGridMotos()"> ${m}
+      </label>
+    `).join('');
+  }
+
+  const platEl = document.getElementById('gm-plataformas');
+  if (platEl && !platEl.dataset.populated) {
+    platEl.dataset.populated = '1';
+    const plats = [...new Set(LEILOES.map(l => l.plataforma).filter(Boolean))].sort();
+    platEl.innerHTML = plats.map(p => `
+      <label style="display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;">
+        <input type="checkbox" checked style="accent-color:var(--accent);" onchange="renderGridMotos()"> ${p}
+      </label>
+    `).join('');
+  }
+
+  const marcasSel = marcasEl ? [...marcasEl.querySelectorAll('input:checked')].map(i => i.parentElement.textContent.trim()) : [];
+  const platsSel = platEl ? [...platEl.querySelectorAll('input:checked')].map(i => i.parentElement.textContent.trim()) : [];
+
+  const busca = (document.getElementById('gm-busca')?.value || '').toLowerCase().trim();
+  const hoje = new Date().toISOString().slice(0,10);
+  const { fimSemana, inicioProxima, fimProxima } = getSemanaLimites();
+  const fimSemanaISO = fimSemana.toISOString().slice(0,10);
+  const fimProximaISO = fimProxima.toISOString().slice(0,10);
+  const inicioProximaISO = inicioProxima.toISOString().slice(0,10);
+
+  let motos = MOTOS.filter(m => {
+    const leilao = LEILOES.find(l => l.id === m.leilao_id);
+    if (!leilao || leilao.encerrado) return false;
+
+    // Filtro plataforma
+    if (platsSel.length && !platsSel.includes(leilao.plataforma)) return false;
+
+    // Filtro período
+    if (gmFiltros.per === 'semana' && leilao.data > fimSemanaISO) return false;
+    if (gmFiltros.per === 'proxima' && (leilao.data < inicioProximaISO || leilao.data > fimProximaISO)) return false;
+
+    // Filtro condição
+    if (gmFiltros.cond && !(m.condicao||'').toLowerCase().includes(gmFiltros.cond)) return false;
+
+    // Filtro porte
+    if (gmFiltros.porte && getPorte(m.cilindrada) !== gmFiltros.porte) return false;
+
+    // Filtro % FIPE
+    if (gmFiltros.fipe) {
+      const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
+      if (!fipe) return false;
+      const pct = Math.round((m.lance_inicial / fipe) * 100);
+      if (pct >= parseInt(gmFiltros.fipe)) return false;
+    }
+
+    // Filtro marca
+    if (marcasSel.length && !marcasSel.includes(normalizarMarca(m.marca))) return false;
+
+    // Busca
+    if (busca) {
+      const txt = `${m.marca} ${m.modelo} ${m.ano} ${m.lote}`.toLowerCase();
+      if (!txt.includes(busca)) return false;
+    }
+
+    return true;
+  });
+
+  // Ordenação
+  const sort = document.getElementById('gm-sort')?.value || 'data';
+  motos.sort((a, b) => {
+    const la = LEILOES.find(l => l.id === a.leilao_id);
+    const lb = LEILOES.find(l => l.id === b.leilao_id);
+    if (sort === 'data') return (la?.data||'').localeCompare(lb?.data||'');
+    if (sort === 'lance') return (a.lance_inicial||0) - (b.lance_inicial||0);
+    if (sort === 'marca') return `${a.marca} ${a.modelo}`.localeCompare(`${b.marca} ${b.modelo}`);
+    if (sort === 'fipe') {
+      const fa = a.fipe_csv || fipeCache[fipeKey(a)];
+      const fb = b.fipe_csv || fipeCache[fipeKey(b)];
+      const pa = fa ? Math.round((a.lance_inicial/fa)*100) : 999;
+      const pb = fb ? Math.round((b.lance_inicial/fb)*100) : 999;
+      return pa - pb;
+    }
+    return 0;
+  });
+
+  // Atualiza contadores
+  const leileosAtivos = [...new Set(motos.map(m => m.leilao_id))].length;
+  document.getElementById('gm-count').textContent = motos.length;
+  document.getElementById('gm-leiloes-count').textContent = leileosAtivos;
+  document.getElementById('gm-result-label').textContent = `${motos.length} moto${motos.length !== 1 ? 's' : ''} em ${leileosAtivos} leilão${leileosAtivos !== 1 ? 'ões' : ''}`;
+
+  if (!motos.length) {
+    grid.innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted);">Nenhuma moto encontrada com esses filtros.</div>';
+    return;
+  }
+
+  const condCores = { financiada: { bg: 'rgba(26,158,92,.85)', label: '✅ Financiada' }, sinistro: { bg: 'rgba(220,53,69,.85)', label: '⚠️ Sinistro' }, sucata: { bg: 'rgba(108,117,125,.85)', label: '🔧 Sucata' }, lotamento: { bg: 'rgba(100,100,200,.85)', label: '📦 Lotamento' } };
+
+  grid.innerHTML = motos.map(m => {
+    const leilao = LEILOES.find(l => l.id === m.leilao_id);
+    const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
+    const pct = fipe && m.lance_inicial ? Math.round((m.lance_inicial / fipe) * 100) : null;
+    const pctLabel = pct ? `${pct}% FIPE` : '';
+    const pctBg = pct ? (pct < 30 ? 'rgba(26,158,92,.9)' : pct < 50 ? 'rgba(255,165,0,.9)' : pct < 70 ? 'rgba(255,165,0,.7)' : 'rgba(220,53,69,.85)') : '';
+    const cond = (m.condicao||'').toLowerCase();
+    const condInfo = condCores[cond] || { bg: 'rgba(100,100,100,.7)', label: m.condicao || '—' };
+    const porte = getPorteLabel(m.cilindrada);
+    const dia = leilao?.dia || (leilao?.data ? new Date(leilao.data + 'T12:00:00').getDate() : '?');
+    const mes = leilao?.mes || (leilao?.data ? new Date(leilao.data + 'T12:00:00').toLocaleString('pt-BR',{month:'short'}).toUpperCase().replace('.','') : '?');
+
+    return `<div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'" onclick="abrirFichaMoto(${m.id})">
+      <div style="position:relative;height:130px;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        ${m.foto
+          ? `<img src="${m.foto}" alt="${m.marca} ${m.modelo}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" onclick="event.stopPropagation();${m.url ? `window.open('${m.url}','_blank')` : ''}">`
+          : ''}
+        <div style="display:${m.foto ? 'none' : 'flex'};align-items:center;justify-content:center;font-size:36px;width:100%;height:100%;${m.url ? 'cursor:pointer;' : ''}" onclick="event.stopPropagation();${m.url ? `window.open('${m.url}','_blank')` : ''}">🏍️</div>
+        <div style="position:absolute;top:6px;left:6px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;background:${condInfo.bg};color:#fff;">${condInfo.label}</div>
+        ${pctLabel ? `<div style="position:absolute;top:6px;right:6px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;background:${pctBg};color:#fff;">${pctLabel}</div>` : ''}
+      </div>
+      <div style="padding:9px 10px;">
+        <div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;">${m.marca} ${m.modelo}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:5px;">${m.ano||'—'}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px;">
+          ${porte ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${porte.label}</span>` : ''}
+          ${m.monta ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${m.monta} monta</span>` : ''}
+        </div>
+        <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:5px;">📅 ${leilao?.nome || m.leilao_id} · ${dia}/${mes}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid var(--border);">
+          <div style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace;">${m.lance_inicial ? 'R$'+Number(m.lance_inicial).toLocaleString('pt-BR') : '—'}</div>
+          <div style="font-size:10px;color:var(--muted);">lance ini.</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
 
 function limparFiltrosAgenda() {
   agendaFiltros.per = '';
@@ -3482,6 +3690,7 @@ function setFiltroHomeMonta(val, btn) {
   if(btn) btn.classList.add('active');
   else document.querySelector('[data-monta=""]')?.classList.add('active');
   renderLeiloes();
+    renderGridMotos();
 }
 
 function setFiltroMoto(f, btn) {
@@ -4150,6 +4359,7 @@ function setFiltroHomePorte(val, btn) {
   if(btn) btn.classList.add('active');
   else document.querySelector('[data-porte=""]').classList.add('active');
   renderLeiloes();
+    renderGridMotos();
 }
 
 function setFiltroHomeCond(val, btn) {
@@ -4195,6 +4405,7 @@ function aplicarFiltrosHome() {
   hfLeilao  = document.getElementById('hf-leilao').value;
   hfCidade  = document.getElementById('hf-cidade').value;
   renderLeiloes();
+    renderGridMotos();
 }
 
 function limparFiltrosHome() {
@@ -4207,6 +4418,7 @@ function limparFiltrosHome() {
   document.querySelectorAll('[data-porte]').forEach(b => b.classList.toggle('active', b.dataset.porte===''));
   document.querySelectorAll('[data-monta]').forEach(b => b.classList.toggle('active', b.dataset.monta===''));
   renderLeiloes();
+    renderGridMotos();
 }
 
 // ===================== MODAL NOVO LEILÃO =====================
