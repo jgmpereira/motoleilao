@@ -4336,31 +4336,9 @@ function abrirFichaMoto(motoId) {
     </div>` : '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">Sem histórico de arrematações para este modelo ainda.</div>'}
   `;
 
-  // Badges
-  document.getElementById('ficha-badges').innerHTML = `
-    <span style="background:${condColor}22;color:${condColor};font-size:10px;font-weight:700;padding:2px 9px;border-radius:4px;border:1px solid ${condColor}44;">${m.condicao||'—'}</span>
-    ${urgBadge}`;
-
-  // Grid de dados
-  const items = [
-    ['Ano', m.ano||'—'],
-    ['Cor', m.cor||'—'],
-    ['Lance Inicial', m.lance_inicial ? 'R$'+Number(m.lance_inicial).toLocaleString('pt-BR') : '—'],
-    ['FIPE', fipe ? 'R$'+Number(fipe).toLocaleString('pt-BR') : '—'],
-    ['% FIPE', pct ? `${pct}%` : '—'],
-    ['Financeira/Pátio', m.financeira||m.patio||'—'],
-  ];
-  if(arr) items.push(['✅ Arrematado', 'R$'+Number(arr.valor).toLocaleString('pt-BR')]);
-
-  document.getElementById('ficha-grid').innerHTML = items.map(([lbl,val]) => `
-    <div class="ficha-item">
-      <div class="ficha-item-label">${lbl}</div>
-      <div class="ficha-item-val">${val}</div>
-      ${lbl==='% FIPE' && pct ? `<div class="ficha-fipe-bar"><div class="ficha-fipe-fill" style="width:${Math.min(pct,100)}%;background:${pct<60?'var(--green)':pct<85?'var(--a2)':'var(--red)'};"></div></div>` : ''}
-    </div>`).join('');
-
   // Info do leilão
   if(l) {
+    const dataFmt = l.data ? new Date(l.data+'T12:00:00').toLocaleDateString('pt-BR') : '—';
     document.getElementById('ficha-leilao-info').innerHTML = `
       <strong style="color:var(--text);">📋 ${l.nome}</strong>
       <span style="margin:0 8px;color:var(--border);">|</span>
