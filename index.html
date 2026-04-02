@@ -932,9 +932,9 @@ function renderLeiloes() {
 
   const temFiltro = hfMarca || hfCond || hfPer || hfLeilao || hfPorte || hfMonta || hfCidade;
   const clearBtn = document.getElementById('hf-clear');
-  clearBtn.style.opacity = temFiltro ? '1' : '0.35';
-  clearBtn.style.pointerEvents = temFiltro ? '' : 'none';
-  document.getElementById('hf-count').textContent = temFiltro ? `${leiloesFiltrados.length} leilão(ões)` : '';
+  if(clearBtn) { clearBtn.style.opacity = temFiltro ? '1' : '0.35'; clearBtn.style.pointerEvents = temFiltro ? '' : 'none'; }
+  const hfCount = document.getElementById('hf-count');
+  if(hfCount) hfCount.textContent = temFiltro ? `${leiloesFiltrados.length} leilão(ões)` : '';
 
   const ativos = leiloesFiltrados.filter(l => getBadgeLeilao(l) !== 'encerrado');
   const encerrados = leiloesFiltrados.filter(l => getBadgeLeilao(l) === 'encerrado');
