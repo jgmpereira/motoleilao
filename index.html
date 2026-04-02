@@ -4345,7 +4345,7 @@ function abrirFichaMoto(motoId) {
     return {txt:'❌ CARO',s:'background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.3);color:var(--red);'};
   })() : null;
 
-  // Linha de valores: Lance | FIPE | Lance atual
+  // Linha de valores: Lance | FIPE
   document.getElementById('ficha-grid').innerHTML = `
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <div style="flex:1;background:var(--bg);border:1px solid rgba(255,77,0,.35);border-radius:8px;padding:8px 10px;">
@@ -4356,10 +4356,6 @@ function abrirFichaMoto(motoId) {
         <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">FIPE${pct?` <span style="font-size:11px;font-weight:700;color:${pct<30?'var(--green)':pct<50?'var(--a2)':pct<70?'#f90':'var(--red)'};">${pct}%</span>`:''}</div>
         <div style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;">R$${Number(fipe).toLocaleString('pt-BR')}</div>
       </div>` : ''}
-      <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;opacity:.6;">
-        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Lance atual <span style="font-size:9px;background:var(--s2);color:var(--muted);border-radius:3px;padding:1px 4px;vertical-align:middle;">em breve</span></div>
-        <div style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--muted);">—</div>
-      </div>
     </div>
     ${histVals.length ? `
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;">
