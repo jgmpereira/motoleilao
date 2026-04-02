@@ -52,7 +52,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:14p
 .hf-clear{font-size:11px;color:var(--accent);cursor:pointer;font-weight:600;padding:5px 8px;border-radius:5px;}
 .hf-clear:hover{background:rgba(255,77,0,.08);}
 /* Modal ficha moto */
-.modal-ficha{background:var(--s1);border-radius:14px;padding:28px;width:560px;max-width:98vw;position:relative;}
+.modal-ficha{background:var(--s1);border-radius:14px;padding:20px;width:600px;max-width:98vw;max-height:90vh;overflow-y:auto;position:relative;}
 .ficha-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
 .ficha-lote{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--accent);line-height:1;min-width:56px;text-align:center;}
 .ficha-title{flex:1;}
@@ -560,7 +560,7 @@ tbody tr:hover{background:var(--s2);}
       </div>
     </div>
     <div class="ficha-grid" id="ficha-grid"></div>
-    <div id="ficha-leilao-info" style="background:var(--s2);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);"></div>
+    <div id="ficha-leilao-info" style="background:var(--s2);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--muted);"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;">
       <button class="btn btn-ghost" onclick="fecharFichaMoto()">Fechar</button>
       <button class="btn btn-accent" id="ficha-btn-leilao" onclick="">Ver Leilão Completo</button>
@@ -894,6 +894,11 @@ function navigateToHash(hash) {
 }
 
 window.addEventListener('hashchange', () => navigateToHash(location.hash));
+window.addEventListener('popstate', () => {
+  if(!location.hash.startsWith('#moto-')) {
+    document.getElementById('modal-ficha-moto').classList.remove('open');
+  }
+});
 
 // ===================== LEILÕES =====================
 function renderLeiloes() {
@@ -4307,50 +4312,53 @@ function abrirFichaMoto(motoId) {
     return {txt:'❌ Acima do limite recomendado',s:'background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.3);color:var(--red);'};
   })() : null;
 
+  // Linha de valores: Lance | FIPE | Lance atual
   document.getElementById('ficha-grid').innerHTML = `
-    <div style="display:grid;grid-template-columns:${histVals.length?'1fr 1fr':'auto'};gap:8px;margin-bottom:8px;align-items:start;">
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        ${m.lance_inicial ? `<div style="flex:1;min-width:90px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
-          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Lance</div>
-          <div style="font-size:13px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent);">R$${Number(m.lance_inicial).toLocaleString('pt-BR')}</div>
-        </div>` : ''}
-        ${fipe ? `<div style="flex:1;min-width:90px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
-          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">FIPE${pct?` · <span style="color:${pct<30?'var(--green)':pct<50?'var(--a2)':pct<70?'#f90':'var(--red)'};">${pct}%</span>`:''}</div>
-          <div style="font-size:13px;font-weight:800;font-family:'DM Mono',monospace;">R$${Number(fipe).toLocaleString('pt-BR')}</div>
-        </div>` : ''}
-      </div>
-      ${histVals.length ? `
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
-        <div style="font-size:9px;color:var(--muted);margin-bottom:5px;">📊 Histórico · ${histVals.length}x</div>
-        <div style="display:flex;gap:4px;margin-bottom:${veredicto?'5px':'0'};">
-          <div style="flex:1;background:var(--s1);border-radius:4px;padding:4px 5px;text-align:center;">
-            <div style="font-size:8px;color:var(--muted);">Menor</div>
-            <div style="font-size:10px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);">R$${Number(histMin).toLocaleString('pt-BR')}</div>
-          </div>
-          <div style="flex:1;background:var(--s1);border-radius:4px;padding:4px 5px;text-align:center;">
-            <div style="font-size:8px;color:var(--muted);">Média</div>
-            <div style="font-size:10px;font-weight:700;font-family:'DM Mono',monospace;color:var(--a2);">R$${Number(histMed).toLocaleString('pt-BR')}</div>
-          </div>
-          <div style="flex:1;background:var(--s1);border-radius:4px;padding:4px 5px;text-align:center;">
-            <div style="font-size:8px;color:var(--muted);">Limite</div>
-            <div style="font-size:10px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red);">R$${Number(limCaro).toLocaleString('pt-BR')}</div>
-          </div>
-        </div>
-        ${veredicto ? `<div style="padding:4px 7px;border-radius:4px;font-size:10px;font-weight:600;${veredicto.s}">${veredicto.txt}</div>` : ''}
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      ${m.lance_inicial ? `<div style="flex:1;background:var(--bg);border:1px solid rgba(255,77,0,.35);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:12px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Lance</div>
+        <div style="font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent);">R$${Number(m.lance_inicial).toLocaleString('pt-BR')}</div>
       </div>` : ''}
+      ${fipe ? `<div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">FIPE${pct?` <span style="font-size:11px;font-weight:700;color:${pct<30?'var(--green)':pct<50?'var(--a2)':pct<70?'#f90':'var(--red)'};">${pct}%</span>`:''}</div>
+        <div style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;">R$${Number(fipe).toLocaleString('pt-BR')}</div>
+      </div>` : ''}
+      <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;opacity:.6;">
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Lance atual <span style="font-size:9px;background:var(--s2);color:var(--muted);border-radius:3px;padding:1px 4px;vertical-align:middle;">em breve</span></div>
+        <div style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--muted);">—</div>
+      </div>
     </div>
+    ${histVals.length ? `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">📊 Histórico de arrematações · ${histVals.length} registro${histVals.length>1?'s':''}</div>
+      <div style="display:flex;gap:6px;margin-bottom:${veredicto?'8px':'0'};">
+        <div style="flex:1;background:var(--s1);border-radius:6px;padding:7px 8px;text-align:center;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:3px;">Menor</div>
+          <div style="font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);">R$${Number(histMin).toLocaleString('pt-BR')}</div>
+        </div>
+        <div style="flex:1;background:var(--s1);border-radius:6px;padding:7px 8px;text-align:center;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:3px;">Média</div>
+          <div style="font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--a2);">R$${Number(histMed).toLocaleString('pt-BR')}</div>
+        </div>
+        <div style="flex:1;background:var(--s1);border-radius:6px;padding:7px 8px;text-align:center;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:3px;">Limite</div>
+          <div style="font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red);">R$${Number(limCaro).toLocaleString('pt-BR')}</div>
+        </div>
+      </div>
+      ${veredicto ? `<div style="padding:7px 10px;border-radius:6px;font-size:12px;font-weight:600;${veredicto.s}">${veredicto.txt}</div>` : ''}
+    </div>` : ''}
     ${historico.length ? `
-    <div>
-      <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;border-bottom:1px solid var(--border);padding-bottom:4px;">🕐 Arrematações anteriores</div>
+    <div style="margin-bottom:4px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:5px;">🕐 Arrematações anteriores</div>
       ${historico.slice(0,4).map(h => {
         const hp = h.arr.valor && fipe ? Math.round((h.arr.valor/fipe)*100) : null;
         const hpCls = hp ? (hp<30?'color:var(--green)':hp<50?'color:var(--a2)':'color:var(--red)') : '';
         const dataFmt = h.leilao?.data ? new Date(h.leilao.data+'T12:00:00').toLocaleDateString('pt-BR') : '—';
-        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);">
-          <div style="font-size:10px;color:var(--muted);">${dataFmt} · ${h.leilao?.plataforma||'—'} · ${h.moto.ano||'—'}</div>
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">
+          <div style="font-size:12px;color:var(--muted);">${dataFmt} · ${h.leilao?.plataforma||'—'} · ${h.moto.ano||'—'}</div>
           <div style="display:flex;align-items:center;gap:5px;">
-            <span style="font-size:11px;font-family:'DM Mono',monospace;font-weight:700;color:var(--green);">R$${Number(h.arr.valor).toLocaleString('pt-BR')}</span>
-            ${hp?`<span style="font-size:9px;padding:1px 4px;border-radius:4px;background:var(--s1);${hpCls}">${hp}%</span>`:''}
+            <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:700;color:var(--green);">R$${Number(h.arr.valor).toLocaleString('pt-BR')}</span>
+            ${hp?`<span style="font-size:11px;padding:2px 5px;border-radius:4px;background:var(--s1);${hpCls}">${hp}%</span>`:''}
           </div>
         </div>`;
       }).join('')}
