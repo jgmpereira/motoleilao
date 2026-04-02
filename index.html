@@ -549,7 +549,7 @@ tbody tr:hover{background:var(--s2);}
 <div class="modal-overlay" id="modal-ficha-moto" onclick="if(event.target===this)fecharFichaMoto()">
   <div class="modal-ficha">
     <button class="hist-close" onclick="fecharFichaMoto()">✕</button>
-    <div id="ficha-foto-area" style="height:200px;background:var(--s2);border-radius:10px;overflow:hidden;margin-bottom:16px;display:flex;align-items:center;justify-content:center;"></div>
+    <div id="ficha-foto-area" style="height:150px;background:var(--s2);border-radius:10px;overflow:hidden;margin-bottom:12px;display:flex;align-items:center;justify-content:center;"></div>
     <div class="ficha-header">
       <div class="ficha-lote" id="ficha-lote">—</div>
       <div class="ficha-title">
@@ -4299,64 +4299,57 @@ function abrirFichaMoto(motoId) {
     ${urgBadge}`;
 
   // Preços + análise lado a lado
+  const veredicto = m.lance_inicial && histMin ? (() => {
+    if(m.lance_inicial<=histMin) return {txt:'🔥 Abaixo do menor histórico',s:'background:rgba(26,158,92,.1);border:1px solid rgba(26,158,92,.3);color:var(--green);'};
+    if(m.lance_inicial<=histMed) return {txt:'✅ Abaixo da média',s:'background:rgba(26,158,92,.1);border:1px solid rgba(26,158,92,.3);color:var(--green);'};
+    if(m.lance_inicial<=limCaro) return {txt:'⚠️ Atenção ao limite',s:'background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.3);color:#f90;'};
+    return {txt:'❌ Acima do limite recomendado',s:'background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.3);color:var(--red);'};
+  })() : null;
+
   document.getElementById('ficha-grid').innerHTML = `
-    <div style="display:grid;grid-template-columns:${histVals.length?'1fr 1fr':'1fr'};gap:10px;margin-bottom:12px;align-items:start;">
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        ${m.lance_inicial ? `<div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px 10px;">
-          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Lance inicial</div>
-          <div style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent);">R$${Number(m.lance_inicial).toLocaleString('pt-BR')}</div>
+    <div style="display:grid;grid-template-columns:${histVals.length?'1fr 1fr':'auto'};gap:8px;margin-bottom:8px;align-items:start;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${m.lance_inicial ? `<div style="flex:1;min-width:90px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Lance</div>
+          <div style="font-size:13px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent);">R$${Number(m.lance_inicial).toLocaleString('pt-BR')}</div>
         </div>` : ''}
-        ${fipe ? `<div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px 10px;">
-          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Valor FIPE</div>
-          <div style="font-size:14px;font-weight:800;font-family:'DM Mono',monospace;">R$${Number(fipe).toLocaleString('pt-BR')}${pct?` <span style="font-size:11px;font-weight:600;color:${pct<30?'var(--green)':pct<50?'var(--a2)':pct<70?'#f90':'var(--red)'};">${pct}%</span>`:''}</div>
+        ${fipe ? `<div style="flex:1;min-width:90px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">FIPE${pct?` · <span style="color:${pct<30?'var(--green)':pct<50?'var(--a2)':pct<70?'#f90':'var(--red)'};">${pct}%</span>`:''}</div>
+          <div style="font-size:13px;font-weight:800;font-family:'DM Mono',monospace;">R$${Number(fipe).toLocaleString('pt-BR')}</div>
         </div>` : ''}
-        ${!m.lance_inicial && !fipe ? `<div style="color:var(--muted);font-size:12px;padding:8px 0;">Sem valores cadastrados</div>` : ''}
       </div>
       ${histVals.length ? `
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:10px;">
-        <div style="font-size:9px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📊 Histórico (${histVals.length}x)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:8px;">
-          <div style="background:var(--s1);border-radius:5px;padding:5px;text-align:center;">
-            <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">Menor</div>
-            <div style="font-size:11px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);">R$${Number(histMin).toLocaleString('pt-BR')}</div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:5px;">📊 Histórico · ${histVals.length}x</div>
+        <div style="display:flex;gap:4px;margin-bottom:${veredicto?'5px':'0'};">
+          <div style="flex:1;background:var(--s1);border-radius:4px;padding:4px 5px;text-align:center;">
+            <div style="font-size:8px;color:var(--muted);">Menor</div>
+            <div style="font-size:10px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);">R$${Number(histMin).toLocaleString('pt-BR')}</div>
           </div>
-          <div style="background:var(--s1);border-radius:5px;padding:5px;text-align:center;">
-            <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">Média</div>
-            <div style="font-size:11px;font-weight:700;font-family:'DM Mono',monospace;color:var(--a2);">R$${Number(histMed).toLocaleString('pt-BR')}</div>
+          <div style="flex:1;background:var(--s1);border-radius:4px;padding:4px 5px;text-align:center;">
+            <div style="font-size:8px;color:var(--muted);">Média</div>
+            <div style="font-size:10px;font-weight:700;font-family:'DM Mono',monospace;color:var(--a2);">R$${Number(histMed).toLocaleString('pt-BR')}</div>
           </div>
-          <div style="background:var(--s1);border-radius:5px;padding:5px;text-align:center;">
-            <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">Limite</div>
-            <div style="font-size:11px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red);">R$${Number(limCaro).toLocaleString('pt-BR')}</div>
+          <div style="flex:1;background:var(--s1);border-radius:4px;padding:4px 5px;text-align:center;">
+            <div style="font-size:8px;color:var(--muted);">Limite</div>
+            <div style="font-size:10px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red);">R$${Number(limCaro).toLocaleString('pt-BR')}</div>
           </div>
         </div>
-        ${m.lance_inicial && histMin ? `<div style="padding:6px 10px;border-radius:6px;font-size:11px;font-weight:600;${
-          m.lance_inicial<=histMin ? 'background:rgba(26,158,92,.1);border:1px solid rgba(26,158,92,.3);color:var(--green);' :
-          m.lance_inicial<=histMed ? 'background:rgba(26,158,92,.1);border:1px solid rgba(26,158,92,.3);color:var(--green);' :
-          m.lance_inicial<=limCaro ? 'background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.3);color:#f90;' :
-          'background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.3);color:var(--red);'
-        }">
-          ${m.lance_inicial<=histMin ? '🔥 Abaixo do menor histórico' :
-            m.lance_inicial<=histMed ? '✅ Abaixo da média' :
-            m.lance_inicial<=limCaro ? '⚠️ Atenção ao limite' :
-            '❌ Acima do limite recomendado'}
-        </div>` : ''}
+        ${veredicto ? `<div style="padding:4px 7px;border-radius:4px;font-size:10px;font-weight:600;${veredicto.s}">${veredicto.txt}</div>` : ''}
       </div>` : ''}
     </div>
-    ${histVals.length ? `
-    <div style="margin-bottom:12px;">
-      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:5px;">🕐 Arrematações anteriores</div>
-      ${historico.slice(0,5).map(h => {
+    ${historico.length ? `
+    <div>
+      <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;border-bottom:1px solid var(--border);padding-bottom:4px;">🕐 Arrematações anteriores</div>
+      ${historico.slice(0,4).map(h => {
         const hp = h.arr.valor && fipe ? Math.round((h.arr.valor/fipe)*100) : null;
         const hpCls = hp ? (hp<30?'color:var(--green)':hp<50?'color:var(--a2)':'color:var(--red)') : '';
         const dataFmt = h.leilao?.data ? new Date(h.leilao.data+'T12:00:00').toLocaleDateString('pt-BR') : '—';
-        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">
-          <div>
-            <div style="font-size:11px;color:var(--muted);">${dataFmt} · ${h.leilao?.plataforma||'—'}</div>
-            <div style="font-size:10px;color:var(--muted);opacity:.7;">${h.moto.condicao||'—'} · ${h.moto.ano||'—'}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:12px;font-family:'DM Mono',monospace;font-weight:700;color:var(--green);">R$${Number(h.arr.valor).toLocaleString('pt-BR')}</span>
-            ${hp?`<span style="font-size:10px;padding:2px 5px;border-radius:6px;background:var(--s1);${hpCls}">${hp}%</span>`:''}
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);">
+          <div style="font-size:10px;color:var(--muted);">${dataFmt} · ${h.leilao?.plataforma||'—'} · ${h.moto.ano||'—'}</div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span style="font-size:11px;font-family:'DM Mono',monospace;font-weight:700;color:var(--green);">R$${Number(h.arr.valor).toLocaleString('pt-BR')}</span>
+            ${hp?`<span style="font-size:9px;padding:1px 4px;border-radius:4px;background:var(--s1);${hpCls}">${hp}%</span>`:''}
           </div>
         </div>`;
       }).join('')}
