@@ -1078,7 +1078,7 @@ function limparFiltrosGm() {
   document.getElementById('gm-busca').value = '';
   const marcasEl = document.getElementById('gm-marcas');
   const platEl = document.getElementById('gm-plataformas');
-  if (marcasEl) marcasEl.querySelectorAll('input').forEach(i => i.checked = true);
+  if (marcasEl) marcasEl.querySelectorAll('input').forEach(i => i.checked = false);
   if (platEl) platEl.querySelectorAll('input').forEach(i => i.checked = true);
   renderGridMotos();
 }
@@ -1091,12 +1091,30 @@ function renderGridMotos() {
   const marcasEl = document.getElementById('gm-marcas');
   if (marcasEl && !marcasEl.dataset.populated) {
     marcasEl.dataset.populated = '1';
-    const marcas = [...new Set(MOTOS.map(m => normalizarMarca(m.marca)).filter(Boolean))].sort();
-    marcasEl.innerHTML = marcas.slice(0, 15).map(m => `
-      <label style="display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;">
-        <input type="checkbox" style="accent-color:var(--accent);" onchange="renderGridMotos()"> ${m}
-      </label>
-    `).join('');
+    const MARCAS_INVALIDAS = new Set(['fiat', 'jta', 'jta-suzuki', 'jta suzuki', 'jta/suzuki']);
+    // Conta motos por marca apenas em leilões ativos
+    const contagem = {};
+    MOTOS.forEach(mo => {
+      const lx = LEILOES.find(x => x.id === mo.leilao_id);
+      if (!lx || lx.encerrado) return;
+      const nm = normalizarMarca(mo.marca);
+      if (!nm) return;
+      contagem[nm] = (contagem[nm] || 0) + 1;
+    });
+    const marcasMain = [], marcasOutras = [];
+    Object.entries(contagem).forEach(([nm, cnt]) => {
+      if (MARCAS_INVALIDAS.has(nm.toLowerCase())) return;
+      if (cnt >= 3) marcasMain.push(nm); else marcasOutras.push(nm);
+    });
+    marcasMain.sort(); marcasOutras.sort();
+    marcasEl.dataset.outras = JSON.stringify(marcasOutras);
+    const ls = 'display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;';
+    const is = 'accent-color:var(--accent);';
+    marcasEl.innerHTML = marcasMain.map(nm =>
+      `<label style="${ls}"><input type="checkbox" data-marca="${nm}" style="${is}" onchange="renderGridMotos()"> ${nm}</label>`
+    ).join('') + (marcasOutras.length ?
+      `<label style="${ls}color:var(--muted);"><input type="checkbox" data-outras="1" style="${is}" onchange="renderGridMotos()"> Outras (${marcasOutras.length})</label>`
+    : '');
   }
 
   const platEl = document.getElementById('gm-plataformas');
@@ -1110,7 +1128,10 @@ function renderGridMotos() {
     `).join('');
   }
 
-  const marcasSel = marcasEl ? [...marcasEl.querySelectorAll('input:checked')].map(i => i.parentElement.textContent.trim()) : [];
+  const marcasSel = marcasEl ? [...marcasEl.querySelectorAll('input[data-marca]:checked')].map(i => i.dataset.marca) : [];
+  const outrasChecked = !!(marcasEl && marcasEl.querySelector('input[data-outras]:checked'));
+  const marcasOutrasSet = new Set(JSON.parse(marcasEl?.dataset.outras || '[]'));
+  const anyMarcaFiltro = marcasSel.length > 0 || outrasChecked;
   const platsSel = platEl ? [...platEl.querySelectorAll('input:checked')].map(i => i.parentElement.textContent.trim()) : [];
 
   const busca = (document.getElementById('gm-busca')?.value || '').toLowerCase().trim();
@@ -1146,7 +1167,11 @@ function renderGridMotos() {
     }
 
     // Filtro marca
-    if (marcasSel.length && !marcasSel.includes(normalizarMarca(m.marca))) return false;
+    if (anyMarcaFiltro) {
+      const nm = normalizarMarca(m.marca);
+      if (marcasOutrasSet.has(nm)) { if (!outrasChecked) return false; }
+      else if (!marcasSel.includes(nm)) return false;
+    }
 
     // Busca
     if (busca) {
