@@ -1112,9 +1112,13 @@ function renderGridMotos() {
     const is = 'accent-color:var(--accent);';
     marcasEl.innerHTML = marcasMain.map(nm =>
       `<label style="${ls}"><input type="checkbox" data-marca="${nm}" style="${is}" onchange="renderGridMotos()"> ${nm}</label>`
-    ).join('') + (marcasOutras.length ?
-      `<label style="${ls}color:var(--muted);"><input type="checkbox" data-outras="1" style="${is}" onchange="renderGridMotos()"> Outras (${marcasOutras.length})</label>`
-    : '');
+    ).join('') + (marcasOutras.length ? `
+      <button onclick="(function(btn){const d=btn.nextElementSibling;const open=d.style.display!=='none';d.style.display=open?'none':'flex';btn.textContent=open?'▼ Ver mais marcas (${marcasOutras.length})':'▲ Ocultar marcas'})(this)" style="margin-top:4px;background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:3px 6px;text-align:left;">▼ Ver mais marcas (${marcasOutras.length})</button>
+      <div style="display:none;flex-direction:column;gap:2px;padding-left:4px;border-left:2px solid var(--border);margin-top:2px;">
+        ${marcasOutras.map(nm =>
+          `<label style="${ls}"><input type="checkbox" data-marca="${nm}" style="${is}" onchange="renderGridMotos()"> ${nm}</label>`
+        ).join('')}
+      </div>` : '');
   }
 
   const platEl = document.getElementById('gm-plataformas');
@@ -4283,6 +4287,7 @@ function toggleFiltrosMobile() {
 function abrirFichaMoto(motoId) {
   const m = MOTOS.find(x => x.id === motoId);
   if(!m) return;
+  console.log('lance_inicial debug:', m.id, m.lance_inicial, typeof m.lance_inicial);
   history.pushState(null, '', '#moto-' + motoId);
   const l = LEILOES.find(x => x.id === m.leilao_id);
   const arr = ARREMATADOS[m.id];
