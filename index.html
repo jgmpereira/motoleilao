@@ -4262,7 +4262,9 @@ function abrirFichaMoto(motoId) {
   const l = LEILOES.find(x => x.id === m.leilao_id);
   const arr = ARREMATADOS[m.id];
   const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
-  const pct = m.lance_inicial && fipe ? Math.round((m.lance_inicial/fipe)*100) : null;
+  // Normaliza lance para número (Supabase pode retornar numeric como string)
+  const lance = (m.lance_inicial !== null && m.lance_inicial !== undefined && m.lance_inicial !== '') ? parseFloat(m.lance_inicial) : null;
+  const pct = lance && fipe ? Math.round((lance/fipe)*100) : null;
 
   // Busca histórico de arrematações do mesmo modelo
   const historico = MOTOS
@@ -4285,9 +4287,12 @@ function abrirFichaMoto(motoId) {
   const fotoEl = modal.querySelector('#ficha-foto-area');
   if(fotoEl) {
     fotoEl.style.background = 'var(--bg)';
+    fotoEl.style.height = 'auto';
+    fotoEl.style.minHeight = '80px';
+    fotoEl.style.maxHeight = '160px';
     fotoEl.innerHTML = m.foto
-      ? `<img src="${m.foto}" style="width:100%;height:100%;object-fit:contain;background:var(--bg);cursor:${m.url?'pointer':'default'}" ${m.url?`onclick="window.open('${m.url}','_blank')"`:''} onerror="this.style.display='none'">`
-      : `<div style="font-size:50px;display:flex;align-items:center;justify-content:center;height:100%;">🏍️</div>`;
+      ? `<img src="${m.foto}" style="width:100%;height:auto;max-height:160px;object-fit:contain;display:block;cursor:${m.url?'pointer':'default'}" ${m.url?`onclick="window.open('${m.url}','_blank')"`:''} onerror="this.parentElement.style.display='none'">`
+      : `<div style="font-size:50px;display:flex;align-items:center;justify-content:center;height:80px;">🏍️</div>`;
   }
 
   // Título e badges
@@ -4304,10 +4309,10 @@ function abrirFichaMoto(motoId) {
     ${urgBadge}`;
 
   // Preços + análise lado a lado
-  const veredicto = m.lance_inicial && histMin ? (() => {
-    if(m.lance_inicial<=histMin) return {txt:'🔥 ÓTIMO NEGÓCIO',s:'background:rgba(26,158,92,.1);border:1px solid rgba(26,158,92,.3);color:var(--green);'};
-    if(m.lance_inicial<=histMed) return {txt:'✅ BOM PREÇO',s:'background:rgba(26,158,92,.1);border:1px solid rgba(26,158,92,.3);color:var(--green);'};
-    if(m.lance_inicial<=limCaro) return {txt:'⚠️ ATENÇÃO',s:'background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.3);color:#f90;'};
+  const veredicto = lance && histMin ? (() => {
+    if(lance<=histMin) return {txt:'🔥 ÓTIMO NEGÓCIO',s:'background:rgba(26,158,92,.1);border:1px solid rgba(26,158,92,.3);color:var(--green);'};
+    if(lance<=histMed) return {txt:'✅ BOM PREÇO',s:'background:rgba(26,158,92,.1);border:1px solid rgba(26,158,92,.3);color:var(--green);'};
+    if(lance<=limCaro) return {txt:'⚠️ ATENÇÃO',s:'background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.3);color:#f90;'};
     return {txt:'❌ CARO',s:'background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.3);color:var(--red);'};
   })() : null;
 
@@ -4316,7 +4321,7 @@ function abrirFichaMoto(motoId) {
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <div style="flex:1;background:var(--bg);border:1px solid rgba(255,77,0,.35);border-radius:8px;padding:8px 10px;">
         <div style="font-size:12px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Lance</div>
-        <div style="font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent);">${m.lance_inicial ? 'R$'+Number(m.lance_inicial).toLocaleString('pt-BR') : '—'}</div>
+        <div style="font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent);">${lance ? 'R$'+lance.toLocaleString('pt-BR') : '—'}</div>
       </div>
       ${fipe ? `<div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;">
         <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">FIPE${pct?` <span style="font-size:11px;font-weight:700;color:${pct<30?'var(--green)':pct<50?'var(--a2)':pct<70?'#f90':'var(--red)'};">${pct}%</span>`:''}</div>
