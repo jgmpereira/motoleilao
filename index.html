@@ -939,7 +939,7 @@ function renderLeiloes() {
   const ativos = leiloesFiltrados.filter(l => getBadgeLeilao(l) !== 'encerrado');
   const encerrados = leiloesFiltrados.filter(l => getBadgeLeilao(l) === 'encerrado');
   const semanaInfo = ativos.filter(l => l.data && parseDateISO(l.data) <= fimSemana);
-  document.getElementById('semana-info').textContent = semanaInfo.length ? `${semanaInfo.length} leilão(ões) esta semana` : '';
+  const semanaInfoEl = document.getElementById('semana-info'); if(semanaInfoEl) semanaInfoEl.textContent = semanaInfo.length ? `${semanaInfo.length} leilão(ões) esta semana` : '';
 
   const renderCard = (l) => {
     let motos = MOTOS.filter(m => m.leilao_id === l.id);
