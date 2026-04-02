@@ -878,6 +878,7 @@ window.addEventListener('hashchange', () => navigateToHash(location.hash));
 // ===================== LEILÕES =====================
 function renderLeiloes() {
   const grid = document.getElementById('leiloes-grid');
+  if(!grid) return;
   if(!LEILOES.length) { grid.innerHTML = '<div style="padding:48px;text-align:center;color:var(--muted);">Nenhum leilão encontrado.</div>'; return; }
 
   // Popular dropdown de marcas (só na primeira vez)
@@ -4401,18 +4402,18 @@ function popularFiltroLeiloes() {
 }
 
 function aplicarFiltrosHome() {
-  hfMarca   = document.getElementById('hf-marca').value;
-  hfLeilao  = document.getElementById('hf-leilao').value;
-  hfCidade  = document.getElementById('hf-cidade').value;
+  hfMarca   = document.getElementById('hf-marca')?.value || '';
+  hfLeilao  = document.getElementById('hf-leilao')?.value || '';
+  hfCidade  = document.getElementById('hf-cidade')?.value || '';
   renderLeiloes();
     renderGridMotos();
 }
 
 function limparFiltrosHome() {
   hfMarca = ''; hfCond = ''; hfPer = ''; hfLeilao = ''; hfPorte = ''; hfMonta = ''; hfCidade = '';
-  document.getElementById('hf-marca').value = '';
-  document.getElementById('hf-leilao').value = '';
-  document.getElementById('hf-cidade').value = '';
+  if(document.getElementById('hf-marca')) document.getElementById('hf-marca').value = '';
+  if(document.getElementById('hf-leilao')) document.getElementById('hf-leilao').value = '';
+  if(document.getElementById('hf-cidade')) document.getElementById('hf-cidade').value = '';
   document.querySelectorAll('[data-cond]').forEach(b => b.classList.toggle('active', b.dataset.cond===''));
   document.querySelectorAll('[data-per]').forEach(b => b.classList.toggle('active', b.dataset.per===''));
   document.querySelectorAll('[data-porte]').forEach(b => b.classList.toggle('active', b.dataset.porte===''));
