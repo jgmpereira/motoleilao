@@ -4340,9 +4340,6 @@ function abrirFichaMoto(motoId) {
   document.getElementById('ficha-modelo').textContent = m.modelo || '';
 
   // Badges
-  const condColor = m.condicao==='financiada'?'var(--blue)':m.condicao==='sinistro'?'var(--a2)':'var(--red)';
-  const badge = l ? getBadgeLeilao(l) : '';
-  const urgBadge = badge==='urgente' ? '<span style="background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">🔥 ESTA SEMANA</span>' : badge==='encerrado' ? '<span style="background:rgba(0,0,0,.1);color:var(--muted);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">ENCERRADO</span>' : '';
   document.getElementById('ficha-badges').innerHTML = `
     <span style="background:${condColor}22;color:${condColor};font-size:10px;font-weight:700;padding:2px 9px;border-radius:4px;border:1px solid ${condColor}44;">${m.condicao||'—'}</span>
     ${urgBadge}`;
@@ -4367,7 +4364,6 @@ function abrirFichaMoto(motoId) {
 
   // Info do leilão
   if(l) {
-    const dataFmt = l.data ? (() => { const d=new Date(l.data+'T00:00:00'); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; })() : '—';
     document.getElementById('ficha-leilao-info').innerHTML = `
       <strong style="color:var(--text);">📋 ${l.nome}</strong>
       <span style="margin:0 8px;color:var(--border);">|</span>
