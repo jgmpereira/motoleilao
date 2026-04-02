@@ -535,6 +535,7 @@ tbody tr:hover{background:var(--s2);}
 <div class="modal-overlay" id="modal-ficha-moto" onclick="if(event.target===this)fecharFichaMoto()">
   <div class="modal-ficha">
     <button class="hist-close" onclick="fecharFichaMoto()">✕</button>
+    <div id="ficha-foto-area" style="height:200px;background:var(--s2);border-radius:10px;overflow:hidden;margin-bottom:16px;display:flex;align-items:center;justify-content:center;"></div>
     <div class="ficha-header">
       <div class="ficha-lote" id="ficha-lote">—</div>
       <div class="ficha-title">
@@ -1069,7 +1070,7 @@ function renderGridMotos() {
     const marcas = [...new Set(MOTOS.map(m => normalizarMarca(m.marca)).filter(Boolean))].sort();
     marcasEl.innerHTML = marcas.slice(0, 15).map(m => `
       <label style="display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;">
-        <input type="checkbox" checked style="accent-color:var(--accent);" onchange="renderGridMotos()"> ${m}
+        <input type="checkbox" style="accent-color:var(--accent);" onchange="renderGridMotos()"> ${m}
       </label>
     `).join('');
   }
@@ -1080,7 +1081,7 @@ function renderGridMotos() {
     const plats = [...new Set(LEILOES.map(l => l.plataforma).filter(Boolean))].sort();
     platEl.innerHTML = plats.map(p => `
       <label style="display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;">
-        <input type="checkbox" checked style="accent-color:var(--accent);" onchange="renderGridMotos()"> ${p}
+        <input type="checkbox" style="accent-color:var(--accent);" onchange="renderGridMotos()"> ${p}
       </label>
     `).join('');
   }
@@ -4334,10 +4335,6 @@ function abrirFichaMoto(motoId) {
       }).join('')}
     </div>` : '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">Sem histórico de arrematações para este modelo ainda.</div>'}
   `;
-
-  document.getElementById('ficha-lote').textContent = m.lote || '—';
-  document.getElementById('ficha-marca').textContent = m.marca || '';
-  document.getElementById('ficha-modelo').textContent = m.modelo || '';
 
   // Badges
   document.getElementById('ficha-badges').innerHTML = `
