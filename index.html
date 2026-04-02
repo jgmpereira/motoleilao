@@ -4334,7 +4334,6 @@ function abrirFichaMoto(motoId) {
       }).join('')}
     </div>` : '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">Sem histórico de arrematações para este modelo ainda.</div>'}
   `;
-  const pct = m.lance_inicial && fipe ? Math.round((m.lance_inicial/fipe)*100) : null;
 
   document.getElementById('ficha-lote').textContent = m.lote || '—';
   document.getElementById('ficha-marca').textContent = m.marca || '';
