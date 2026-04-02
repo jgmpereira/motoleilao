@@ -1048,7 +1048,7 @@ function setGmFiltro(tipo, val, btn) {
 function limparFiltrosGm() {
   Object.keys(gmFiltros).forEach(k => gmFiltros[k] = '');
   document.querySelectorAll('#motos-sidebar .hf-chip').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('#motos-sidebar .hf-chip[onclick*="''"]').forEach(b => b.classList.add('active'));
+  document.querySelectorAll('#motos-sidebar .hf-chip').forEach(b => { if(b.getAttribute('onclick') && b.getAttribute('onclick').includes("''")) b.classList.add('active'); });
   document.getElementById('gm-busca').value = '';
   const marcasEl = document.getElementById('gm-marcas');
   const platEl = document.getElementById('gm-plataformas');
