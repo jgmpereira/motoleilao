@@ -272,19 +272,21 @@ Redesign completo da interface em andamento na branch `nova-home`.
 
 ### O que já foi feito
 - ✅ Aba **Agenda** criada — lista de leilões com filtros de período, plataforma e status
-- ✅ Aba **Motos** renomeada (era "Leilões") — grid de motos com sidebar de filtros
-- ✅ Grid de motos com foto, badge condição, % FIPE, porte, monta, lance inicial
-- ✅ Filtros: busca, período, condição, porte, % FIPE, marca, plataforma
+- ✅ Aba **Motos** — grid de motos com sidebar de filtros e foto
+- ✅ Filtros: busca, período, condição, porte, % FIPE, marca (desmarcado por padrão), plataforma
 - ✅ Ordenação: data, % FIPE, lance, marca
-- ✅ Foto clicável → abre anúncio no site da leiloeira
-- ✅ Card clicável → abre ficha da moto (`abrirFichaMoto`)
-- ✅ Hash routing `#agenda` funcionando
-- ✅ Botão limpar filtros na Agenda e no grid de motos
+- ✅ Foto clicável → abre anúncio no site da leiloeira (nova aba)
+- ✅ Card → hash `#moto-{id}`, abre ficha; Ctrl+click abre em nova aba
+- ✅ Botão voltar do navegador fecha a ficha (popstate)
+- ✅ Mobile: sidebar como overlay, botão Filtros fixo no topo, grid 2 colunas
+- ✅ Ficha da moto: foto, badges, lance/FIPE/lance atual, análise histórica, arrematações anteriores
+- ✅ Indicador histórico: menor visto, média, limite caro, veredicto automático
 
 ### Próximo passo
-- 🔲 Testar grid de motos no site e ajustar visual se necessário
-- 🔲 Ficha da moto — adicionar indicador histórico (menor/média/limite caro)
-- 🔲 Ajustar ficha para mostrar infos em destaque (condição, porte, monta)
+- 🔲 Ajustes visuais finais na ficha (fontes, espaçamento)
+- 🔲 Merge da `nova-home` para `main` quando aprovado
+- 🔲 Lance atual em tempo real (futuro)
+- 🔲 Scrapers dos demais leilões (Superbid, Copart, etc.) para popular fotos
 
 ### Comportamento definido
 - Foto do card → abre anúncio na leiloeira (nova aba)
