@@ -4231,7 +4231,111 @@ function abrirFichaMoto(motoId) {
   const l = LEILOES.find(x => x.id === m.leilao_id);
   const arr = ARREMATADOS[m.id];
   const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
-  const pct = arr && fipe ? Math.round((arr.valor/fipe)*100) : null;
+  const pct = m.lance_inicial && fipe ? Math.round((m.lance_inicial/fipe)*100) : null;
+
+  // Busca histórico de arrematações do mesmo modelo
+  const historico = MOTOS
+    .filter(x => normalizarMarca(x.marca) === normalizarMarca(m.marca) && x.modelo === m.modelo && ARREMATADOS[x.id])
+    .map(x => ({ moto: x, arr: ARREMATADOS[x.id], leilao: LEILOES.find(l => l.id === x.leilao_id) }))
+    .filter(x => x.arr && x.arr.valor > 0)
+    .sort((a,b) => (b.leilao?.data||'').localeCompare(a.leilao?.data||''));
+
+  const histVals = historico.map(h => h.arr.valor);
+  const histMin = histVals.length ? Math.min(...histVals) : null;
+  const histMax = histVals.length ? Math.max(...histVals) : null;
+  const histMed = histVals.length ? Math.round(histVals.reduce((a,b)=>a+b,0)/histVals.length) : null;
+  const limCaro = histMed ? Math.round(histMed * 1.15) : null;
+
+  // Monta modal
+  const modal = document.getElementById('modal-ficha-moto');
+  if(!modal) return;
+
+  // Foto
+  const fotoEl = modal.querySelector('#ficha-foto-area');
+  if(fotoEl) {
+    fotoEl.style.background = 'var(--bg)';
+    fotoEl.innerHTML = m.foto
+      ? `<img src="${m.foto}" style="width:100%;height:100%;object-fit:cover;cursor:${m.url?'pointer':'default'}" ${m.url?`onclick="window.open('${m.url}','_blank')"`:''} onerror="this.style.display='none'">`
+      : `<div style="font-size:50px;display:flex;align-items:center;justify-content:center;height:100%;">🏍️</div>`;
+  }
+
+  // Título e badges
+  document.getElementById('ficha-lote').textContent = m.lote || '—';
+  document.getElementById('ficha-marca').textContent = m.marca || '';
+  document.getElementById('ficha-modelo').textContent = m.modelo || '';
+
+  const condColor = m.condicao==='financiada'?'var(--green)':m.condicao==='sinistro'?'var(--a2)':'var(--muted)';
+  const badge = l ? getBadgeLeilao(l) : '';
+  const urgBadge = badge==='urgente'||badge==='hoje' ? '<span style="background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">🔥 ESTA SEMANA</span>' : badge==='encerrado' ? '<span style="background:rgba(0,0,0,.1);color:var(--muted);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">ENCERRADO</span>' : '';
+  document.getElementById('ficha-badges').innerHTML = `
+    <span style="background:${condColor}22;color:${condColor};font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;border:1px solid ${condColor}44;">${m.condicao||'—'}</span>
+    ${m.cilindrada?`<span style="background:var(--s1);color:var(--muted);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;border:1px solid var(--border);">⚙️ ${m.cilindrada}cc</span>`:''}
+    ${m.monta?`<span style="background:var(--s1);color:var(--muted);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;border:1px solid var(--border);">🏍️ ${m.monta} monta</span>`:''}
+    ${urgBadge}`;
+
+  // Preços
+  document.getElementById('ficha-grid').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Lance inicial</div>
+        <div style="font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent);">${m.lance_inicial?'R$'+Number(m.lance_inicial).toLocaleString('pt-BR'):'—'}</div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Valor FIPE</div>
+        <div style="font-size:16px;font-weight:800;font-family:'DM Mono',monospace;">${fipe?'R$'+Number(fipe).toLocaleString('pt-BR'):'—'}${pct?` <span style="font-size:11px;font-weight:600;color:${pct<30?'var(--green)':pct<50?'var(--a2)':pct<70?'#f90':'var(--red)'};">(${pct}%)</span>`:''}</div>
+      </div>
+    </div>
+    ${histVals.length ? `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">📊 Análise pelo histórico</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Baseado em ${histVals.length} arrematação(ões) do mesmo modelo</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">🔥 Menor visto</div>
+          <div style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);">R$${Number(histMin).toLocaleString('pt-BR')}</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">📊 Média</div>
+          <div style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--a2);">R$${Number(histMed).toLocaleString('pt-BR')}</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">❌ Limite caro</div>
+          <div style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red);">R$${Number(limCaro).toLocaleString('pt-BR')}</div>
+        </div>
+      </div>
+      ${m.lance_inicial && histMin ? `<div style="padding:10px 14px;border-radius:8px;font-size:12px;font-weight:600;${
+        m.lance_inicial<=histMin ? 'background:rgba(26,158,92,.1);border:1px solid rgba(26,158,92,.3);color:var(--green);' :
+        m.lance_inicial<=histMed ? 'background:rgba(26,158,92,.1);border:1px solid rgba(26,158,92,.3);color:var(--green);' :
+        m.lance_inicial<=limCaro ? 'background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.3);color:#f90;' :
+        'background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.3);color:var(--red);'
+      }">
+        ${m.lance_inicial<=histMin ? '🔥 ÓTIMO NEGÓCIO — lance abaixo do menor histórico' :
+          m.lance_inicial<=histMed ? '✅ BOM PREÇO — lance abaixo da média histórica' :
+          m.lance_inicial<=limCaro ? `⚠️ ATENÇÃO — tente não passar de R$${Number(limCaro).toLocaleString('pt-BR')}` :
+          `❌ CARO — acima do limite recomendado de R$${Number(limCaro).toLocaleString('pt-BR')}`}
+      </div>` : ''}
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:6px;">🕐 Arrematações anteriores</div>
+      ${historico.slice(0,5).map(h => {
+        const hp = h.arr.valor && fipe ? Math.round((h.arr.valor/fipe)*100) : null;
+        const hpCls = hp ? (hp<30?'color:var(--green)':hp<50?'color:var(--a2)':'color:var(--red)') : '';
+        const dataFmt = h.leilao?.data ? new Date(h.leilao.data+'T12:00:00').toLocaleDateString('pt-BR') : '—';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-size:12px;color:var(--muted);">${dataFmt} · ${h.leilao?.plataforma||'—'}</div>
+            <div style="font-size:11px;color:var(--muted);opacity:.7;">${h.moto.condicao||'—'} · ${h.moto.ano||'—'}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-family:'DM Mono',monospace;font-weight:700;color:var(--green);">R$${Number(h.arr.valor).toLocaleString('pt-BR')}</span>
+            ${hp?`<span style="font-size:11px;padding:2px 6px;border-radius:8px;background:var(--s1);${hpCls}">${hp}% FIPE</span>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>` : '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">Sem histórico de arrematações para este modelo ainda.</div>'}
+  `;
+
+  const pct = m.lance_inicial && fipe ? Math.round((m.lance_inicial/fipe)*100) : null;
 
   document.getElementById('ficha-lote').textContent = m.lote || '—';
   document.getElementById('ficha-marca').textContent = m.marca || '';
