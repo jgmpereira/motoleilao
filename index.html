@@ -1191,7 +1191,7 @@ function renderGridMotos() {
           ${porte ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${porte.label}</span>` : ''}
           ${m.monta ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${m.monta} monta</span>` : ''}
         </div>
-        <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:5px;">📅 ${leilao?.nome || m.leilao_id} · ${dia}/${mes}</div>
+        <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:5px;">📅 ${leilao?.nome || m.leilao_id}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid var(--border);">
           <div style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace;">${m.lance_inicial ? 'R$'+Number(m.lance_inicial).toLocaleString('pt-BR') : '—'}</div>
           <div style="font-size:10px;color:var(--muted);">lance ini.</div>
