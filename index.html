@@ -1263,7 +1263,7 @@ function limparFiltrosAgenda() {
   document.querySelectorAll('#page-agenda .hf-chip').forEach(b => { if(b.getAttribute('onclick') && b.getAttribute('onclick').includes("''")) b.classList.add('active'); });
   // Reset checkboxes plataforma
   const platEl = document.getElementById('agenda-filter-plat');
-  if (platEl) platEl.querySelectorAll('input').forEach(i => i.checked = true);
+  if (platEl) platEl.querySelectorAll('input').forEach(i => i.checked = false);
   renderAgenda();
 }
 
@@ -1290,7 +1290,7 @@ function renderAgenda() {
     const plats = [...new Set(LEILOES.map(l => l.plataforma).filter(Boolean))].sort();
     platEl.innerHTML = plats.map(p => `
       <label style="display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;">
-        <input type="checkbox" checked style="accent-color:var(--accent);" onchange="renderAgenda()"> ${p}
+        <input type="checkbox" style="accent-color:var(--accent);" onchange="renderAgenda()"> ${p}
       </label>
     `).join('');
   }
@@ -4318,9 +4318,9 @@ function abrirFichaMoto(motoId) {
     fotoEl.style.background = 'var(--bg)';
     fotoEl.style.height = 'auto';
     fotoEl.style.minHeight = '80px';
-    fotoEl.style.maxHeight = '160px';
+    fotoEl.style.maxHeight = '220px';
     fotoEl.innerHTML = m.foto
-      ? `<img src="${m.foto}" style="width:100%;height:auto;max-height:160px;object-fit:contain;display:block;cursor:${m.url?'pointer':'default'}" ${m.url?`onclick="window.open('${m.url}','_blank')"`:''} onerror="this.parentElement.style.display='none'">`
+      ? `<img src="${m.foto}" style="width:100%;height:auto;max-height:220px;object-fit:contain;display:block;cursor:${m.url?'pointer':'default'}" ${m.url?`onclick="window.open('${m.url}','_blank')"`:''} onerror="this.parentElement.style.display='none'">`
       : `<div style="font-size:50px;display:flex;align-items:center;justify-content:center;height:80px;">🏍️</div>`;
   }
 
