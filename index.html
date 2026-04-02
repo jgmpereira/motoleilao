@@ -4287,13 +4287,12 @@ function toggleFiltrosMobile() {
 function abrirFichaMoto(motoId) {
   const m = MOTOS.find(x => x.id === motoId);
   if(!m) return;
-  console.log('lance_inicial debug:', m.id, m.lance_inicial, typeof m.lance_inicial);
   history.pushState(null, '', '#moto-' + motoId);
   const l = LEILOES.find(x => x.id === m.leilao_id);
   const arr = ARREMATADOS[m.id];
   const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
-  // Normaliza lance para número (Supabase pode retornar numeric como string)
-  const lance = (m.lance_inicial !== null && m.lance_inicial !== undefined && m.lance_inicial !== '') ? parseFloat(m.lance_inicial) : null;
+  // parseFloat converte string/número → NaN ou 0 viram null via || null
+  const lance = parseFloat(m.lance_inicial) || null;
   const pct = lance && fipe ? Math.round((lance/fipe)*100) : null;
 
   // Busca histórico de arrematações do mesmo modelo
@@ -4339,7 +4338,7 @@ function abrirFichaMoto(motoId) {
     ${urgBadge}`;
 
   // Preços + análise lado a lado
-  const veredicto = lance && histMin ? (() => {
+  const veredicto = lance > 0 && histMin > 0 ? (() => {
     if(lance<=histMin) return {txt:'🔥 ÓTIMO NEGÓCIO',s:'background:rgba(26,158,92,.1);border:1px solid rgba(26,158,92,.3);color:var(--green);'};
     if(lance<=histMed) return {txt:'✅ BOM PREÇO',s:'background:rgba(26,158,92,.1);border:1px solid rgba(26,158,92,.3);color:var(--green);'};
     if(lance<=limCaro) return {txt:'⚠️ ATENÇÃO',s:'background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.3);color:#f90;'};
