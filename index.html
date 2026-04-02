@@ -1225,7 +1225,8 @@ function renderGridMotos() {
     const pctBg = pct ? (pct < 30 ? 'rgba(26,158,92,.9)' : pct < 50 ? 'rgba(255,165,0,.9)' : pct < 70 ? 'rgba(255,165,0,.7)' : 'rgba(220,53,69,.85)') : '';
     const cond = (m.condicao||'').toLowerCase();
     const condInfo = condCores[cond] || { bg: 'rgba(100,100,100,.7)', label: m.condicao || '—' };
-    const porte = getPorteLabel(m.cilindrada);
+    const ccEfetiva = m.cilindrada || (!m.cilindrada && m.monta ? extractCilindrada(m.marca, m.modelo) : null);
+    const porte = getPorteLabel(ccEfetiva);
     const dia = leilao?.dia || (leilao?.data ? new Date(leilao.data + 'T12:00:00').getDate() : '?');
     const mes = leilao?.mes || (leilao?.data ? new Date(leilao.data + 'T12:00:00').toLocaleString('pt-BR',{month:'short'}).toUpperCase().replace('.','') : '?');
 
