@@ -2213,97 +2213,152 @@ function combinarCsvs(arquivos) {
 // ===================== CILINDRADA =====================
 function extractCilindrada(marca, modelo) {
   const texto = ((marca||'') + ' ' + (modelo||'')).toUpperCase();
+
+  // Modelos com nome ambíguo ou sem número — devem vir ANTES do fallback
+  // Ordenados do mais específico para o mais genérico (chave mais longa primeiro)
   const MODELOS_FIXOS = {
-    // Yamaha R-series — R15 ANTES de R1 para evitar falso positivo
+    // ── Yamaha R-series (R15 antes de R1 para não dar falso match) ──
     'YZF-R15':155,'YZF R15':155,'R15':155,
     'YZF-R3':321,'YZF R3':321,'R3':321,
     'YZF-R6':599,'YZF R6':599,'R6':599,
     'YZF-R7':689,'YZF R7':689,'R7':689,
     'YZF-R1':998,'YZF R1':998,
-    // MT series
-    'MT-03':321,'MT03':321,'MT 03':321,'MT-07':689,'MT07':689,'MT-09':890,'MT09':890,
-    // Kawasaki
-    'NINJA 400':399,'Z400':399,'NINJA 650':649,'Z650':649,'NINJA 1000':1043,
-    'NINJA ZX-6R':636,'NINJA ZX-10R':998,
-    'VERSYS 650':649,'VERSYS-X 300':296,'VERSYS X 300':296,'VERSYS 300':296,
-    'Z 650':649,'Z 900':948,'Z900':948,'Z 1000':1043,'Z1000':1043,
-    'ELIMINATOR 500':500,'ELIMINATOR500':500,
-    // Honda
-    'CBR 600':599,'CBR600':599,'CBR 1000':999,'CBR1000':999,'CBR 250':249,'CBR250':249,
-    'CB 500':471,'CB500':471,'CB 650':649,'CB650':649,
-    // CB com sufixo de letra (fallback não captura porque 0+letra sem word-boundary)
-    'CB250F':250,'CB 250F':250,'CB 250 F':250,
-    'CB300':300,'CB 300':300,'CB300R':300,'CB 300R':300,'CB300F':300,'CB 300F':300,
-    'CB 300 F':300,'CB 300 R':300,
-    // CBX
-    'CBX250':250,'CBX 250':250,
-    // CG (número fundido: CG150, CG125)
-    'CG125':125,'CG 125':125,'CG150':150,'CG 150':150,'CG160':160,'CG 160':160,
-    // NXR Bros
-    'NXR150':150,'NXR 150':150,'NXR160':160,'NXR 160':160,
-    'XRE 300':292,'XRE300':292,'XRE 190':184,'XRE190':184,
-    'NC 750':745,'NC750':745,'SH 300':279,'SH300':279,
-    'HORNET':599,'AFRICA TWIN':1084,'AFRICA-TWIN':1084,'PAN AMERICA':1252,
-    'PCX':160,'NMAX':155,'N-MAX':155,'XMAX':292,'X-MAX':292,
+    // ── Yamaha MT ──
+    'MT-03':321,'MT03':321,'MT 03':321,
+    'MT-07':689,'MT07':689,'MT 07':689,
+    'MT-09':890,'MT09':890,'MT 09':890,
+    // ── Yamaha XTZ / Crosser / Lander / Ténéré ──
+    'CROSSER 150':150,'CROSSER150':150,'XTZ 150':150,'XTZ150':150,
+    'LANDER 250':249,'XTZ 250':249,'XTZ250':249,
+    'XTZ 660':600,'XTZ660':660,
+    'TENERE 250':249,'TENERE250':249,
+    'TENERE 700':689,'TENERE700':689,
+    'XT660':660,'XT 660':660,'XT660R':660,'XT 660R':660,'XT 660Z':660,
+    // ── Yamaha Factor / Fazer ──
+    'FACTOR 150':150,'FACTOR150':150,
+    'FAZER 150':150,'FAZER150':150,'FAZER SED':150,
+    'FAZER 250':249,'FAZER250':249,
+    'FZ15':150,'FZ 15':150,
+    'FZ25':249,'FZ 25':249,
+    // ── Yamaha YBR / YS ──
+    'YBR 125':125,'YBR125':125,'YBR 150':150,'YBR150':150,
+    'YS150':150,'YS 150':150,'YS250':250,'YS 250':250,
+    // ── Yamaha scooters/outros ──
+    'CRYPTON':115,'CRYPTON T':115,
+    'NEO AT':113,'NEO 115':113,
+    'FLUO 125':125,'FLUO125':125,
+    'NMAX':155,'N-MAX':155,
+    'XMAX':292,'X-MAX':292,
     'TMAX':560,'T-MAX':560,
-    'LEAD 110':110,'LEAD110':110,'BIZ 110':110,'BIZ110':110,
-    'BIZ 125':125,'BIZ125':125,'POP 110':110,'POP110':110,'POP 100':100,'POP100':100,
-    // BMW
+    'XJ6':600,
+    // ── Kawasaki ──
+    'NINJA ZX-10R':998,'NINJA ZX-6R':636,
+    'NINJA 400':399,'NINJA 650':649,'NINJA 1000':1043,
+    'VERSYS-X 300':296,'VERSYS X 300':296,'VERSYS 300':296,
+    'VERSYS 650':649,
+    'Z400':399,'Z 400':399,
+    'Z650':649,'Z 650':649,
+    'Z900':948,'Z 900':948,
+    'Z1000':1043,'Z 1000':1043,
+    'ELIMINATOR 500':500,
+    // ── Honda — CG (número fundido) ──
+    'CG FAN':150,'FAN 150':150,'FAN150':150,'FAN 125':125,'FAN125':125,
+    'CG TITAN':160,'TITAN 160':160,'TITAN160':160,'TITAN 150':150,'TITAN150':150,
+    'CG125':125,'CG 125':125,
+    'CG150':150,'CG 150':150,
+    'CG160':160,'CG 160':160,
+    // ── Honda — NXR Bros ──
+    'NXR160':160,'NXR 160':160,'BROS 160':160,
+    'NXR150':150,'NXR 150':150,'BROS 150':150,
+    'BROS':160, // fallback genérico Bros → 160 (versão mais comum atual)
+    // ── Honda — CB ──
+    'CBR 600':599,'CBR600':599,
+    'CBR 1000':999,'CBR1000':999,
+    'CBR 250':249,'CBR250':249,
+    'CB 650':649,'CB650':649,
+    'CB 500':471,'CB500':471,
+    'CB300F':300,'CB 300F':300,'CB300R':300,'CB 300R':300,
+    'CB300':300,'CB 300':300,
+    'CB250F':250,'CB 250F':250,
+    'TWISTER':250, // Honda CB 250 Twister — nome sem número
+    // ── Honda — CBX / XRE / XR ──
+    'CBX250':250,'CBX 250':250,
+    'XRE 300':292,'XRE300':292,
+    'XRE 190':184,'XRE190':184,
+    'TORNADO':230, // XR 250 Tornado
+    // ── Honda — scooters/commuters ──
+    'HORNET':599,
+    'AFRICA TWIN':1084,'AFRICA-TWIN':1084,
+    'PAN AMERICA':1252,
+    'NC 750':745,'NC750':745,
+    'SH 300':279,'SH300':279,
+    'PCX':160,
+    'LEAD 110':110,'LEAD110':110,
+    'BIZ 125':125,'BIZ125':125,
+    'BIZ 110':110,'BIZ110':110,
+    'POP 110':110,'POP110':110,
+    'POP 100':100,'POP100':100,
+    'DREAM 110':110,'DREAM110':110,
+    'WAVE 110':110,'WAVE110':110,
+    'SHADOW':600,
+    // ── BMW ──
     'S1000RR':999,'S1000 RR':999,'S1000XR':999,
-    'R1200GS':1170,'R1250GS':1254,'R1300GS':1300,
-    'F750GS':853,'F 750':853,'F750':853,
-    'F800':798,'F 800':798,'F850':853,'F 850':853,
+    'R1300GS':1300,'R1250GS':1254,'R1200GS':1170,
+    'F850GS':853,'F750GS':853,
+    'F850':853,'F 850':853,'F750':853,'F 750':853,
+    'F800':798,'F 800':798,
     'G650GS':652,'G 650':652,
-    'G310':310,'G 310':310,'G310R':310,'G 310 R':310,'G310GS':310,'G 310 GS':310,
-    // KTM
+    'G310GS':310,'G 310 GS':310,'G310R':310,'G 310 R':310,
+    'G310':310,'G 310':310,
+    // ── KTM ──
     'DUKE 390':373,'DUKE 250':248,'DUKE 990':999,
     '990 SUPER DUKE':999,
-    // Ducati
-    'MONSTER 821':821,'MONSTER 937':937,'SCRAMBLER':803,'MULTISTRADA':1103,
-    'MTS V4':1158,'MULTISTRADA V4':1158,
-    // Triumph
-    'STREET TRIPLE':765,'BONNEVILLE':1200,'TIGER EXPLORER':1215,
-    'TIGER 800':800,'TIGER 900':888,'SPEED 400':400,
-    // Harley-Davidson
-    'SPORTSTER':883,'FAT BOY':1868,'FATBOY':1868,
-    'ROAD KING':1745,'STREET BOB':1745,'FXLRST':1868,'VRSC':1131,
-    'XL 1200':1202,'XL1200':1202,'XL883':883,
-    // Suzuki
-    'GSX-R1000':999,'GSR750':749,'GSX750':749,'GSX-8':776,'V-STROM 650':645,'V-STROM650':645,
+    'ADVENTURE 390':373,
+    // ── Ducati ──
+    'MULTISTRADA V4':1158,'MTS V4':1158,
+    'MULTISTRADA':1103,
+    'MONSTER 937':937,'MONSTER 821':821,
+    'SCRAMBLER':803,
+    // ── Triumph ──
+    'TIGER EXPLORER':1215,
+    'TIGER 900':888,'TIGER 800':800,
+    'STREET TRIPLE':765,
+    'BONNEVILLE':1200,
+    'SPEED 400':400,
+    // ── Harley-Davidson ──
+    'FAT BOY':1868,'FATBOY':1868,'FXLRST':1868,
+    'ROAD KING':1745,'STREET BOB':1745,
+    'XL1200':1202,'XL 1200':1202,
+    'XL883':883,'SPORTSTER':883,
+    'VRSC':1131,
+    // ── Suzuki ──
+    'GSX-R1000':999,'GSR750':749,'GSX750':749,'GSX-8':776,
+    'V-STROM 650':645,'V-STROM650':645,
     'INTRUDER 125':125,'INTRUDER125':125,
-    // Royal Enfield
-    'HIMALAYAN':411,'METEOR 350':349,'SCRAM 411':411,'SCRAM411':411,
-    // Scooters
-    'BURGMAN 400':400,'BURGMAN 650':638,
-    // Yamaha outros
-    'FACTOR 150':150,'FACTOR150':150,'FAZER 150':150,'FAZER150':150,
-    'FAZER SED':150,'FAZER SED 150':150,
-    'FAZER 250':249,'FAZER250':249,'FZ25':249,'FZ 25':249,
-    'FZ15':150,'FZ 15':150,
-    'YBR 125':125,'YBR125':125,'YBR 150':150,'YBR150':150,
-    // YS (número fundido: YS150, YS250)
-    'YS150':150,'YS 150':150,'YS250':250,'YS 250':250,
-    'LANDER 250':249,'XTZ 250':249,'XTZ250':249,
-    'CROSSER 150':150,'CROSSER150':150,'XTZ 150':150,'XTZ150':150,
-    // XT660 (com e sem sufixo)
-    'XT660':660,'XT 660':660,'XT660R':660,'XT 660R':660,'XT 660Z':660,
-    'CRYPTON':115,'FLUO 125':125,'FLUO125':125,
-    'NEO 115':113,'NEO AT':113,
-    'XJ6':600,
+    // ── Royal Enfield ──
+    'HIMALAYAN':411,
+    'SCRAM 411':411,'SCRAM411':411,
+    'METEOR 350':349,
+    'THUNDERBIRD':350,
+    'CLASSIC 350':349,'CLASSIC350':349,
+    'HUNTER 350':349,
+    // ── Scooters genéricos ──
+    'BURGMAN 650':638,'BURGMAN 400':400,
   };
 
-  // Ordena por tamanho da chave (maior primeiro) para evitar match parcial como R1→R15
+  // Ordena chaves por comprimento desc para evitar match parcial (ex: "R1" antes de "R15")
   const chaves = Object.keys(MODELOS_FIXOS).sort((a,b) => b.length - a.length);
   for(const key of chaves) {
-    // Usa word-boundary: verifica se está isolado ou no início/fim de palavra
-    const re = new RegExp('(^|[\\s\\-/])' + key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '([\\s\\-/0-9]|$)');
+    const re = new RegExp('(^|[\\s\\-/])' + key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '([\\s\\-/]|$)');
     if(re.test(texto)) return MODELOS_FIXOS[key];
   }
 
-  // Fallback: extrai número entre 50–2500 que não seja ano (não seguido de outro número tipo 22/22)
-  const numeros = (texto.match(/\b(\d{2,4})\b/g)||[]).map(Number);
-  for(const n of numeros) {
-    if(n >= 50 && n <= 2500) return n;
+  // Fallback melhorado: extrai QUALQUER sequência de dígitos do texto (resolve CG150, NXR160,
+  // CB300R, G310, etc. onde \b não funciona porque letra+dígito são ambos \w).
+  // Pula anos (>= 1900) e valores fora da faixa realista de cilindradas (50–1899 cc).
+  const nums = (texto.match(/\d+/g) || []).map(Number);
+  for(const n of nums) {
+    if(n >= 50 && n < 1900) return n;
   }
   return null;
 }
