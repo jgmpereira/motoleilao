@@ -881,9 +881,9 @@ function renderLeiloes() {
   if(!LEILOES.length) { grid.innerHTML = '<div style="padding:48px;text-align:center;color:var(--muted);">Nenhum leilão encontrado.</div>'; return; }
 
   // Popular dropdown de marcas (só na primeira vez)
-  if(document.getElementById('hf-marca').options.length <= 1) popularFiltroMarcas();
-  popularFiltroLeiloes();
-  popularFiltroCidades();
+  if(document.getElementById('hf-marca') && document.getElementById('hf-marca').options.length <= 1) popularFiltroMarcas();
+  if(document.getElementById('hf-leilao')) popularFiltroLeiloes();
+  if(document.getElementById('hf-cidade')) popularFiltroCidades();
 
   const { fimSemana, inicioProxima, fimProxima } = getSemanaLimites();
 
