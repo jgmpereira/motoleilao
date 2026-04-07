@@ -277,14 +277,11 @@ async function main() {
     if (!aucId) continue;
 
     const lid = `superbid_${aucId}`;
-    const dataISO = parseDatatime(auc.beginDate || auc.endDate || '');
+    // Usa endDate para exibir quando o leilão fecha; fallback para beginDate
+    const dataISO = parseDatatime(auc.endDate || auc.beginDate || '');
     if (!dataISO) continue;
 
-    // Descarta leilões muito passados (>3 dias)
-    if (dataISO < hoje) {
-      const diffDias = (Date.now() - new Date(dataISO + 'T12:00:00').getTime()) / 86_400_000;
-      if (diffDias > 3) continue;
-    }
+    // Não filtra por data — a API já retorna só leilões abertos (searchType=opened)
 
     if (!leiloesPorId[lid]) {
       const addr = auc.address || {};
