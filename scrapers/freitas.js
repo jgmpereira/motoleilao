@@ -405,6 +405,22 @@ async function main() {
     console.log(`  → Inseriu ${novas.length} moto(s)`);
   }
 
+  // ── 5. Marca como encerrado leilões Freitas com data passada ─────────────────
+  const leiloesPast = await supaFetch(
+    `leiloes?id=like.freitas_*&encerrado=eq.false&data=lt.${hoje}&select=id,data`
+  );
+  if (leiloesPast && leiloesPast.length > 0) {
+    console.log(`\n🔒 Encerrando ${leiloesPast.length} leilão(ões) com data passada...`);
+    for (const l of leiloesPast) {
+      await supaFetch(`leiloes?id=eq.${l.id}`, {
+        method: 'PATCH',
+        body:   JSON.stringify({ encerrado: true }),
+        prefer: 'return=minimal',
+      });
+      console.log(`  → ${l.id} (${l.data}) marcado como encerrado`);
+    }
+  }
+
   console.log('\n✅ Scraper concluído com sucesso!');
 }
 
