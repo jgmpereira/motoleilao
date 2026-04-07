@@ -180,8 +180,8 @@ function parseShortDesc(desc) {
   const modeloRaw = marcaModelo.slice(spaceIdx + 1).replace(/\s+\d{4}\/\d{4}.*$/, '').trim();
   const marca  = normalizarMarca(marcaRaw);
   const modelo = toTitle(modeloRaw);
-  // Rejeita se marca não parece uma marca real (número, palavra genérica)
-  if (!marca || !modelo || /^\d+$/.test(marcaRaw)) return null;
+  // Rejeita se marca começa com dígito (ex: "1ª", "2") ou não parece real
+  if (!marca || !modelo || /^\d/.test(marcaRaw)) return null;
   const anoRaw = parts.find(p => /^\d{2,4}\/\d{2,4}$/.test(p)) ?? null;
   let ano = null;
   if (anoRaw) {

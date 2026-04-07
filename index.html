@@ -1129,29 +1129,36 @@ function renderGridMotos() {
   const marcasEl = document.getElementById('gm-marcas');
   if (marcasEl && !marcasEl.dataset.populated) {
     marcasEl.dataset.populated = '1';
+    const MARCAS_PRINCIPAIS = [
+      { valor: 'Honda',           label: 'Honda' },
+      { valor: 'Yamaha',          label: 'Yamaha' },
+      { valor: 'Kawasaki',        label: 'Kawasaki' },
+      { valor: 'Suzuki',          label: 'Suzuki' },
+      { valor: 'BMW',             label: 'BMW Motorrad' },
+      { valor: 'Harley-Davidson', label: 'Harley-Davidson' },
+      { valor: 'Triumph',         label: 'Triumph' },
+      { valor: 'Ducati',          label: 'Ducati' },
+      { valor: 'Royal Enfield',   label: 'Royal Enfield' },
+      { valor: 'KTM',             label: 'KTM' },
+    ];
+    const valoresPrincipais = new Set(MARCAS_PRINCIPAIS.map(m => m.valor));
     const MARCAS_INVALIDAS = new Set(['fiat', 'jta', 'jta-suzuki', 'jta suzuki', 'jta/suzuki']);
-    // Conta motos por marca apenas em leilões ativos
-    const contagem = {};
+    // Coleta marcas "outras" do banco (ativas, não principais, não inválidas)
+    const outrasSet = new Set();
     MOTOS.forEach(mo => {
       const lx = LEILOES.find(x => x.id === mo.leilao_id);
       if (!lx || lx.encerrado) return;
       const nm = normalizarMarca(mo.marca);
-      if (!nm) return;
-      contagem[nm] = (contagem[nm] || 0) + 1;
+      if (!nm || valoresPrincipais.has(nm) || MARCAS_INVALIDAS.has(nm.toLowerCase())) return;
+      outrasSet.add(nm);
     });
-    const marcasMain = [], marcasOutras = [];
-    Object.entries(contagem).forEach(([nm, cnt]) => {
-      if (MARCAS_INVALIDAS.has(nm.toLowerCase())) return;
-      if (cnt >= 3) marcasMain.push(nm); else marcasOutras.push(nm);
-    });
-    marcasMain.sort(); marcasOutras.sort();
-    marcasEl.dataset.outras = JSON.stringify(marcasOutras);
+    const marcasOutras = [...outrasSet].sort();
     const ls = 'display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;';
     const is = 'accent-color:var(--accent);';
-    marcasEl.innerHTML = marcasMain.map(nm =>
-      `<label style="${ls}"><input type="checkbox" data-marca="${nm}" style="${is}" onchange="renderGridMotos();syncGmFiltrosHash()"> ${nm}</label>`
+    marcasEl.innerHTML = MARCAS_PRINCIPAIS.map(({ valor, label }) =>
+      `<label style="${ls}"><input type="checkbox" data-marca="${valor}" style="${is}" onchange="renderGridMotos();syncGmFiltrosHash()"> ${label}</label>`
     ).join('') + (marcasOutras.length ? `
-      <button onclick="(function(btn){const d=btn.nextElementSibling;const open=d.style.display!=='none';d.style.display=open?'none':'flex';btn.textContent=open?'▼ Ver mais marcas (${marcasOutras.length})':'▲ Ocultar marcas'})(this)" style="margin-top:4px;background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:3px 6px;text-align:left;">▼ Ver mais marcas (${marcasOutras.length})</button>
+      <button onclick="(function(btn){const d=btn.nextElementSibling;const open=d.style.display!=='none';d.style.display=open?'none':'flex';btn.textContent=open?'▼ Outras marcas (${marcasOutras.length})':'▲ Ocultar'})(this)" style="margin-top:6px;background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:3px 6px;text-align:left;">▼ Outras marcas (${marcasOutras.length})</button>
       <div style="display:none;flex-direction:column;gap:2px;padding-left:4px;border-left:2px solid var(--border);margin-top:2px;">
         ${marcasOutras.map(nm =>
           `<label style="${ls}"><input type="checkbox" data-marca="${nm}" style="${is}" onchange="renderGridMotos();syncGmFiltrosHash()"> ${nm}</label>`
