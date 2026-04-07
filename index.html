@@ -888,6 +888,12 @@ function navigateToHash(hash) {
     const leilao = LEILOES.find(l => l.id === id);
     if(leilao) { abrirLeilao(leilao.id, true); return; }
   }
+  if(hash === '#leiloes' || hash.startsWith('#leiloes?')) {
+    const qs = hash.includes('?') ? hash.slice(hash.indexOf('?') + 1) : '';
+    applyGmFiltrosFromHash(qs);
+    showPage('leiloes', null, true);
+    return;
+  }
   const page = HASH_TO_PAGE[hash];
   if(page) showPage(page, null, true);
   else showPage('leiloes', null, true);
@@ -895,9 +901,9 @@ function navigateToHash(hash) {
 
 window.addEventListener('hashchange', () => navigateToHash(location.hash));
 window.addEventListener('popstate', () => {
-  if(!location.hash.startsWith('#moto-')) {
-    document.getElementById('modal-ficha-moto').classList.remove('open');
-  }
+  if(location.hash.startsWith('#moto-')) return;
+  document.getElementById('modal-ficha-moto').classList.remove('open');
+  navigateToHash(location.hash);
 });
 
 // ===================== LEILÕES =====================
@@ -1061,6 +1067,25 @@ const agendaFiltros = { per: '', status: '', plat: '' };
 // ===================== GRID DE MOTOS =====================
 const gmFiltros = { per: '', cond: '', porte: '', fipe: '', marca: '', plat: '' };
 
+function syncGmFiltrosHash() {
+  const params = new URLSearchParams();
+  ['per','cond','porte','fipe'].forEach(k => { if(gmFiltros[k]) params.set(k, gmFiltros[k]); });
+  const qs = params.toString();
+  const hash = qs ? '#leiloes?' + qs : '#leiloes';
+  if(location.hash !== hash) history.pushState(null, '', hash);
+}
+
+function applyGmFiltrosFromHash(qs) {
+  const params = new URLSearchParams(qs || '');
+  ['per','cond','porte','fipe'].forEach(k => { gmFiltros[k] = params.get(k) || ''; });
+  document.querySelectorAll('#motos-sidebar .hf-chip').forEach(chip => {
+    const oc = chip.getAttribute('onclick') || '';
+    const mt = oc.match(/setGmFiltro\('(\w+)','([^']*)'/);
+    if(!mt) return;
+    chip.classList.toggle('active', gmFiltros[mt[1]] === mt[2]);
+  });
+}
+
 function setGmFiltro(tipo, val, btn) {
   gmFiltros[tipo] = val;
   if (btn) {
@@ -1069,6 +1094,7 @@ function setGmFiltro(tipo, val, btn) {
     btn.classList.add('active');
   }
   renderGridMotos();
+  syncGmFiltrosHash();
 }
 
 function limparFiltrosGm() {
@@ -1081,6 +1107,7 @@ function limparFiltrosGm() {
   if (marcasEl) marcasEl.querySelectorAll('input').forEach(i => i.checked = false);
   if (platEl) platEl.querySelectorAll('input').forEach(i => i.checked = true);
   renderGridMotos();
+  syncGmFiltrosHash();
 }
 
 function renderGridMotos() {
@@ -1225,8 +1252,9 @@ function renderGridMotos() {
     const pctBg = pct ? (pct < 30 ? 'rgba(26,158,92,.9)' : pct < 50 ? 'rgba(255,165,0,.9)' : pct < 70 ? 'rgba(255,165,0,.7)' : 'rgba(220,53,69,.85)') : '';
     const cond = (m.condicao||'').toLowerCase();
     const condInfo = condCores[cond] || { bg: 'rgba(100,100,100,.7)', label: m.condicao || '—' };
-    const ccEfetiva = m.cilindrada || (!m.cilindrada && m.monta ? extractCilindrada(m.marca, m.modelo) : null);
+    const ccEfetiva = m.cilindrada || extractCilindrada(m.marca, m.modelo);
     const porte = getPorteLabel(ccEfetiva);
+    const montaEfetiva = m.monta || inferMonta(ccEfetiva);
     const dia = leilao?.dia || (leilao?.data ? new Date(leilao.data + 'T12:00:00').getDate() : '?');
     const mes = leilao?.mes || (leilao?.data ? new Date(leilao.data + 'T12:00:00').toLocaleString('pt-BR',{month:'short'}).toUpperCase().replace('.','') : '?');
 
@@ -1244,7 +1272,7 @@ function renderGridMotos() {
         <div style="font-size:11px;color:var(--muted);margin-bottom:5px;">${m.ano||'—'}</div>
         <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px;">
           ${porte ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${porte.label}</span>` : ''}
-          ${m.monta ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${m.monta} monta</span>` : ''}
+          ${montaEfetiva ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${montaEfetiva} monta</span>` : ''}
         </div>
         <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:5px;">📅 ${leilao?.nome || m.leilao_id}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid var(--border);">
@@ -2320,11 +2348,12 @@ function extractCilindrada(marca, modelo) {
     'MONSTER 937':937,'MONSTER 821':821,
     'SCRAMBLER':803,
     // ── Triumph ──
-    'TIGER EXPLORER':1215,
+    'TIGER EXPLORER':1215,'TIGER EXPLOR':1215,
     'TIGER 900':888,'TIGER 800':800,
     'STREET TRIPLE':765,
     'BONNEVILLE':1200,
     'SPEED 400':400,
+    'SCRAMBLER 1200':1200,'SCRAMBLER 400':400,
     // ── Harley-Davidson ──
     'FAT BOY':1868,'FATBOY':1868,'FXLRST':1868,
     'ROAD KING':1745,'STREET BOB':1745,
@@ -2367,6 +2396,12 @@ function getPorte(cc) {
   if(cc<=200) return 'pequena';
   if(cc<=500) return 'media';
   return 'alta';
+}
+function inferMonta(cc) {
+  if(!cc) return null;
+  if(cc<=150) return 'pequena';
+  if(cc<=500) return 'media';
+  return 'grande';
 }
 function getPorteLabel(cc) {
   const p=getPorte(cc);
@@ -4401,12 +4436,14 @@ function abrirFichaMoto(motoId) {
   document.getElementById('ficha-marca').textContent = m.marca || '';
   document.getElementById('ficha-modelo').textContent = m.modelo || '';
 
+  const ccEfetiva = m.cilindrada || extractCilindrada(m.marca, m.modelo);
+  const montaEfetiva = m.monta || inferMonta(ccEfetiva);
   const condColor = m.condicao==='financiada'?'var(--green)':m.condicao==='sinistro'?'var(--a2)':'var(--muted)';
   const urgBadge = !l ? '' : l.encerrado ? '<span style="background:rgba(0,0,0,.1);color:var(--muted);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">ENCERRADO</span>' : (() => { const b = getBadgeLeilao(l); return b==='urgente'||b==='hoje' ? '<span style="background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">🔥 ESTA SEMANA</span>' : ''; })();
   document.getElementById('ficha-badges').innerHTML = `
     <span style="background:${condColor}22;color:${condColor};font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;border:1px solid ${condColor}44;">${m.condicao||'—'}</span>
-    ${m.cilindrada?`<span style="background:var(--s1);color:var(--muted);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;border:1px solid var(--border);">⚙️ ${m.cilindrada}cc</span>`:''}
-    ${m.monta?`<span style="background:var(--s1);color:var(--muted);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;border:1px solid var(--border);">🏍️ ${m.monta} monta</span>`:''}
+    ${ccEfetiva?`<span style="background:var(--s1);color:var(--muted);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;border:1px solid var(--border);">⚙️ ${ccEfetiva}cc</span>`:''}
+    ${montaEfetiva?`<span style="background:var(--s1);color:var(--muted);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;border:1px solid var(--border);">🏍️ ${montaEfetiva} monta</span>`:''}
     ${urgBadge}`;
 
   // Preços + análise lado a lado
