@@ -2,8 +2,8 @@ name: Scraper — Sodré Santoro
 
 on:
   schedule:
-    # 08:00 BRT (11:00 UTC) nos dias úteis; adicionar sáb/dom se o Sodré publicar nos fins de semana
-    - cron: '0 11 * * 1-5'
+    # 08:00 BRT (11:00 UTC) todos os dias
+    - cron: '0 11 * * *'
   workflow_dispatch:
     inputs:
       debug:

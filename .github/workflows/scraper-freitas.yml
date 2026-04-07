@@ -2,8 +2,8 @@ name: Scraper — Freitas Leiloeiro
 
 on:
   schedule:
-    # 08:00 BRT (11:00 UTC) nos dias úteis
-    - cron: '30 11 * * 1-5'
+    # 08:30 BRT (11:30 UTC) todos os dias
+    - cron: '30 11 * * *'
   workflow_dispatch:
 
 jobs:
