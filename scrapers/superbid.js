@@ -123,33 +123,71 @@ function nomeDoMes(dataISO) {
 }
 
 // ── Parse da descrição do produto ─────────────────────────────────────────────
-// Formato: "YAMAHA YBR150 FACTOR PRO, 2020/2020, Placa FINAL 7 (SP),"
-// Mais simples: "HONDA CG 160 CARGO, 2018/2019, Placa FINAL 9 (BA),"
-// Formato raro: "BMW R 1250 GS ADV, 2019/2020, PLACA FINAL 3 (SP)"
+// Formatos conhecidos:
+//   "YAMAHA YBR150 FACTOR PRO, 2020/2020, Placa FINAL 7 (SP),"  — padrão
+//   "SUCATA HONDA/CG 150 TITAN KS, ANO/MOD 2007/2008, CINZA"    — prefixo + slash
+//   "MOTO HONDA/CG 150 JOB 2008/2008"                            — prefixo + slash
+//   "1 Motocicleta no Estado: Yamaha/YS150 Fazer SED - ..."      — judicial + slash
+//   "Honda, modelo Lead 110, ano/modelo 2015, cor preta"          — vírgula + keyword
 function parseShortDesc(desc) {
   if (!desc) return null;
-  const parts = desc.split(',').map(s => s.trim()).filter(Boolean);
-  if (parts.length < 1) return null;
 
-  const marcaModelo = parts[0];
-  // Separa primeira palavra (marca) do resto (modelo)
+  function extrairAno(texto) {
+    const m = texto.match(/\b(\d{4}\/\d{4}|\d{2}\/\d{2})\b/);
+    if (!m) return null;
+    const [a, b] = m[1].split('/');
+    return `${a.slice(-2)}/${b.slice(-2)}`;
+  }
+
+  // 1. Padrão MARCA/MODELO (ex: "SUCATA HONDA/CG 150", "Yamaha/YS150 Fazer SED")
+  //    Ignora falsos positivos: ANO/MODELO, ANO/MOD, etc.
+  const slashRe = /\b([A-Za-záéêâàãôõíóúç\-]{3,})\/([A-Za-z][^\n,]{2,})/g;
+  let m;
+  while ((m = slashRe.exec(desc)) !== null) {
+    if (/^(ano|mod|modelo|placa|cor|chassi|motor)$/i.test(m[1])) continue;
+    const marca = normalizarMarca(m[1]);
+    if (!marca) continue;
+    const modeloRaw = m[2]
+      .replace(/\s*[-–]\s*(preta|branca|azul|vermelha|prata|cinza|verde|amarela|laranja)[^,]*/i, '')
+      .replace(/\s*[-–]\s*ano\s+\d{4}.*/i, '')
+      .replace(/\s*[-–]\s*\d{4}.*/i, '')
+      .replace(/\s+em\s+.*/i, '')
+      .replace(/\s*\(.*?\)/g, '')
+      .replace(/\s+\d{4}\/\d{4}.*$/, '')
+      .trim();
+    const modelo = toTitle(modeloRaw);
+    if (!modelo || modelo.length < 2) continue;
+    return { marca, modelo, ano: extrairAno(desc) };
+  }
+
+  // 2. "Honda, modelo Lead 110, ano/modelo 2015, cor preta"
+  const kwM = desc.match(/\b([A-Za-záéêâàãôõíóúç]{3,}),\s*modelo\s+([^,\n]+)/i);
+  if (kwM) {
+    const marca = normalizarMarca(kwM[1]);
+    const modelo = toTitle(kwM[2].trim());
+    if (marca && modelo) return { marca, modelo, ano: extrairAno(desc) };
+  }
+
+  // 3. Padrão padrão: remove prefixos e pega MARCA MODELO
+  const cleaned = desc
+    .replace(/^(sucata|moto|motocicleta|uma?\s+motocicleta[s]?[^:]*:\s*|[0-9]+\s+motocicleta[s]?[^:]*:\s*|lote\s+\d+\s+moto\s+)/i, '')
+    .trim();
+  const parts = cleaned.split(',').map(s => s.trim()).filter(Boolean);
+  const marcaModelo = parts[0] || '';
   const spaceIdx = marcaModelo.indexOf(' ');
   if (spaceIdx < 0) return null;
   const marcaRaw  = marcaModelo.slice(0, spaceIdx).trim();
-  const modeloRaw = marcaModelo.slice(spaceIdx + 1).trim();
-
+  const modeloRaw = marcaModelo.slice(spaceIdx + 1).replace(/\s+\d{4}\/\d{4}.*$/, '').trim();
   const marca  = normalizarMarca(marcaRaw);
   const modelo = toTitle(modeloRaw);
-
-  // Ano: primeiro campo que casa com YYYY/YYYY ou YY/YY
+  // Rejeita se marca não parece uma marca real (número, palavra genérica)
+  if (!marca || !modelo || /^\d+$/.test(marcaRaw)) return null;
   const anoRaw = parts.find(p => /^\d{2,4}\/\d{2,4}$/.test(p)) ?? null;
   let ano = null;
   if (anoRaw) {
     const [a, b] = anoRaw.split('/');
     ano = `${a.slice(-2)}/${b.slice(-2)}`;
   }
-
-  if (!marca || !modelo) return null;
   return { marca, modelo, ano };
 }
 
@@ -200,7 +238,8 @@ function extractCilindrada(marca, modelo) {
   }
   const nums = [...texto.matchAll(/\b(\d{2,4})\b(?!\/)/g)].map(m => +m[1]);
   for (const n of nums) {
-    if (n >= 50 && n <= 2500) return n;
+    // Exclui anos (1900–2100) para não confundir com cilindrada
+    if (n >= 50 && n <= 2500 && !(n >= 1900 && n <= 2100)) return n;
   }
   return null;
 }
