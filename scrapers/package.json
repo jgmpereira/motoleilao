@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Scrapers automáticos para MotoLeilão",
   "scripts": {
-    "sodre": "node sodre.js"
+    "sodre": "node sodre.js",
+    "freitas": "node freitas.js"
   },
   "engines": {
     "node": ">=20"
