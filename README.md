@@ -266,6 +266,29 @@ localStorage → Supabase (fipe_valores) → API externa
 
 ---
 
+## Novo Layout (em produção no `main` desde Abr/2026)
+
+### ✅ Implementado
+- Aba **Motos** — grid com foto, filtros na sidebar, badges de condição/porte/monta
+- Aba **Agenda** — lista de leilões com filtros de período, plataforma e status
+- Filtros: busca, período, condição, porte, % FIPE, marca (expandível), plataforma
+- URL por filtro — filtros ativos refletem no hash da URL (navegável com botão voltar)
+- Foto clicável → abre anúncio no site da leiloeira (nova aba)
+- Card → hash `#moto-{id}`, abre ficha; Ctrl+click abre em nova aba
+- Ficha da moto: foto, badges, lance/FIPE, análise histórica, arrematações anteriores
+- Indicador histórico: menor visto, média, limite caro, veredicto automático
+- Mobile: sidebar como overlay, botão Filtros fixo no topo, grid 2 colunas
+- Cilindrada inferida pelo nome do modelo quando não cadastrada
+- Monta inferida pela cilindrada quando não cadastrada
+- Busca global do topo removida (substituída pelo campo na sidebar)
+
+### 🔲 Próximos passos
+- Scrapers dos demais leilões (Superbid, Copart, etc.) para popular fotos
+- Lance atual em tempo real
+- Melhorias no histórico da aba Histórico
+
+---
+
 ## Novo Layout (branch `nova-home`)
 
 Redesign completo da interface em andamento na branch `nova-home`.
