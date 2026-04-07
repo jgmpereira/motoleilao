@@ -183,13 +183,6 @@ tbody tr:hover{background:var(--s2);}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);letter-spacing:1px;}
 
-/* Busca global */
-.global-search-wrap{padding:12px 28px;border-bottom:1px solid var(--border);background:var(--s1);}
-.global-search{width:100%;max-width:500px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
-.global-search:focus{border-color:var(--accent);}
-.search-results{position:absolute;background:var(--s1);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);max-height:320px;overflow-y:auto;z-index:150;width:500px;margin-top:4px;}
-.search-result-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--s2);display:flex;align-items:center;justify-content:space-between;}
-.search-result-item:hover{background:var(--s2);}
 .search-result-item:last-child{border-bottom:none;}
 
 /* Modal novo leilão / moto */
@@ -257,11 +250,6 @@ tbody tr:hover{background:var(--s2);}
   <div class="stat"><div class="slabel">Melhor negócio</div><div class="sval g" id="stat-best">—</div><div class="ssub" id="stat-best-sub">—</div></div>
 </div>
 
-<!-- Busca global -->
-<div class="global-search-wrap" style="position:relative;">
-  <input type="text" class="global-search" id="global-search" placeholder="🔍 Buscar moto em todos os leilões (marca, modelo, lote...)" oninput="buscaGlobal()" autocomplete="off">
-  <div class="search-results" id="search-results" style="display:none;"></div>
-</div>
 
 <!-- PAGE LEILÕES -->
 <div id="page-leiloes" class="page active">
@@ -1070,6 +1058,16 @@ const gmFiltros = { per: '', cond: '', porte: '', fipe: '', marca: '', plat: '' 
 function syncGmFiltrosHash() {
   const params = new URLSearchParams();
   ['per','cond','porte','fipe'].forEach(k => { if(gmFiltros[k]) params.set(k, gmFiltros[k]); });
+  const platEl = document.getElementById('gm-plataformas');
+  if(platEl) {
+    const plats = [...platEl.querySelectorAll('input:checked')].map(i => i.parentElement.textContent.trim());
+    if(plats.length) params.set('plat', plats.join(','));
+  }
+  const marcasEl = document.getElementById('gm-marcas');
+  if(marcasEl) {
+    const marcas = [...marcasEl.querySelectorAll('input[data-marca]:checked')].map(i => i.dataset.marca);
+    if(marcas.length) params.set('marca', marcas.join(','));
+  }
   const qs = params.toString();
   const hash = qs ? '#leiloes?' + qs : '#leiloes';
   if(location.hash !== hash) history.pushState(null, '', hash);
@@ -1078,12 +1076,25 @@ function syncGmFiltrosHash() {
 function applyGmFiltrosFromHash(qs) {
   const params = new URLSearchParams(qs || '');
   ['per','cond','porte','fipe'].forEach(k => { gmFiltros[k] = params.get(k) || ''; });
+  gmFiltros.plat = params.get('plat') || '';
+  gmFiltros.marca = params.get('marca') || '';
   document.querySelectorAll('#motos-sidebar .hf-chip').forEach(chip => {
     const oc = chip.getAttribute('onclick') || '';
     const mt = oc.match(/setGmFiltro\('(\w+)','([^']*)'/);
     if(!mt) return;
     chip.classList.toggle('active', gmFiltros[mt[1]] === mt[2]);
   });
+  // Restaura checkboxes se já populados (ex: navegação back/forward)
+  const platEl = document.getElementById('gm-plataformas');
+  if(platEl && platEl.dataset.populated) {
+    const plats = new Set(gmFiltros.plat ? gmFiltros.plat.split(',') : []);
+    platEl.querySelectorAll('input').forEach(i => { i.checked = plats.has(i.parentElement.textContent.trim()); });
+  }
+  const marcasEl = document.getElementById('gm-marcas');
+  if(marcasEl && marcasEl.dataset.populated) {
+    const marcas = new Set(gmFiltros.marca ? gmFiltros.marca.split(',') : []);
+    marcasEl.querySelectorAll('input[data-marca]').forEach(i => { i.checked = marcas.has(i.dataset.marca); });
+  }
 }
 
 function setGmFiltro(tipo, val, btn) {
@@ -1138,14 +1149,19 @@ function renderGridMotos() {
     const ls = 'display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;';
     const is = 'accent-color:var(--accent);';
     marcasEl.innerHTML = marcasMain.map(nm =>
-      `<label style="${ls}"><input type="checkbox" data-marca="${nm}" style="${is}" onchange="renderGridMotos()"> ${nm}</label>`
+      `<label style="${ls}"><input type="checkbox" data-marca="${nm}" style="${is}" onchange="renderGridMotos();syncGmFiltrosHash()"> ${nm}</label>`
     ).join('') + (marcasOutras.length ? `
       <button onclick="(function(btn){const d=btn.nextElementSibling;const open=d.style.display!=='none';d.style.display=open?'none':'flex';btn.textContent=open?'▼ Ver mais marcas (${marcasOutras.length})':'▲ Ocultar marcas'})(this)" style="margin-top:4px;background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:3px 6px;text-align:left;">▼ Ver mais marcas (${marcasOutras.length})</button>
       <div style="display:none;flex-direction:column;gap:2px;padding-left:4px;border-left:2px solid var(--border);margin-top:2px;">
         ${marcasOutras.map(nm =>
-          `<label style="${ls}"><input type="checkbox" data-marca="${nm}" style="${is}" onchange="renderGridMotos()"> ${nm}</label>`
+          `<label style="${ls}"><input type="checkbox" data-marca="${nm}" style="${is}" onchange="renderGridMotos();syncGmFiltrosHash()"> ${nm}</label>`
         ).join('')}
       </div>` : '');
+    // Restaura seleção de marcas vinda do hash
+    if(gmFiltros.marca) {
+      const marcasSel = new Set(gmFiltros.marca.split(','));
+      marcasEl.querySelectorAll('input[data-marca]').forEach(i => { i.checked = marcasSel.has(i.dataset.marca); });
+    }
   }
 
   const platEl = document.getElementById('gm-plataformas');
@@ -1154,9 +1170,14 @@ function renderGridMotos() {
     const plats = [...new Set(LEILOES.map(l => l.plataforma).filter(Boolean))].sort();
     platEl.innerHTML = plats.map(p => `
       <label style="display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;">
-        <input type="checkbox" style="accent-color:var(--accent);" onchange="renderGridMotos()"> ${p}
+        <input type="checkbox" style="accent-color:var(--accent);" onchange="renderGridMotos();syncGmFiltrosHash()"> ${p}
       </label>
     `).join('');
+    // Restaura seleção de plataformas vinda do hash
+    if(gmFiltros.plat) {
+      const platsSel = new Set(gmFiltros.plat.split(','));
+      platEl.querySelectorAll('input').forEach(i => { i.checked = platsSel.has(i.parentElement.textContent.trim()); });
+    }
   }
 
   const marcasSel = marcasEl ? [...marcasEl.querySelectorAll('input[data-marca]:checked')].map(i => i.dataset.marca) : [];
@@ -4308,82 +4329,6 @@ function updateStats() {
   }
 }
 
-// ===================== BUSCA GLOBAL =====================
-function buscaGlobal() {
-  const q = document.getElementById('global-search').value.toLowerCase().trim();
-  const box = document.getElementById('search-results');
-  if(q.length < 2) { box.style.display='none'; return; }
-
-  const res = MOTOS.filter(m =>
-    (m.marca||'').toLowerCase().includes(q) ||
-    (m.modelo||'').toLowerCase().includes(q) ||
-    (m.lote||'').toLowerCase().includes(q) ||
-    (`${m.marca} ${m.modelo}`).toLowerCase().includes(q)
-  ).slice(0, 30);
-
-  if(!res.length) {
-    box.style.display='block';
-    box.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;">Nenhuma moto encontrada.</div>';
-    return;
-  }
-
-  // Agrupar por modelo
-  const byModelo = {};
-  res.forEach(m => {
-    const key = `${m.marca}|${m.modelo}`;
-    if(!byModelo[key]) byModelo[key] = [];
-    byModelo[key].push(m);
-  });
-
-  box.style.display='block';
-  box.innerHTML = Object.entries(byModelo).map(([key, motos]) => {
-    const [marca, modelo] = key.split('|');
-    const header = `<div style="padding:7px 14px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--s2);border-bottom:1px solid var(--border);">
-      🏍 ${marca} ${modelo} — ${motos.length} aparição(ões)
-    </div>`;
-    const rows = motos.map(m => {
-      const l = LEILOES.find(l => l.id === m.leilao_id);
-      const arr = ARREMATADOS[m.id];
-      const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
-      const pct = arr && fipe ? Math.round((arr.valor/fipe)*100) : null;
-      const badge = l ? getBadgeLeilao(l) : 'none';
-      const badgeHtml = badge === 'urgente'
-        ? '<span style="background:var(--accent);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:4px;">🔥 ESTA SEMANA</span>'
-        : badge === 'encerrado'
-        ? '<span style="background:rgba(0,0,0,.1);color:var(--muted);font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:4px;">ENCERRADO</span>'
-        : badge === 'proxima'
-        ? '<span style="background:rgba(180,100,0,.1);color:var(--a2);font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:4px;">PRÓX. SEMANA</span>'
-        : '';
-      const dataFmt = l ? (() => {
-        const d = new Date(l.data+'T00:00:00');
-        return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-      })() : '—';
-      return `<div class="search-result-item" onclick="abrirFichaMoto(${m.id});document.getElementById('global-search').value='';document.getElementById('search-results').style.display='none';">
-        <div style="flex:1;">
-          <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
-            <span style="font-size:12px;font-weight:600;">${m.ano} · ${m.cor||'—'}</span>
-            <span style="font-size:10px;color:var(--muted);background:rgba(0,0,0,.05);padding:1px 5px;border-radius:3px;">${m.condicao}</span>
-            ${badgeHtml}
-          </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px;">
-            📅 ${dataFmt}${l&&l.hora?' às '+l.hora:''} · ${l?l.nome:m.leilao_id}${m.lote?' · Lote <strong>'+m.lote+'</strong>':''}
-          </div>
-        </div>
-        <div style="text-align:right;min-width:130px;padding-left:10px;">
-          <div style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--a2);">
-            ${m.lance_inicial ? 'Lance: R$'+Number(m.lance_inicial).toLocaleString('pt-BR') : 'Lance: —'}
-          </div>
-          ${arr ? `<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);">✅ R$${Number(arr.valor).toLocaleString('pt-BR')}</div><div style="font-size:10px;padding:2px 6px;border-radius:4px;margin-top:2px;display:inline-block;background:${arr.status_arrematado==='condicional'?'rgba(255,165,0,.15)':'rgba(26,158,92,.12)'};color:${arr.status_arrematado==='condicional'?'#e67e00':'var(--green)'};">${arr.status_arrematado==='condicional'?'⏳ condicional':'✔ vendido'}</div>` : '<div style="font-size:10px;color:var(--muted);">não arrematado</div>'}
-          ${pct ? `<div style="font-size:10px;color:var(--muted);">${pct}% FIPE</div>` : ''}
-        </div>
-      </div>`;
-    }).join('');
-    return header + rows;
-  }).join('');
-}
-document.addEventListener('click', e => {
-  if(!e.target.closest('.global-search-wrap')) document.getElementById('search-results').style.display='none';
-});
 
 // ===================== FICHA MOTO =====================
 function toggleFiltrosMobile() {
