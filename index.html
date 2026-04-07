@@ -1116,7 +1116,7 @@ function limparFiltrosGm() {
   const marcasEl = document.getElementById('gm-marcas');
   const platEl = document.getElementById('gm-plataformas');
   if (marcasEl) marcasEl.querySelectorAll('input').forEach(i => i.checked = false);
-  if (platEl) platEl.querySelectorAll('input').forEach(i => i.checked = true);
+  if (platEl) platEl.querySelectorAll('input').forEach(i => i.checked = false);
   renderGridMotos();
   syncGmFiltrosHash();
 }
