@@ -1,9 +1,9 @@
-name: Scraper — Freitas Leiloeiro
+name: Scraper — VIP Leilões
 
 on:
   schedule:
-    # 06:20 BRT (09:20 UTC) todos os dias
-    - cron: '20 9 * * *'
+    # 06:40 BRT (09:40 UTC) todos os dias
+    - cron: '40 9 * * *'
   workflow_dispatch:
 
 jobs:
@@ -31,4 +31,4 @@ jobs:
         working-directory: scrapers
         env:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-        run: node freitas.js
+        run: node vip.js
