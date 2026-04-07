@@ -43,6 +43,7 @@ function httpGet(url) {
         'Referer':    'https://www.freitasleiloeiro.com.br/',
         'Accept-Language': 'pt-BR,pt;q=0.9',
       },
+      rejectUnauthorized: false,
     };
     const req = https.get(opts, res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
