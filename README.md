@@ -332,6 +332,31 @@ localStorage → Supabase (fipe_valores) → API externa
 
 ---
 
+## Monetização (em andamento)
+
+### Estrutura
+- Plataforma de pagamento: Kiwify — plano mensal R$19,90
+- Autenticação: Supabase Auth
+- Tabela: `assinantes` (email, status, plano, data_inicio, data_cancelamento, kiwify_order_id)
+- Edge Function: `kiwify-webhook` — recebe eventos do Kiwify e cria/cancela usuários
+- URL do webhook: `https://ntlwhwmtsyniinbkwjgg.supabase.co/functions/v1/kiwify-webhook?token=tkv7tkdm8ns`
+
+### Feito
+- Produto criado no Kiwify (R$19,90/mês)
+- Webhook configurado no Kiwify apontando para Edge Function
+- Edge Function deployada e testada
+- Cria usuário no Auth e registra em `assinantes` ao receber `order_approved`
+- Cancela acesso ao receber `order_refunded` ou `subscription_canceled`
+- JWT desabilitado na função (pública, autenticada pelo token na query string)
+
+### Próximos passos monetização
+1. Email de boas-vindas — enviar email com login e senha temporária após pagamento
+2. Tela de login no dashboard — proteger o acesso com email/senha via Supabase Auth
+3. Verificar assinatura ativa — após login, checar se `assinantes.status = ativo`
+4. Página de reset de senha — para o usuário definir sua própria senha
+
+---
+
 ## Como usar este README em nova conversa
 
 Cole no início do chat:
