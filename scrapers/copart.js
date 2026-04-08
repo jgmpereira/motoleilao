@@ -181,34 +181,102 @@ function parseAdDate(ad) {
   return { dataISO: m[1], hora: m[2] };
 }
 
-// ── Busca paginada via page.evaluate ──────────────────────────────────────────
-async function fetchAllLots(page) {
+// ── Busca paginada — intercepta request do Angular e replica com paginação ─────
+async function fetchAllLots(page, context) {
   const allContent = [];
-  let firstRecord = 0;
-  let totalElements = null;
+  let capturedBody   = null;   // body exato enviado pelo Angular (com filtro correto)
+  let capturedHdrs   = null;   // headers do request Angular
+  let totalElements  = null;
 
-  while (true) {
-    const result = await page.evaluate(async ({ searchStr, firstRecord, displayLength }) => {
+  // ── Captura o primeiro request feito pelo Angular app ─────────────────────
+  // O Angular lê o searchStr da URL e monta o body correto para o endpoint.
+  // Precisamos desse body pois nosso formato manual não aplica o filtro.
+  await context.route('**/public/vehicleFinder/search', async (route) => {
+    const req = route.request();
+    if (!capturedBody) {
+      capturedBody = req.postData();
+      // Captura headers relevantes para replicar nas chamadas seguintes
+      const hdrs = await req.allHeaders();
+      capturedHdrs = {
+        'Content-Type': hdrs['content-type'] || 'application/json',
+        'Accept':       hdrs['accept']        || 'application/json, text/plain, */*',
+        'X-Requested-With': hdrs['x-requested-with'] || '',
+        'Referer':      hdrs['referer'] || '',
+      };
+      console.log(`  📡 Body Angular capturado: ${capturedBody?.slice(0, 120)}...`);
+    }
+    await route.continue();
+  });
+
+  // Captura primeira resposta para pegar total + primeiros lotes
+  const firstRespPromise = new Promise((resolve) => {
+    const handler = async (response) => {
+      if (!response.url().includes('/public/vehicleFinder/search')) return;
       try {
-        const body = {
-          query: '',
-          searchStr,
-          watchListOnly: false,
-          externalZipCode: '',
-          ignoreStorage: false,
-          isBuyItNow: false,
-          isNotable: false,
-          isUpcoming: false,
-          isMember: false,
-          defaultSort: true,
-          displayLength,
-          firstRecord,
-          sortOrder: 'DESC',
-          sortName: '',
-        };
+        const json = await response.json();
+        const results = json?.data?.results;
+        if (results && Array.isArray(results.content)) {
+          context.off('response', handler);
+          resolve(results);
+        }
+      } catch {}
+    };
+    context.on('response', handler);
+  });
+
+  // Navega — Angular dispara o primeiro request com o filtro correto
+  await page.goto(COPART_SEARCH_URL, { waitUntil: 'networkidle', timeout: 60_000 });
+  await page.waitForTimeout(3_000);
+
+  let firstResults;
+  try {
+    firstResults = await Promise.race([
+      firstRespPromise,
+      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15_000)),
+    ]);
+  } catch {
+    console.warn('  ⚠️  Primeira resposta da API não capturada — aguardando...');
+    firstResults = null;
+  }
+
+  if (!firstResults || !capturedBody) {
+    console.error('  ❌ Não foi possível capturar o request/response do Angular.');
+    return [];
+  }
+
+  totalElements = firstResults.totalElements ?? 0;
+  const defaultPageSize = firstResults.content.length || 10;
+  allContent.push(...firstResults.content);
+
+  console.log(`  📊 Total filtrado: ${totalElements} | Página size: ${defaultPageSize}`);
+  console.log(`  Página 1: ${firstResults.content.length} lotes (acumulado: ${allContent.length})`);
+
+  if (totalElements === 0) return allContent;
+
+  // ── Parseia body capturado e prepara template para próximas páginas ────────
+  let bodyTemplate;
+  try {
+    bodyTemplate = JSON.parse(capturedBody);
+  } catch {
+    console.error('  ❌ Erro ao parsear body capturado:', capturedBody);
+    return allContent;
+  }
+
+  // Remove unroute para não interferir nas chamadas seguintes
+  await context.unroute('**/public/vehicleFinder/search');
+
+  // ── Pagina com o body template + firstRecord incrementado ─────────────────
+  const hdrsForEval = capturedHdrs;
+  let firstRecord = defaultPageSize;
+
+  while (firstRecord < totalElements) {
+    const nextBody = { ...bodyTemplate, firstRecord, displayLength: defaultPageSize };
+
+    const result = await page.evaluate(async ({ body, headers }) => {
+      try {
         const res = await fetch('/public/vehicleFinder/search', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { ...headers, 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
           credentials: 'include',
         });
@@ -217,30 +285,23 @@ async function fetchAllLots(page) {
       } catch (e) {
         return { error: e.message };
       }
-    }, { searchStr: COPART_SEARCH_STR, firstRecord, displayLength: PAGE_SIZE });
+    }, { body: nextBody, headers: hdrsForEval });
 
     if (result?.error) {
-      console.error(`  ❌ Erro na página ${firstRecord / PAGE_SIZE + 1}: ${result.error}`);
+      console.error(`  ❌ Erro (firstRecord=${firstRecord}): ${result.error}`);
       break;
     }
 
-    const results = result?.data?.results;
-    const content = results?.content ?? [];
-    const total   = results?.totalElements ?? results?.total ?? 0;
-
-    if (totalElements === null) {
-      totalElements = total;
-      console.log(`  📊 Total de lotes Copart (motos): ${totalElements}`);
-    }
-
+    const content = result?.data?.results?.content ?? [];
     allContent.push(...content);
-    console.log(`  Página ${Math.floor(firstRecord / PAGE_SIZE) + 1}: ${content.length} lotes (acumulado: ${allContent.length})`);
 
-    firstRecord += PAGE_SIZE;
-    if (content.length === 0 || firstRecord >= totalElements) break;
+    const pageNum = Math.floor(firstRecord / defaultPageSize) + 1;
+    console.log(`  Página ${pageNum}: ${content.length} lotes (acumulado: ${allContent.length})`);
 
-    // Pausa entre páginas para não sobrecarregar
-    await new Promise(r => setTimeout(r, 400));
+    if (content.length === 0) break;
+    firstRecord += defaultPageSize;
+
+    await new Promise(r => setTimeout(r, 300));
   }
 
   return allContent;
@@ -279,20 +340,9 @@ async function main() {
   const page = await context.newPage();
 
   try {
-    // ── 1. Navega para estabelecer cookies WAF ────────────────────────────────
-    console.log('\n🌐 Navegando para a busca (estabelecendo cookies WAF)...');
-    const navResp = await page.goto(COPART_SEARCH_URL, {
-      waitUntil: 'networkidle',
-      timeout:   60_000,
-    });
-    console.log(`   Status HTTP: ${navResp?.status()}`);
-
-    // Aguarda a SPA Angular inicializar
-    await page.waitForTimeout(3_000);
-
-    // ── 2. Busca todos os lotes via fetch dentro do browser ───────────────────
-    console.log('\n🔍 Buscando lotes (paginado via fetch interno)...');
-    const allContent = await fetchAllLots(page);
+    // ── 1. Busca todos os lotes (intercepta request Angular + pagina) ────────
+    console.log('\n🔍 Buscando lotes...');
+    const allContent = await fetchAllLots(page, context);
 
     console.log(`\n   Total bruto: ${allContent.length} lotes`);
 
@@ -369,9 +419,9 @@ async function main() {
       const lanceRaw = parseFloat(lot.hb ?? lot.ob ?? lot.hbn ?? 0);
       const lance = lanceRaw > 0 ? lanceRaw : null;
 
-      // Foto
+      // Foto — tims já vem como URL completa
       const foto = lot.tims
-        ? `https://cs.copart.com/v1/AUTH_svc.pdoc00001/${lot.tims}`
+        ? lot.tims
         : null;
 
       // Número do lote e pátio
