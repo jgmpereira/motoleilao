@@ -253,31 +253,44 @@ async function fetchAllLots(page, context) {
 
   if (totalElements === 0) return allContent;
 
-  // ── Parseia body capturado e prepara template para próximas páginas ────────
-  let bodyTemplate;
+  // ── Parseia body (form-urlencoded do DataTables) para paginação ───────────
+  // O Angular usa DataTables: body é x-www-form-urlencoded com start=0&length=20
+  // Para paginar: incrementar start=20, 40, 60...
+  let params;
   try {
-    bodyTemplate = JSON.parse(capturedBody);
+    params = new URLSearchParams(capturedBody);
   } catch {
-    console.error('  ❌ Erro ao parsear body capturado:', capturedBody);
+    console.error('  ❌ Erro ao parsear body capturado');
     return allContent;
   }
+
+  const pageLength = parseInt(params.get('length') ?? String(defaultPageSize));
+  console.log(`  📋 DataTables pageLength: ${pageLength}`);
 
   // Remove unroute para não interferir nas chamadas seguintes
   await context.unroute('**/public/vehicleFinder/search');
 
-  // ── Pagina com o body template + firstRecord incrementado ─────────────────
+  // ── Pagina incrementando start ─────────────────────────────────────────────
   const hdrsForEval = capturedHdrs;
-  let firstRecord = defaultPageSize;
+  // O Content-Type é application/x-www-form-urlencoded (DataTables, não JSON)
+  const evalHeaders = {
+    ...hdrsForEval,
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+  };
 
-  while (firstRecord < totalElements) {
-    const nextBody = { ...bodyTemplate, firstRecord, displayLength: defaultPageSize };
+  let start = pageLength;
+
+  while (start < totalElements) {
+    params.set('start', String(start));
+    params.set('page', String(Math.floor(start / pageLength)));
+    const bodyStr = params.toString();
 
     const result = await page.evaluate(async ({ body, headers }) => {
       try {
         const res = await fetch('/public/vehicleFinder/search', {
           method: 'POST',
-          headers: { ...headers, 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
+          headers,
+          body,
           credentials: 'include',
         });
         if (!res.ok) return { error: `HTTP ${res.status}` };
@@ -285,21 +298,21 @@ async function fetchAllLots(page, context) {
       } catch (e) {
         return { error: e.message };
       }
-    }, { body: nextBody, headers: hdrsForEval });
+    }, { body: bodyStr, headers: evalHeaders });
 
     if (result?.error) {
-      console.error(`  ❌ Erro (firstRecord=${firstRecord}): ${result.error}`);
+      console.error(`  ❌ Erro (start=${start}): ${result.error}`);
       break;
     }
 
     const content = result?.data?.results?.content ?? [];
     allContent.push(...content);
 
-    const pageNum = Math.floor(firstRecord / defaultPageSize) + 1;
+    const pageNum = Math.floor(start / pageLength) + 1;
     console.log(`  Página ${pageNum}: ${content.length} lotes (acumulado: ${allContent.length})`);
 
     if (content.length === 0) break;
-    firstRecord += defaultPageSize;
+    start += pageLength;
 
     await new Promise(r => setTimeout(r, 300));
   }
@@ -419,9 +432,9 @@ async function main() {
       const lanceRaw = parseFloat(lot.hb ?? lot.ob ?? lot.hbn ?? 0);
       const lance = lanceRaw > 0 ? lanceRaw : null;
 
-      // Foto — tims já vem como URL completa
+      // Foto — tims vem como URL completa com ?imageType=thumbnail → usa big
       const foto = lot.tims
-        ? lot.tims
+        ? String(lot.tims).replace('imageType=thumbnail', 'imageType=big')
         : null;
 
       // Número do lote e pátio
