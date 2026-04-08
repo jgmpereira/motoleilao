@@ -1,0 +1,53 @@
+name: Scraper — Copart Brasil
+
+on:
+  schedule:
+    # 06:50 BRT (09:50 UTC) todos os dias
+    - cron: '50 9 * * *'
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Salvar screenshot de debug como artefato'
+        type: boolean
+        default: false
+
+jobs:
+  scrape:
+    name: Raspar lotes de motos
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: scrapers/package-lock.json
+
+      - name: Instalar dependências
+        working-directory: scrapers
+        run: npm install
+
+      - name: Instalar Chromium (Playwright)
+        working-directory: scrapers
+        run: npx playwright install chromium --with-deps
+
+      - name: Executar scraper
+        working-directory: scrapers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: node copart.js
+
+      - name: Upload artefato de debug
+        if: failure() || (github.event_name == 'workflow_dispatch' && inputs.debug)
+        uses: actions/upload-artifact@v4
+        with:
+          name: copart-debug-${{ github.run_id }}
+          path: scrapers/copart-*.png
+          retention-days: 3
+          if-no-files-found: ignore
