@@ -265,11 +265,12 @@ async function main() {
       'Accept-Language': 'pt-BR,pt;q=0.9',
     },
   });
-  if (canalRes.status !== 200) {
+  // 200 ou 302 são válidos — os cookies vêm nos headers da própria resposta
+  if (canalRes.status !== 200 && canalRes.status !== 302) {
     throw new Error(`Canal retornou HTTP ${canalRes.status}`);
   }
   const cookieStr = parseCookies(canalRes.cookies);
-  console.log(`   Cookie: ${cookieStr.slice(0, 60)}...`);
+  console.log(`   Cookie (HTTP ${canalRes.status}): ${cookieStr.slice(0, 60)}...`);
 
   // ── 2. Busca total de resultados (página 1) ───────────────────────────────
   const POST_BODY = 'Filtro.Classificacao=1&Filtro.OrdenarPor=DataInicio' +
