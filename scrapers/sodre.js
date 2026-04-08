@@ -340,7 +340,7 @@ function extrairLotesDeResposta(json) {
 }
 
 // ── Detecta se um lote é de moto ─────────────────────────────────────────────
-const MARCAS_MOTO = new Set(['honda','yamaha','kawasaki','suzuki','bmw','harley','ducati',
+const MARCAS_MOTO_LOWER = new Set(['honda','yamaha','kawasaki','suzuki','bmw','harley','ducati',
   'triumph','ktm','royal enfield','dafra','shineray','bajaj','haojue','jtz','cfmoto',
   'benelli','aprilia','mv agusta','indian','zero']);
 
@@ -351,7 +351,7 @@ function isMoto(lot) {
   if (cat && cat !== 'veiculo' && cat !== 'vehicle') return false;
   // Fallback para lotes vindos do DOM scraping
   const desc = String(lot.lot_title ?? lot.title ?? lot.description ?? lot.name ?? '').toLowerCase();
-  if (MARCAS_MOTO.has(desc.split(' ')[0])) return true;
+  if (MARCAS_MOTO_LOWER.has(desc.split(' ')[0])) return true;
   return true; // já filtramos lot_category=motos na URL
 }
 
