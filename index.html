@@ -221,7 +221,7 @@ tbody tr:hover{background:var(--s2);}
 </div>
 
 <header>
-  <div class="logo" onclick="showPage('leiloes');limparFiltrosGm()" style="cursor:pointer;">
+  <div class="logo" onclick="fecharFichaMoto();limparFiltrosGm();showPage('leiloes')" style="cursor:pointer;">
     <div class="logo-icon">🏍</div>
     <h1>MOTO<span>LEILÃO</span></h1>
   </div>
@@ -920,7 +920,7 @@ function renderLeiloes() {
       const bate = motos.some(m => {
         if(hfMarca && normalizarMarca(m.marca) !== hfMarca) return false;
         if(hfCond  && !(m.condicao||'').toLowerCase().includes(hfCond)) return false;
-        if(hfPorte && getPorte(m.cilindrada) !== hfPorte) return false;
+        if(hfPorte && (getPorte(m.cilindrada) || (m.monta==='grande'?'alta':m.monta)) !== hfPorte) return false;
         if(hfMonta && m.monta !== hfMonta) return false;
         return true;
       });
@@ -969,7 +969,7 @@ function renderLeiloes() {
       motosFiltradas = motos.filter(m => {
         if(hfMarca && normalizarMarca(m.marca) !== hfMarca) return false;
         if(hfCond  && !(m.condicao||'').toLowerCase().includes(hfCond)) return false;
-        if(hfPorte && getPorte(m.cilindrada) !== hfPorte) return false;
+        if(hfPorte && (getPorte(m.cilindrada) || (m.monta==='grande'?'alta':m.monta)) !== hfPorte) return false;
         if(hfMonta && m.monta !== hfMonta) return false;
         return true;
       });
@@ -1303,7 +1303,7 @@ function renderGridMotos() {
         <div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;">${m.marca} ${m.modelo}</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:5px;">${m.ano||'—'}</div>
         <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px;">
-          ${porte ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${porte.label}</span>` : ''}
+          ${porte ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${porte.texto} · ${ccEfetiva}cc</span>` : ''}
           ${montaEfetiva ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${montaEfetiva} monta</span>` : ''}
         </div>
         <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:5px;">📅 ${leilao?.nome || m.leilao_id}</div>
@@ -4398,7 +4398,7 @@ function abrirFichaMoto(motoId) {
   const urgBadge = !l ? '' : l.encerrado ? '<span style="background:rgba(0,0,0,.1);color:var(--muted);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">ENCERRADO</span>' : (() => { const b = getBadgeLeilao(l); return b==='urgente'||b==='hoje' ? '<span style="background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">🔥 ESTA SEMANA</span>' : ''; })();
   document.getElementById('ficha-badges').innerHTML = `
     <span style="background:${condColor}22;color:${condColor};font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;border:1px solid ${condColor}44;">${m.condicao||'—'}</span>
-    ${ccEfetiva?`<span style="background:var(--s1);color:var(--muted);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;border:1px solid var(--border);">⚙️ ${ccEfetiva}cc</span>`:''}
+    ${ccEfetiva?`<span style="background:var(--s1);color:var(--muted);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;border:1px solid var(--border);">⚙️ ${ccEfetiva}cc · ${getPorteLabel(ccEfetiva)?.texto||''}</span>`:''}
     ${montaEfetiva?`<span style="background:var(--s1);color:var(--muted);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;border:1px solid var(--border);">🏍️ ${montaEfetiva} monta</span>`:''}
     ${urgBadge}`;
 
