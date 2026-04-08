@@ -221,7 +221,7 @@ tbody tr:hover{background:var(--s2);}
 </div>
 
 <header>
-  <div class="logo" onclick="showPage('leiloes')" style="cursor:pointer;">
+  <div class="logo" onclick="showPage('leiloes');limparFiltrosGm()" style="cursor:pointer;">
     <div class="logo-icon">🏍</div>
     <h1>MOTO<span>LEILÃO</span></h1>
   </div>
@@ -1214,8 +1214,12 @@ function renderGridMotos() {
     // Filtro condição
     if (gmFiltros.cond && !(m.condicao||'').toLowerCase().includes(gmFiltros.cond)) return false;
 
-    // Filtro porte
-    if (gmFiltros.porte && getPorte(m.cilindrada) !== gmFiltros.porte) return false;
+    // Filtro porte — usa cilindrada se disponível, senão monta salva pelo scraper
+    // (scrapers armazenam monta como 'grande', getPorte retorna 'alta' para >500cc)
+    if (gmFiltros.porte) {
+      const porte = getPorte(m.cilindrada) || (m.monta === 'grande' ? 'alta' : m.monta) || null;
+      if (porte !== gmFiltros.porte) return false;
+    }
 
     // Filtro % FIPE
     if (gmFiltros.fipe) {
