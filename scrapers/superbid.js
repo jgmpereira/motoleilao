@@ -105,6 +105,17 @@ function normalizarMarca(raw) {
   return toTitle(raw);
 }
 
+// Whitelist de marcas de moto — rejeita carros que escapem do filtro da busca
+const MARCAS_MOTO = new Set([
+  'Honda','Yamaha','Kawasaki','Suzuki','BMW','KTM','Ducati','Triumph',
+  'Harley-Davidson','Royal Enfield','Aprilia','Benelli','CFMoto','Dafra',
+  'Shineray','Bajaj','Haojue','JTZ','MV Agusta','Indian','Zero',
+  'Sundown','Hero','Moto Guzzi','Norton','Husqvarna','Gas Gas','Traxx',
+  'Kasinski','Kymco','Sym','Lifan','Loncin','Zongshen','Buell','Can-Am',
+  'Star','Vmoto','Super Soco','Energica',
+]);
+function isMoto(marca) { return !!marca && MARCAS_MOTO.has(marca); }
+
 const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 
 // "2026-04-23 14:00:00" → "2026-04-23"
@@ -346,6 +357,7 @@ async function main() {
     if (!parsed) continue;
 
     const { marca, modelo, ano } = parsed;
+    if (!isMoto(marca)) { console.log(`  ⚠️  ignorado (não é moto): ${marca} ${modelo}`); continue; }
     const lance = offer.offerDetail?.initialBidValue ?? null;
     const foto  = offer.product?.thumbnailUrl || null;
     const lote  = offer.lotNumber ? String(offer.lotNumber) : null;

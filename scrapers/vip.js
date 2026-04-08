@@ -108,6 +108,17 @@ function normalizarMarca(raw) {
   return toTitle(raw);
 }
 
+// Whitelist de marcas de moto — rejeita carros que escapem do filtro da busca
+const MARCAS_MOTO = new Set([
+  'Honda','Yamaha','Kawasaki','Suzuki','BMW','KTM','Ducati','Triumph',
+  'Harley-Davidson','Royal Enfield','Aprilia','Benelli','CFMoto','Dafra',
+  'Shineray','Bajaj','Haojue','JTZ','MV Agusta','Indian','Zero',
+  'Sundown','Hero','Moto Guzzi','Norton','Husqvarna','Gas Gas','Traxx',
+  'Kasinski','Kymco','Sym','Lifan','Loncin','Zongshen','Buell','Can-Am',
+  'Star','Vmoto','Super Soco','Energica',
+]);
+function isMoto(marca) { return !!marca && MARCAS_MOTO.has(marca); }
+
 // "R$ 3.500,00" → 3500
 function parseLance(vlr) {
   if (!vlr) return null;
@@ -363,6 +374,7 @@ async function main() {
     }
 
     const { marca, modelo, ano, lance, lote, local, foto, url } = lot;
+    if (!isMoto(marca)) { console.log(`  ⚠️  ignorado (não é moto): ${marca} ${modelo}`); continue; }
     const cilindrada = extractCilindrada(marca, modelo);
     const monta = cilindrada == null ? null
       : cilindrada <= 150 ? 'pequena'

@@ -93,6 +93,17 @@ function normalizarMarca(marca) {
   return marca.trim().split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 }
 
+// Whitelist de marcas de moto — rejeita carros que escapem do filtro da busca
+const MARCAS_MOTO = new Set([
+  'Honda','Yamaha','Kawasaki','Suzuki','BMW','KTM','Ducati','Triumph',
+  'Harley-Davidson','Royal Enfield','Aprilia','Benelli','CFMoto','Dafra',
+  'Shineray','Bajaj','Haojue','JTZ','MV Agusta','Indian','Zero',
+  'Sundown','Hero','Moto Guzzi','Norton','Husqvarna','Gas Gas','Traxx',
+  'Kasinski','Kymco','Sym','Lifan','Loncin','Zongshen','Buell','Can-Am',
+  'Star','Vmoto','Super Soco','Energica',
+]);
+function isMoto(marca) { return !!marca && MARCAS_MOTO.has(marca); }
+
 function extractCilindrada(marca, modelo) {
   const texto = ((marca || '') + ' ' + (modelo || '')).toUpperCase();
   // Mapa portado do index.html — keys maiores primeiro para evitar match parcial
@@ -519,6 +530,7 @@ async function main() {
         motosPorLeilao[lid] = [];
       }
 
+      if (!isMoto(marca)) { console.log(`  ⚠️  ignorado (não é moto): ${marca} ${modelo}`); continue; }
       const cilindrada = extractCilindrada(marca, modelo);
       // Usa monta da API se disponível; senão deriva da cilindrada
       const monta = montaAPI ?? (cilindrada == null ? null : cilindrada <= 200 ? 'pequena' : cilindrada <= 500 ? 'media' : 'grande');
