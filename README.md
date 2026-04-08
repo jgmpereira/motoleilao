@@ -93,6 +93,39 @@ Dashboard de monitoramento de leilões de moto.
 - **Agendamento:** Todo dia à meia-noite BRT (`0 3 * * *` UTC)
 - **Workflow:** `.github/workflows/scraper-sodre-encerrados.yml`
 
+### `scrapers/freitas.js` — Freitas Leiloeiro
+- **O que faz:** Fetch direto de HTML (sem Playwright), parseia lotes via regex
+- **Filtro:** `isMoto()` whitelist de marcas — rejeita carros
+- **Agendamento:** Todo dia às 06:20 BRT (`20 9 * * *` UTC)
+- **Workflow:** `.github/workflows/scraper-freitas.yml`
+
+### `scrapers/vip.js` — VIP Leilões
+- **O que faz:** GET /canal para cookie + POST /pesquisa paginado, parseia cards HTML
+- **Autenticação:** Cookie `__CBCanal` obtido via redirect 302 (aceita 200 e 302)
+- **Filtro:** `isMoto()` whitelist de marcas — rejeita carros que escapem do filtro da busca
+- **Agendamento:** Todo dia às 06:40 BRT (`40 9 * * *` UTC)
+- **Workflow:** `.github/workflows/scraper-vip.yml`
+
+### `scrapers/superbid.js` — Superbid
+- **O que faz:** API REST JSON, paginada, busca lotes abertos de motos
+- **Parsing:** `parseShortDesc` com 3 estratégias: padrão barra (MARCA/MODELO), keyword "modelo", fallback strip prefixo
+- **Filtro:** Remove lotes com `cilindrada` = ano (1900–2100), `isMoto()` whitelist
+- **Agendamento:** Todo dia às 07:00 BRT (`0 10 * * *` UTC)
+- **Workflow:** `.github/workflows/scraper-superbid.yml`
+
+### `scrapers/copart.js` — Copart Brasil
+- **O que faz:** Playwright obrigatório — WAF Imperva/Incapsula bloqueia fetch direto do Node.js
+- **Estratégia:**
+  1. Navega para URL filtrada (`categoria:Motos`, `#LotYear:[1980 TO 2027]`) no Playwright
+  2. Intercepta o request que o Angular app faz ao endpoint `/public/vehicleFinder/search` (body é `x-www-form-urlencoded`, formato DataTables)
+  3. Usa esse body como template e incrementa `start=N` para paginar (20 por página, ~2315 lotes)
+  4. Réplica os requests via `page.evaluate(fetch(...))` — mesma sessão/cookies, bypassa WAF
+- **Filtra:** Lotes com `stt: "Aguardando Classificação"` ou `ad` vazio (vendas futuras sem data)
+- **Campos:** `ln` (lote), `mkn` (marca), `lm` (modelo), `lcy` (ano), `ad` (data leilão), `stt` (status/condição), `hb` (bid), `tims` (foto — URL completa com `?imageType=big`)
+- **Agrupa:** Por data em `copart_YYYYMMDD`
+- **Agendamento:** Todo dia às 06:50 BRT (`50 9 * * *` UTC)
+- **Workflow:** `.github/workflows/scraper-copart.yml`
+
 ### `scripts/popular-fipe.js` — Pré-popular FIPE
 - **O que faz:** Busca FIPE de todas as motos sem valor FIPE no banco
 - **Agendamento:** Dia 1 de cada mês às 7h BRT
@@ -112,8 +145,12 @@ Dashboard de monitoramento de leilões de moto.
 
 | Arquivo | Descrição | Horário (BRT) |
 |---|---|---|
-| `scraper-sodre.yml` | Scraper leilões ativos | 8h diário |
-| `scraper-sodre-encerrados.yml` | Scraper encerrados | 20h diário |
+| `scraper-sodre.yml` | Scraper Sodré Santoro — lotes ativos | 8h diário |
+| `scraper-sodre-encerrados.yml` | Scraper Sodré — encerrados | 20h diário |
+| `scraper-freitas.yml` | Scraper Freitas Leiloeiro | 6h20 diário |
+| `scraper-vip.yml` | Scraper VIP Leilões | 6h40 diário |
+| `scraper-superbid.yml` | Scraper Superbid | 7h diário |
+| `scraper-copart.yml` | Scraper Copart Brasil (Playwright) | 6h50 diário |
 | `fipe-mensal.yml` | Atualização FIPE | 7h dia 1 do mês |
 | `backup-supabase.yml` | Backup das tabelas do Supabase | 3h diário |
 
@@ -241,21 +278,27 @@ localStorage → Supabase (fipe_valores) → API externa
 
 ---
 
-## Estado Atual (Março 2026)
+## Estado Atual (Abril 2026)
 
 ### ✅ Funcionando
+- 5 scrapers automáticos rodando diariamente: Sodré, Freitas, VIP, Superbid, Copart
 - Scraper Sodré ativo (70+ lotes por leilão)
 - Scraper encerrados com URL correta (`prd-api.sodresantoro.com.br/api/v1`)
 - Scraper encerrados roda às 20h BRT e já pega leilões do mesmo dia (`data=lte`)
+- Scraper Freitas: fetch direto HTML, sem Playwright, `isMoto()` whitelist
+- Scraper VIP: cookie via redirect 302, POST paginado, `isMoto()` whitelist
+- Scraper Superbid: REST JSON paginado, 3 estratégias de parsing de descrição
+- Scraper Copart: Playwright + interceptação do body DataTables do Angular app, `page.evaluate(fetch())` para paginar com sessão ativa
 - Badge `vendido` / `condicional` na listagem, card e histórico
 - FIPE automático ao abrir leilão
 - Atualização mensal FIPE (dia 1)
 - Fix `popular-fipe.js`: erro 409 no cache não impede salvar `fipe_csv`
-- Hash routing em todas as abas
+- Hash routing em todas as abas; logo clicável volta à home e limpa filtros
 - Importação manual de múltiplas plataformas
 - Backup automático diário do Supabase (pasta `backups/YYYY-MM-DD/`, retém 30 dias)
 - Cards do dashboard exibem dia/mês a partir do campo `data` quando `dia`/`mes` são nulos
-- Scraper remove lixo `ipva2026` do nome do modelo automaticamente
+- Filtros de porte (Alta CC / Média CC / Pequena CC) funcionam mesmo quando `cilindrada` é nulo (fallback por `monta`)
+- Cards e ficha exibem label "Alta CC · 850cc" (não só a cilindrada)
 
 ### 🔧 Pontos de atenção
 - Arrematados inseridos antes de Mar/2026 não têm `status_arrematado` (coluna era nula)
@@ -263,6 +306,7 @@ localStorage → Supabase (fipe_valores) → API externa
 - O scraper de encerrados só reprocessa leilões com `encerrado=false` — se precisar reprocessar um já encerrado, é necessário setar `encerrado=false` no Supabase manualmente
 - Motos de marcas chinesas sem cobertura FIPE (JTZ, Haojian) sempre retornam "não encontrado"
 - Arquivo `.env` com `SUPABASE_KEY` precisa ser recriado se o Codespaces for resetado
+- Copart: se o Angular mudar o formato do body DataTables ou endpoint, o scraper precisará recapturar o template
 
 ---
 
@@ -283,39 +327,8 @@ localStorage → Supabase (fipe_valores) → API externa
 - Busca global do topo removida (substituída pelo campo na sidebar)
 
 ### 🔲 Próximos passos
-- Scrapers dos demais leilões (Superbid, Copart, etc.) para popular fotos
 - Lance atual em tempo real
 - Melhorias no histórico da aba Histórico
-
----
-
-## Novo Layout (branch `nova-home`)
-
-Redesign completo da interface em andamento na branch `nova-home`.
-
-### O que já foi feito
-- ✅ Aba **Agenda** criada — lista de leilões com filtros de período, plataforma e status
-- ✅ Aba **Motos** — grid de motos com sidebar de filtros e foto
-- ✅ Filtros: busca, período, condição, porte, % FIPE, marca (desmarcado por padrão), plataforma
-- ✅ Ordenação: data, % FIPE, lance, marca
-- ✅ Foto clicável → abre anúncio no site da leiloeira (nova aba)
-- ✅ Card → hash `#moto-{id}`, abre ficha; Ctrl+click abre em nova aba
-- ✅ Botão voltar do navegador fecha a ficha (popstate)
-- ✅ Mobile: sidebar como overlay, botão Filtros fixo no topo, grid 2 colunas
-- ✅ Ficha da moto: foto, badges, lance/FIPE/lance atual, análise histórica, arrematações anteriores
-- ✅ Indicador histórico: menor visto, média, limite caro, veredicto automático
-
-### Próximo passo
-- 🔲 Ajustes visuais finais na ficha (fontes, espaçamento)
-- 🔲 Merge da `nova-home` para `main` quando aprovado
-- 🔲 Lance atual em tempo real (futuro)
-- 🔲 Scrapers dos demais leilões (Superbid, Copart, etc.) para popular fotos
-
-### Comportamento definido
-- Foto do card → abre anúncio na leiloeira (nova aba)
-- Resto do card → abre ficha da moto com histórico de arrematações
-- Agenda → clicar no leilão abre página de detalhe do leilão (como hoje)
-- Ficha da moto → indicador inteligente baseado no histórico (menor, média, limite caro)
 
 ---
 
