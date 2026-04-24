@@ -119,6 +119,25 @@ const MARCAS_MOTO = new Set([
 ]);
 function isMoto(marca) { return !!marca && MARCAS_MOTO.has(marca); }
 
+// Modelos de carro que podem escapar por terem marca de fabricante misto (ex: Honda)
+const MODELOS_CARRO = new Set([
+  'fit','civic','city','hr-v','hrv','cr-v','crv','accord','jazz','wr-v','wrv',
+  'corolla','etios','yaris','hilux','sw4','rav4','camry','prius',
+  'onix','prisma','spin','tracker','cruze','s10','trailblazer','cobalt',
+  'gol','polo','virtus','t-cross','tcross','fox','up','saveiro','amarok','tiguan',
+  'ka','fiesta','focus','ecosport','ranger','territory','bronco',
+  'uno','palio','siena','strada','bravo','mobi','toro','fiorino','doblo','pulse',
+  'sandero','logan','duster','kwid','captur',
+  'hb20','creta','ix35','tucson','santa fe','elantra',
+  'kicks','march','versa','frontier','sentra','leaf',
+  'compass','renegade','commander',
+]);
+
+function isCarro(modelo) {
+  const low = (modelo || '').toLowerCase();
+  return [...MODELOS_CARRO].some(m => low === m || low.startsWith(m + ' ') || low.includes(' ' + m));
+}
+
 // "R$ 3.500,00" → 3500
 function parseLance(vlr) {
   if (!vlr) return null;
@@ -379,7 +398,7 @@ async function main() {
     }
 
     const { marca, modelo, ano, lance, lote, local, foto, url } = lot;
-    if (!isMoto(marca)) { console.log(`  ⚠️  ignorado (não é moto): ${marca} ${modelo}`); continue; }
+    if (!isMoto(marca) || isCarro(modelo)) { console.log(`  ⚠️  ignorado (não é moto): ${marca} ${modelo}`); continue; }
     const cilindrada = extractCilindrada(marca, modelo);
     const monta = cilindrada == null ? null
       : cilindrada <= 150 ? 'pequena'
