@@ -1130,16 +1130,16 @@ function renderGridMotos() {
   if (marcasEl && !marcasEl.dataset.populated) {
     marcasEl.dataset.populated = '1';
     const MARCAS_PRINCIPAIS = [
-      { valor: 'Honda',           label: 'Honda' },
-      { valor: 'Yamaha',          label: 'Yamaha' },
-      { valor: 'Kawasaki',        label: 'Kawasaki' },
-      { valor: 'Suzuki',          label: 'Suzuki' },
       { valor: 'BMW',             label: 'BMW Motorrad' },
-      { valor: 'Harley-Davidson', label: 'Harley-Davidson' },
-      { valor: 'Triumph',         label: 'Triumph' },
       { valor: 'Ducati',          label: 'Ducati' },
-      { valor: 'Royal Enfield',   label: 'Royal Enfield' },
+      { valor: 'Harley-Davidson', label: 'Harley-Davidson' },
+      { valor: 'Honda',           label: 'Honda' },
+      { valor: 'Kawasaki',        label: 'Kawasaki' },
       { valor: 'KTM',             label: 'KTM' },
+      { valor: 'Royal Enfield',   label: 'Royal Enfield' },
+      { valor: 'Suzuki',          label: 'Suzuki' },
+      { valor: 'Triumph',         label: 'Triumph' },
+      { valor: 'Yamaha',          label: 'Yamaha' },
     ];
     const valoresPrincipais = new Set(MARCAS_PRINCIPAIS.map(m => m.valor));
     const MARCAS_INVALIDAS = new Set(['fiat', 'jta', 'jta-suzuki', 'jta suzuki', 'jta/suzuki']);
