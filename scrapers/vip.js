@@ -307,6 +307,7 @@ async function main() {
       method: 'POST',
       headers: COMMON_HEADERS,
     }, POST_BODY);
+    if (res.status === 403) return null; // bloqueado pelo anti-bot, parar paginação
     if (res.status !== 200) throw new Error(`Página ${pageNum} retornou HTTP ${res.status}`);
     return res.body;
   }
@@ -326,12 +327,16 @@ async function main() {
   console.log(`   Página 1: ${page1Lots.length} lotes`);
 
   for (let pn = 2; pn <= totalPages; pn++) {
+    // Pausa aleatória entre 1.2s e 2.8s para evitar bloqueio anti-bot
+    await new Promise(r => setTimeout(r, 1200 + Math.random() * 1600));
     const html = await fetchPage(pn);
+    if (html === null) {
+      console.log(`   Página ${pn}: bloqueado (403) — parando paginação com ${allLots.length} lotes coletados`);
+      break;
+    }
     const lots = parseCards(html);
     allLots.push(...lots);
     console.log(`   Página ${pn}: ${lots.length} lotes`);
-    // Pequena pausa para não sobrecarregar o servidor
-    await new Promise(r => setTimeout(r, 300));
   }
 
   console.log(`\n   Total parseado: ${allLots.length} lotes`);
