@@ -110,12 +110,16 @@ function normalizarMarca(raw) {
 
 // Whitelist de marcas de moto — rejeita carros que escapem do filtro da busca
 const MARCAS_MOTO = new Set([
-  'Honda','Yamaha','Kawasaki','Suzuki','BMW','KTM','Ducati','Triumph',
-  'Harley-Davidson','Royal Enfield','Aprilia','Benelli','CFMoto','Dafra',
-  'Shineray','Bajaj','Haojue','JTZ','MV Agusta','Indian','Zero',
-  'Sundown','Hero','Moto Guzzi','Norton','Husqvarna','Gas Gas','Traxx',
-  'Kasinski','Kymco','Sym','Lifan','Loncin','Zongshen','Buell','Can-Am',
-  'Star','Vmoto','Super Soco','Energica',
+  // Renomadas internacionais
+  'Aprilia','BMW','Ducati','Harley-Davidson','Honda','Kawasaki','KTM',
+  'Royal Enfield','Suzuki','Triumph','Yamaha',
+  // Conhecidas / nicho
+  'Bajaj','Benelli','Can-Am','CFMoto','Hero','Husqvarna','Indian',
+  'Moto Guzzi','MV Agusta','Norton','Zero',
+  // Marcas menores / asiáticas
+  'Buell','Dafra','Energica','Gas Gas','Haojue','JTZ','Kasinski',
+  'Kymco','Lifan','Loncin','Shineray','Star','Sundown','Super Soco',
+  'Sym','Traxx','Vmoto','Zongshen',
 ]);
 function isMoto(marca) { return !!marca && MARCAS_MOTO.has(marca); }
 
