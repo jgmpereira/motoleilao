@@ -4717,6 +4717,7 @@ function renderHistoricoGeral() {
   const condClass = {financiada:'cond-fin',sinistro:'cond-sin',sucata:'cond-suc',lotamento:'cond-lot'};
   el.innerHTML=`<table style="min-width:700px;">
     <thead><tr>
+      <th style="width:48px;"></th>
       ${th('data','Data')}
       ${th('plataforma','Plataforma')}
       ${th('lote','Lote')}
@@ -4737,7 +4738,11 @@ function renderHistoricoGeral() {
       const pctC=pct?(pct<30?'pct-great':pct<50?'pct-good':pct<70?'pct-ok':'pct-high'):'';
       const ind=getIndicador(m,pct);
       const leilao=LEILOES.find(l=>l.id===m.leilao_id);
+      const fotoTd=m.foto
+        ?`<td style="padding:4px 6px;width:48px;"><img src="${m.foto}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"><div style="display:none;width:40px;height:40px;border-radius:4px;background:var(--s3);align-items:center;justify-content:center;font-size:18px;">🏍️</div></td>`
+        :`<td style="padding:4px 6px;width:48px;"><div style="display:flex;width:40px;height:40px;border-radius:4px;background:var(--s3);align-items:center;justify-content:center;font-size:18px;">🏍️</div></td>`;
       return `<tr>
+        ${fotoTd}
         <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${leilao?leilao.data:m.leilao_id}</td>
         <td style="font-size:11px;color:var(--muted);">${leilao?.plataforma||'—'}</td>
         <td class="td-lote">${m.lote||'—'}</td>
