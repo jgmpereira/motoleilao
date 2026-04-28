@@ -861,6 +861,10 @@ async function fazerLogin() {
     authToken = data.access_token;
     authEmail = data.user?.email || email;
     await verificarAssinatura(authEmail);
+    if (data.user?.user_metadata?.senha_temporaria === true) {
+      mostrarDefinirSenha(authToken, 'Crie uma senha permanente');
+      return;
+    }
     localStorage.setItem('supaAuthToken', authToken);
     localStorage.setItem('supaAuthEmail', authEmail);
     esconderLogin();
@@ -917,13 +921,16 @@ function fazerLogout() {
 // ===================== DEFINIR SENHA (invite / recovery) =====================
 let _pendingToken = null;
 
-function mostrarDefinirSenha(token) {
+function mostrarDefinirSenha(token, titulo = 'Defina sua senha') {
   _pendingToken = token;
   document.getElementById('loading-overlay').style.display = 'none';
   document.getElementById('login-overlay').style.display = 'flex';
   document.getElementById('login-form-section').style.display = 'none';
   document.getElementById('definir-senha-section').style.display = 'block';
-  document.getElementById('login-subtitle').textContent = 'Defina sua senha';
+  document.getElementById('login-subtitle').textContent = titulo;
+  document.getElementById('nova-senha').value = '';
+  document.getElementById('confirmar-senha').value = '';
+  document.getElementById('definir-senha-erro').textContent = '';
 }
 
 async function confirmarDefinirSenha() {
@@ -952,7 +959,7 @@ async function confirmarDefinirSenha() {
         'Authorization': `Bearer ${_pendingToken}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ password: nova })
+      body: JSON.stringify({ password: nova, data: { senha_temporaria: false } })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error_description || data.msg || 'Erro ao definir senha.');
