@@ -248,6 +248,16 @@ tbody tr:hover{background:var(--s2);}
 .lp-price-list li:last-child{border-bottom:none;}
 .lp-price-list li::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0;}
 .lp-footer{text-align:center;padding:28px 48px;border-top:1px solid rgba(255,255,255,.05);font-size:12px;color:#3a4050;background:#0e1015;}
+
+/* ASSINATURA EXPIRADA */
+#assinatura-expirada{display:none;position:fixed;inset:0;background:#111318;z-index:9998;align-items:center;justify-content:center;}
+.asn-card{background:#1c1f27;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:48px 40px;max-width:440px;width:90vw;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.4);}
+.asn-icon{font-size:52px;margin-bottom:20px;}
+.asn-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:#e0e4eb;margin-bottom:12px;}
+.asn-subtitle{font-size:14px;color:#5c6478;line-height:1.65;margin-bottom:32px;}
+.asn-email{font-family:'DM Mono',monospace;font-size:12px;color:#4b5362;margin-top:-20px;margin-bottom:28px;}
+.asn-btns{display:flex;flex-direction:column;gap:10px;}
+
 @media(max-width:960px){.lp-features-grid{grid-template-columns:repeat(2,1fr);}.lp-nav{padding:14px 24px;}}
 @media(max-width:640px){
   .lp-nav,.lp-hero,.lp-section,.lp-section.alt,.lp-footer{padding-left:20px;padding-right:20px;}
@@ -333,6 +343,20 @@ tbody tr:hover{background:var(--s2);}
   <footer class="lp-footer">
     © 2026 MotoLeilão — Monitor de leilões de motos
   </footer>
+</div>
+
+<!-- ASSINATURA EXPIRADA -->
+<div id="assinatura-expirada">
+  <div class="asn-card">
+    <div class="asn-icon">🔒</div>
+    <div class="asn-title">Sua assinatura está inativa</div>
+    <div class="asn-subtitle">Seu acesso foi cancelado ou expirou. Reative sua assinatura para continuar monitorando leilões e comparando preços com a FIPE.</div>
+    <div id="asn-email" class="asn-email"></div>
+    <div class="asn-btns">
+      <a href="https://pay.kiwify.com.br/d0fkD1p" target="_blank" rel="noopener" class="lp-btn-primary" style="display:block;">Reativar assinatura</a>
+      <button onclick="fazerLogout()" class="lp-btn-secondary" style="cursor:pointer;font-family:'DM Sans',sans-serif;border:none;" onmouseover="this.style.borderColor='rgba(255,255,255,.3)'" >Sair</button>
+    </div>
+  </div>
 </div>
 
 <!-- LOGIN -->
@@ -950,6 +974,20 @@ function esconderLanding() {
   document.querySelectorAll('.page').forEach(p => p.style.display = '');
 }
 
+function mostrarAssinaturaExpirada() {
+  const el = document.getElementById('assinatura-expirada');
+  el.style.display = 'flex';
+  const emailEl = document.getElementById('asn-email');
+  if (emailEl && authEmail) emailEl.textContent = authEmail;
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('loading-overlay').style.display = 'none';
+  document.getElementById('landing-page').style.display = 'none';
+  document.getElementById('app-header').style.display = 'none';
+  document.querySelector('.tabs').style.display = 'none';
+  document.querySelector('.stats').style.display = 'none';
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+}
+
 async function checkAuth() {
   // Supabase envia access_token no hash após convite ou recuperação de senha
   console.log('[checkAuth] hash completo:', location.hash);
@@ -978,6 +1016,7 @@ async function checkAuth() {
     esconderLogin();
     carregarDados();
   } catch(e) {
+    if (e.message === 'SUBSCRIPTION_INACTIVE') return;
     authToken = null; authEmail = null;
     localStorage.removeItem('supaAuthToken');
     localStorage.removeItem('supaAuthEmail');
@@ -1019,6 +1058,13 @@ async function fazerLogin() {
     esconderLogin();
     carregarDados();
   } catch(e) {
+    if (e.message === 'SUBSCRIPTION_INACTIVE') {
+      if (authToken) {
+        localStorage.setItem('supaAuthToken', authToken);
+        localStorage.setItem('supaAuthEmail', authEmail);
+      }
+      return;
+    }
     authToken = null; authEmail = null;
     errEl.style.color = 'var(--red)';
     errEl.textContent = e.message;
@@ -1031,7 +1077,10 @@ async function fazerLogin() {
 async function verificarAssinatura(email) {
   if (!email) throw new Error('Email não identificado.');
   const rows = await supaFetch(`assinantes?email=eq.${encodeURIComponent(email)}&status=eq.ativo&select=id`);
-  if (!rows || rows.length === 0) throw new Error('Assinatura não encontrada ou cancelada.');
+  if (!rows || rows.length === 0) {
+    mostrarAssinaturaExpirada();
+    throw new Error('SUBSCRIPTION_INACTIVE');
+  }
 }
 
 async function recuperarSenha() {
@@ -1121,6 +1170,13 @@ async function confirmarDefinirSenha() {
     esconderLogin();
     carregarDados();
   } catch(e) {
+    if (e.message === 'SUBSCRIPTION_INACTIVE') {
+      if (authToken) {
+        localStorage.setItem('supaAuthToken', authToken);
+        localStorage.setItem('supaAuthEmail', authEmail);
+      }
+      return;
+    }
     errEl.style.color = 'var(--red)';
     errEl.textContent = e.message;
   } finally {
