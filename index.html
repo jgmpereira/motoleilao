@@ -1016,7 +1016,7 @@ async function checkAuth() {
     esconderLogin();
     carregarDados();
   } catch(e) {
-    if (e.message === 'SUBSCRIPTION_INACTIVE') return;
+    if (e.message === 'SUBSCRIPTION_INACTIVE') { mostrarAssinaturaExpirada(); return; }
     authToken = null; authEmail = null;
     localStorage.removeItem('supaAuthToken');
     localStorage.removeItem('supaAuthEmail');
@@ -1059,10 +1059,9 @@ async function fazerLogin() {
     carregarDados();
   } catch(e) {
     if (e.message === 'SUBSCRIPTION_INACTIVE') {
-      if (authToken) {
-        localStorage.setItem('supaAuthToken', authToken);
-        localStorage.setItem('supaAuthEmail', authEmail);
-      }
+      localStorage.setItem('supaAuthToken', authToken);
+      localStorage.setItem('supaAuthEmail', authEmail);
+      mostrarAssinaturaExpirada();
       return;
     }
     authToken = null; authEmail = null;
@@ -1077,10 +1076,7 @@ async function fazerLogin() {
 async function verificarAssinatura(email) {
   if (!email) throw new Error('Email não identificado.');
   const rows = await supaFetch(`assinantes?email=eq.${encodeURIComponent(email)}&status=eq.ativo&select=id`);
-  if (!rows || rows.length === 0) {
-    mostrarAssinaturaExpirada();
-    throw new Error('SUBSCRIPTION_INACTIVE');
-  }
+  if (!rows || rows.length === 0) throw new Error('SUBSCRIPTION_INACTIVE');
 }
 
 async function recuperarSenha() {
@@ -1171,10 +1167,9 @@ async function confirmarDefinirSenha() {
     carregarDados();
   } catch(e) {
     if (e.message === 'SUBSCRIPTION_INACTIVE') {
-      if (authToken) {
-        localStorage.setItem('supaAuthToken', authToken);
-        localStorage.setItem('supaAuthEmail', authEmail);
-      }
+      localStorage.setItem('supaAuthToken', authToken);
+      localStorage.setItem('supaAuthEmail', authEmail);
+      mostrarAssinaturaExpirada();
       return;
     }
     errEl.style.color = 'var(--red)';
