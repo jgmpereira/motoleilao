@@ -37,10 +37,14 @@ const SINONIMOS = {
   'honda|biz ex': 'biz 125 ex',
 };
 
+const FIPE_HEADERS = process.env.FIPE_TOKEN
+  ? { 'Authorization': `Bearer ${process.env.FIPE_TOKEN}` }
+  : {};
+
 async function apiFetch(url) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const r = await fetch(url);
+      const r = await fetch(url, { headers: FIPE_HEADERS });
       if (r.status === 429) {
         process.stdout.write(' [rate limit, aguardando 2s]');
         await sleep(2000);
@@ -54,7 +58,7 @@ async function apiFetch(url) {
         }
         return null;
       }
-      await sleep(800);
+      await sleep(300);
       return await r.json();
     } catch(e) {
       if (attempt === 0) { await sleep(2000); continue; }
