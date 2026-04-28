@@ -15,14 +15,33 @@ if (!SUPA_KEY) { console.error('❌ SUPABASE_KEY não definido'); process.exit(1
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+const FIPE_HEADERS = process.env.FIPE_TOKEN
+  ? { 'Authorization': `Bearer ${process.env.FIPE_TOKEN}` }
+  : {};
+
 async function apiFetch(url) {
-  for (let t = 0; t < 3; t++) {
+  for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const r = await fetch(url);
-      if (r.status === 429) { await sleep(3000 * (t+1)); continue; }
-      if (!r.ok) return null;
+      const r = await fetch(url, { headers: FIPE_HEADERS });
+      if (r.status === 429) {
+        process.stdout.write(' [rate limit, aguardando 2s]');
+        await sleep(2000);
+        continue;
+      }
+      if (!r.ok) {
+        if (attempt === 0) {
+          process.stdout.write(' [erro, retry em 2s]');
+          await sleep(2000);
+          continue;
+        }
+        return null;
+      }
+      await sleep(300);
       return await r.json();
-    } catch(e) { await sleep(2000); }
+    } catch(e) {
+      if (attempt === 0) { await sleep(2000); continue; }
+      return null;
+    }
   }
   return null;
 }
@@ -126,8 +145,7 @@ async function main() {
       nullConsec++;
     }
 
-    // Backoff progressivo
-    const delay = nullConsec >= 5 ? 3000 : nullConsec >= 3 ? 1500 : 500;
+    const delay = nullConsec >= 5 ? 2000 : nullConsec >= 3 ? 1000 : 200;
     await sleep(delay);
   }
 

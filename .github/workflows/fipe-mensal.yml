@@ -22,4 +22,5 @@ jobs:
       - name: Atualizar FIPE
         env:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          FIPE_TOKEN: ${{ secrets.FIPE_TOKEN }}
         run: node scripts/atualizar-fipe-mensal.js
