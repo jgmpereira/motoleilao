@@ -221,19 +221,35 @@ tbody tr:hover{background:var(--s2);}
       <div style="width:40px;height:40px;background:var(--accent);clip-path:polygon(20% 0%,80% 0%,100% 20%,100% 80%,80% 100%,20% 100%,0% 80%,0% 20%);display:flex;align-items:center;justify-content:center;font-size:18px;">🏍</div>
       <span style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:4px;color:var(--text);">MOTO<span style="color:var(--accent);">LEILÃO</span></span>
     </div>
-    <div style="text-align:center;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:32px;">Monitor de Leilões</div>
-    <div class="form-group">
-      <label class="form-label">Email</label>
-      <input id="login-email" type="email" class="form-input" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')document.getElementById('login-senha').focus()">
+    <div id="login-subtitle" style="text-align:center;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:32px;">Monitor de Leilões</div>
+    <!-- SEÇÃO: login normal -->
+    <div id="login-form-section">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input id="login-email" type="email" class="form-input" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')document.getElementById('login-senha').focus()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input id="login-senha" type="password" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()">
+      </div>
+      <div id="login-erro" style="font-size:12px;min-height:20px;margin-bottom:10px;text-align:center;line-height:1.4;"></div>
+      <button id="login-btn" onclick="fazerLogin()" class="btn btn-accent" style="width:100%;padding:12px;font-size:14px;letter-spacing:.5px;">Entrar</button>
+      <div style="text-align:center;margin-top:16px;">
+        <button onclick="recuperarSenha()" style="background:none;border:none;font-size:12px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;padding:4px 8px;border-radius:4px;transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Esqueci minha senha</button>
+      </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Senha</label>
-      <input id="login-senha" type="password" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()">
-    </div>
-    <div id="login-erro" style="font-size:12px;min-height:20px;margin-bottom:10px;text-align:center;line-height:1.4;"></div>
-    <button id="login-btn" onclick="fazerLogin()" class="btn btn-accent" style="width:100%;padding:12px;font-size:14px;letter-spacing:.5px;">Entrar</button>
-    <div style="text-align:center;margin-top:16px;">
-      <button onclick="recuperarSenha()" style="background:none;border:none;font-size:12px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;padding:4px 8px;border-radius:4px;transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Esqueci minha senha</button>
+    <!-- SEÇÃO: definir senha (invite / recovery) -->
+    <div id="definir-senha-section" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Nova Senha</label>
+        <input id="nova-senha" type="password" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')document.getElementById('confirmar-senha').focus()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirmar Senha</label>
+        <input id="confirmar-senha" type="password" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')confirmarDefinirSenha()">
+      </div>
+      <div id="definir-senha-erro" style="font-size:12px;min-height:20px;margin-bottom:10px;text-align:center;line-height:1.4;"></div>
+      <button id="definir-senha-btn" onclick="confirmarDefinirSenha()" class="btn btn-accent" style="width:100%;padding:12px;font-size:14px;letter-spacing:.5px;">Definir Senha</button>
     </div>
   </div>
 </div>
@@ -777,6 +793,9 @@ async function supaFetch(path, opts={}) {
 function mostrarLogin(erroMsg) {
   document.getElementById('login-overlay').style.display = 'flex';
   document.getElementById('loading-overlay').style.display = 'none';
+  document.getElementById('login-form-section').style.display = 'block';
+  document.getElementById('definir-senha-section').style.display = 'none';
+  document.getElementById('login-subtitle').textContent = 'Monitor de Leilões';
   if (erroMsg) {
     const el = document.getElementById('login-erro');
     el.style.color = 'var(--red)';
@@ -792,6 +811,17 @@ function esconderLogin() {
 }
 
 async function checkAuth() {
+  // Supabase envia access_token no hash após convite ou recuperação de senha
+  if (location.hash && location.hash.length > 1) {
+    const params = new URLSearchParams(location.hash.slice(1));
+    const type = params.get('type');
+    const token = params.get('access_token');
+    if ((type === 'invite' || type === 'recovery') && token) {
+      history.replaceState(null, '', location.pathname + location.search);
+      mostrarDefinirSenha(token);
+      return;
+    }
+  }
   if (!authToken) { mostrarLogin(); return; }
   try {
     await verificarAssinatura(authEmail);
@@ -880,6 +910,65 @@ function fazerLogout() {
   const userEl = document.getElementById('login-user-info');
   if (userEl) userEl.textContent = '';
   mostrarLogin();
+}
+
+// ===================== DEFINIR SENHA (invite / recovery) =====================
+let _pendingToken = null;
+
+function mostrarDefinirSenha(token) {
+  _pendingToken = token;
+  document.getElementById('loading-overlay').style.display = 'none';
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.getElementById('login-form-section').style.display = 'none';
+  document.getElementById('definir-senha-section').style.display = 'block';
+  document.getElementById('login-subtitle').textContent = 'Defina sua senha';
+}
+
+async function confirmarDefinirSenha() {
+  const nova = document.getElementById('nova-senha').value;
+  const conf = document.getElementById('confirmar-senha').value;
+  const errEl = document.getElementById('definir-senha-erro');
+  const btn = document.getElementById('definir-senha-btn');
+  errEl.textContent = '';
+  if (!nova || nova.length < 6) {
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+    return;
+  }
+  if (nova !== conf) {
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = 'As senhas não coincidem.';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+  try {
+    const res = await fetch(`${SUPA_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${_pendingToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ password: nova })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.msg || 'Erro ao definir senha.');
+    authToken = _pendingToken;
+    authEmail = data.email;
+    _pendingToken = null;
+    await verificarAssinatura(authEmail);
+    localStorage.setItem('supaAuthToken', authToken);
+    localStorage.setItem('supaAuthEmail', authEmail);
+    esconderLogin();
+    carregarDados();
+  } catch(e) {
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Definir Senha';
+  }
 }
 
 // ===================== STATE =====================
