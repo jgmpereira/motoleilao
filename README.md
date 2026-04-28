@@ -353,10 +353,14 @@ localStorage → Supabase (fipe_valores) → API externa
 - Troca de senha obrigatória no primeiro login — usuário é forçado a definir senha própria antes de acessar o app
 - Verificação de assinatura ativa — após login, checa `assinantes.status = ativo`; bloqueia acesso se inativo
 - Usuários VIP — lista de emails com acesso sem verificação de assinatura (bypass direto)
+- Landing page de vendas — página pública integrada no `index.html`, aparece na URL raiz antes do login; hero, 4 cards de funcionalidades, card de preço R$19,90/mês, botão Kiwify
+- Tela de assinatura expirada — tela dark com cadeado exibida quando `assinantes.status != ativo`; botão "Reativar assinatura" (Kiwify) e botão "Sair"; token salvo no localStorage para o usuário recuperar acesso após reativar sem precisar logar de novo
 
-### 🔲 Próximos passos monetização
-1. Landing page de vendas — página pública apresentando o produto e botão de compra Kiwify
-2. Página de assinatura expirada — tela amigável exibida quando `assinantes.status != ativo`, com link para reativar
+### 🔲 Próximos passos — divulgação
+1. Postar no Instagram/TikTok — vídeo curto mostrando o dashboard ao vivo: abrindo leilão, vendo % FIPE, filtrando por condição
+2. Grupo no WhatsApp ou Telegram — canal para assinantes com dicas de leilão e alertas de lotes abaixo de 50% FIPE
+3. SEO básico — adicionar `<meta>` de descrição e OG tags na landing para compartilhamento em redes sociais
+4. Teste com primeiros pagantes — validar fluxo completo: compra no Kiwify → webhook → email → login → dashboard
 
 ---
 
