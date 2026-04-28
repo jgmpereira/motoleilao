@@ -214,13 +214,37 @@ tbody tr:hover{background:var(--s2);}
 </head>
 <body>
 
+<!-- LOGIN -->
+<div id="login-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:40px 36px;width:400px;max-width:95vw;box-shadow:0 24px 64px rgba(0,0,0,.12);">
+    <div style="display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:8px;">
+      <div style="width:40px;height:40px;background:var(--accent);clip-path:polygon(20% 0%,80% 0%,100% 20%,100% 80%,80% 100%,20% 100%,0% 80%,0% 20%);display:flex;align-items:center;justify-content:center;font-size:18px;">🏍</div>
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:4px;color:var(--text);">MOTO<span style="color:var(--accent);">LEILÃO</span></span>
+    </div>
+    <div style="text-align:center;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:32px;">Monitor de Leilões</div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input id="login-email" type="email" class="form-input" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')document.getElementById('login-senha').focus()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Senha</label>
+      <input id="login-senha" type="password" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()">
+    </div>
+    <div id="login-erro" style="font-size:12px;min-height:20px;margin-bottom:10px;text-align:center;line-height:1.4;"></div>
+    <button id="login-btn" onclick="fazerLogin()" class="btn btn-accent" style="width:100%;padding:12px;font-size:14px;letter-spacing:.5px;">Entrar</button>
+    <div style="text-align:center;margin-top:16px;">
+      <button onclick="recuperarSenha()" style="background:none;border:none;font-size:12px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;padding:4px 8px;border-radius:4px;transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Esqueci minha senha</button>
+    </div>
+  </div>
+</div>
+
 <!-- LOADING -->
 <div class="loading-overlay" id="loading-overlay">
   <div class="loading-spinner"></div>
   <div class="loading-text" id="loading-text">CARREGANDO DADOS...</div>
 </div>
 
-<header>
+<header id="app-header">
   <div class="logo" onclick="fecharFichaMoto();limparFiltrosGm();showPage('leiloes')" style="cursor:pointer;">
     <div class="logo-icon">🏍</div>
     <h1>MOTO<span>LEILÃO</span></h1>
@@ -228,9 +252,11 @@ tbody tr:hover{background:var(--s2);}
   <div class="hright">
     <div class="live"><div class="ldot"></div>MONITORANDO</div>
     <span class="fipe-status" id="fipe-global-status"></span>
+    <span id="login-user-info" style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
     <button class="btn btn-accent btn-sm" onclick="abrirModalImportar()">📥 Importar</button>
     <button class="btn btn-green btn-sm" onclick="abrirModalLeilao()">+ Leilão</button>
     <button class="btn btn-ghost btn-sm" onclick="showPage('analise')">📊 Análise</button>
+    <button class="btn btn-ghost btn-sm" id="logout-btn" onclick="fazerLogout()" title="Sair" style="display:none;">🚪 Sair</button>
   </div>
 </header>
 
@@ -721,13 +747,19 @@ tbody tr:hover{background:var(--s2);}
 const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50bHdod210c3luaWluYmt3amdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTM4OTIsImV4cCI6MjA4ODg4OTg5Mn0.zZi8nMpKMcFvZe_uDLZQB3Jtb80UpkefKa3Q7M6mDwA';
 
+// ===================== AUTH STATE =====================
+let authToken = null;
+let authEmail = null;
+try { authToken = localStorage.getItem('supaAuthToken'); } catch(e){}
+try { authEmail = localStorage.getItem('supaAuthEmail'); } catch(e){}
+
 async function supaFetch(path, opts={}) {
   const isWrite = opts.method && opts.method !== 'GET';
   const res = await fetch(`${SUPA_URL}/rest/v1/${path}`, {
     ...opts,
     headers: {
       'apikey': SUPA_KEY,
-      'Authorization': `Bearer ${SUPA_KEY}`,
+      'Authorization': `Bearer ${authToken || SUPA_KEY}`,
       'Content-Type': 'application/json',
       'Prefer': opts.prefer !== undefined ? opts.prefer : (isWrite ? 'return=minimal' : 'return=representation'),
       ...(opts.headers||{})
@@ -739,6 +771,115 @@ async function supaFetch(path, opts={}) {
   }
   const text = await res.text();
   return text ? JSON.parse(text) : null;
+}
+
+// ===================== AUTH FUNCTIONS =====================
+function mostrarLogin(erroMsg) {
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.getElementById('loading-overlay').style.display = 'none';
+  if (erroMsg) {
+    const el = document.getElementById('login-erro');
+    el.style.color = 'var(--red)';
+    el.textContent = erroMsg;
+  }
+}
+
+function esconderLogin() {
+  document.getElementById('login-overlay').style.display = 'none';
+  const userEl = document.getElementById('login-user-info');
+  if (userEl && authEmail) userEl.textContent = authEmail;
+  document.getElementById('logout-btn').style.display = '';
+}
+
+async function checkAuth() {
+  if (!authToken) { mostrarLogin(); return; }
+  try {
+    await verificarAssinatura(authEmail);
+    esconderLogin();
+    carregarDados();
+  } catch(e) {
+    authToken = null; authEmail = null;
+    localStorage.removeItem('supaAuthToken');
+    localStorage.removeItem('supaAuthEmail');
+    mostrarLogin(e.message);
+  }
+}
+
+async function fazerLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-senha').value;
+  const errEl = document.getElementById('login-erro');
+  const btn = document.getElementById('login-btn');
+  errEl.textContent = '';
+  if (!email || !password) {
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = 'Preencha email e senha.';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Entrando...';
+  try {
+    const res = await fetch(`${SUPA_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.msg || 'Credenciais inválidas.');
+    authToken = data.access_token;
+    authEmail = data.user?.email || email;
+    await verificarAssinatura(authEmail);
+    localStorage.setItem('supaAuthToken', authToken);
+    localStorage.setItem('supaAuthEmail', authEmail);
+    esconderLogin();
+    carregarDados();
+  } catch(e) {
+    authToken = null; authEmail = null;
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+  }
+}
+
+async function verificarAssinatura(email) {
+  if (!email) throw new Error('Email não identificado.');
+  const rows = await supaFetch(`assinantes?email=eq.${encodeURIComponent(email)}&status=eq.ativo&select=id`);
+  if (!rows || rows.length === 0) throw new Error('Assinatura não encontrada ou cancelada.');
+}
+
+async function recuperarSenha() {
+  const email = document.getElementById('login-email').value.trim();
+  const errEl = document.getElementById('login-erro');
+  if (!email) {
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = 'Digite seu email para recuperar a senha.';
+    return;
+  }
+  try {
+    const res = await fetch(`${SUPA_URL}/auth/v1/recover`, {
+      method: 'POST',
+      headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    if (!res.ok) throw new Error('Erro ao enviar email de recuperação.');
+    errEl.style.color = 'var(--green)';
+    errEl.textContent = 'Email de recuperação enviado! Verifique sua caixa de entrada.';
+  } catch(e) {
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = e.message;
+  }
+}
+
+function fazerLogout() {
+  authToken = null; authEmail = null;
+  localStorage.removeItem('supaAuthToken');
+  localStorage.removeItem('supaAuthEmail');
+  document.getElementById('logout-btn').style.display = 'none';
+  const userEl = document.getElementById('login-user-info');
+  if (userEl) userEl.textContent = '';
+  mostrarLogin();
 }
 
 // ===================== STATE =====================
@@ -4717,7 +4858,7 @@ function showToast(msg, icon='✅') {
 }
 
 // ===================== INIT =====================
-carregarDados();
+checkAuth();
 </script>
 </body>
 </html>
