@@ -4739,14 +4739,14 @@ function renderHistoricoGeral() {
       const ind=getIndicador(m,pct);
       const leilao=LEILOES.find(l=>l.id===m.leilao_id);
       const fotoTd=m.foto
-        ?`<td style="padding:4px 6px;width:48px;"><img src="${m.foto}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"><div style="display:none;width:40px;height:40px;border-radius:4px;background:var(--s3);align-items:center;justify-content:center;font-size:18px;">🏍️</div></td>`
-        :`<td style="padding:4px 6px;width:48px;"><div style="display:flex;width:40px;height:40px;border-radius:4px;background:var(--s3);align-items:center;justify-content:center;font-size:18px;">🏍️</div></td>`;
-      return `<tr>
+        ?`<td style="padding:4px 6px;width:60px;cursor:pointer;" onclick="abrirFichaMoto(${m.id})"><img src="${m.foto}" style="width:56px;height:56px;object-fit:cover;border-radius:4px;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"><div style="display:none;width:56px;height:56px;border-radius:4px;background:var(--s3);align-items:center;justify-content:center;font-size:22px;">🏍️</div></td>`
+        :`<td style="padding:4px 6px;width:60px;cursor:pointer;" onclick="abrirFichaMoto(${m.id})"><div style="display:flex;width:56px;height:56px;border-radius:4px;background:var(--s3);align-items:center;justify-content:center;font-size:22px;">🏍️</div></td>`;
+      return `<tr style="cursor:pointer;" onclick="abrirFichaMoto(${m.id})">
         ${fotoTd}
         <td style="font-size:11px;color:var(--muted);white-space:nowrap;">${leilao?leilao.data:m.leilao_id}</td>
         <td style="font-size:11px;color:var(--muted);">${leilao?.plataforma||'—'}</td>
         <td class="td-lote">${m.lote||'—'}</td>
-        <td><strong>${m.marca} ${m.modelo}</strong></td>
+        <td><strong style="cursor:pointer;">${m.marca} ${m.modelo}</strong></td>
         <td style="color:var(--muted);font-size:11px;">${m.ano||'—'}</td>
         <td>${(()=>{ const pl=getPorteLabel(m.cilindrada); return pl?`<span class="porte-tag ${pl.cls}">${pl.label}</span>`:'<span style="color:var(--muted);font-size:11px;">—</span>'; })()}</td>
         <td><span class="cond-tag ${condClass[m.condicao]||''}">${m.condicao||'—'}</span></td>
@@ -4755,7 +4755,7 @@ function renderHistoricoGeral() {
         <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);">${fipe?'R$'+Number(fipe).toLocaleString('pt-BR'):'—'}</td>
         <td>${pct?`<span class="pct-tag ${pctC}">${pct}%</span>`:'—'}</td>
         <td><span class="${ind.cls}">${ind.text}</span></td>
-        <td><button onclick="deletarArrematado(${m.id},this)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕</button></td>
+        <td onclick="event.stopPropagation()"><button onclick="deletarArrematado(${m.id},this)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕</button></td>
       </tr>`;
     }).join('')}</tbody>
   </table>`;
