@@ -376,7 +376,7 @@ tbody tr:hover{background:var(--s2);}
 </div>
 
 <!-- LOADING -->
-<div class="loading-overlay" id="loading-overlay">
+<div class="loading-overlay" id="loading-overlay" style="display:none;">
   <div class="loading-spinner"></div>
   <div class="loading-text" id="loading-text">CARREGANDO DADOS...</div>
 </div>
@@ -934,6 +934,7 @@ function esconderLogin() {
 function mostrarLanding() {
   document.getElementById('landing-page').style.display = 'block';
   document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('loading-overlay').style.display = 'none';
   document.getElementById('app-header').style.display = 'none';
   document.querySelector('.tabs').style.display = 'none';
   document.querySelector('.stats').style.display = 'none';
