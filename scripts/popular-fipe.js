@@ -38,13 +38,28 @@ const SINONIMOS = {
 };
 
 async function apiFetch(url) {
-  for (let t = 0; t < 3; t++) {
+  for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const r = await fetch(url);
-      if (r.status === 429) { await sleep(3000 * (t+1)); continue; }
-      if (!r.ok) return null;
+      if (r.status === 429) {
+        process.stdout.write(' [rate limit, aguardando 2s]');
+        await sleep(2000);
+        continue;
+      }
+      if (!r.ok) {
+        if (attempt === 0) {
+          process.stdout.write(' [erro, retry em 2s]');
+          await sleep(2000);
+          continue;
+        }
+        return null;
+      }
+      await sleep(800);
       return await r.json();
-    } catch(e) { await sleep(2000); }
+    } catch(e) {
+      if (attempt === 0) { await sleep(2000); continue; }
+      return null;
+    }
   }
   return null;
 }
@@ -252,8 +267,7 @@ async function main() {
       falhou++;
     }
 
-    // Pausa pequena para não sobrecarregar a API
-    await sleep(300);
+    await sleep(200);
   }
 
   console.log(`\n✅ Concluído: ${ok} encontrados, ${falhou} não encontrados de ${motos.length} total`);
