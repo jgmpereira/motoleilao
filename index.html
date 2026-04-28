@@ -210,9 +210,130 @@ tbody tr:hover{background:var(--s2);}
   .stats .stat:nth-child(4),.stats .stat:nth-child(5){display:none;}
   #gm-topbar{position:sticky;top:0;z-index:50;background:var(--s1);padding:8px 0;margin-bottom:8px;margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px;}
 }
+
+/* LANDING PAGE */
+#landing-page{background:#111318;color:#e8eaed;min-height:100vh;}
+.lp-nav{display:flex;align-items:center;justify-content:space-between;padding:18px 48px;position:sticky;top:0;background:rgba(17,19,24,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06);z-index:50;}
+.lp-logo{display:flex;align-items:center;gap:10px;}
+.lp-logo-icon{width:36px;height:36px;background:var(--accent);clip-path:polygon(20% 0%,80% 0%,100% 20%,100% 80%,80% 100%,20% 100%,0% 80%,0% 20%);display:flex;align-items:center;justify-content:center;font-size:16px;}
+.lp-logo-text{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:#e8eaed;}
+.lp-logo-text span{color:var(--accent);}
+.lp-hero{padding:100px 48px 80px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(255,77,0,.13) 0%,transparent 60%);}
+.lp-hero-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(255,77,0,.12);border:1px solid rgba(255,77,0,.25);color:var(--accent);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:28px;}
+.lp-hero h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,6vw,68px);letter-spacing:2px;line-height:1.05;color:#fff;margin-bottom:20px;}
+.lp-hero h2 span{color:var(--accent);}
+.lp-hero p{font-size:clamp(14px,1.8vw,17px);color:#8a93a8;max-width:540px;margin:0 auto 36px;line-height:1.65;}
+.lp-hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.lp-btn-primary{background:var(--accent);color:#fff;padding:14px 32px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;letter-spacing:.3px;transition:all .2s;display:inline-block;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.lp-btn-primary:hover{background:#e04000;transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,77,0,.35);}
+.lp-btn-secondary{background:transparent;color:#c8cfd9;padding:14px 32px;border-radius:10px;font-size:15px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,.15);transition:all .2s;display:inline-block;}
+.lp-btn-secondary:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.05);color:#e8eaed;}
+.lp-section{padding:80px 48px;}
+.lp-section.alt{background:#0e1015;}
+.lp-section-label{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);text-align:center;margin-bottom:10px;}
+.lp-section-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:#fff;text-align:center;margin-bottom:44px;}
+.lp-features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:1100px;margin:0 auto;}
+.lp-feat-card{background:#1c1f27;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:28px 22px;transition:border-color .2s,transform .2s;}
+.lp-feat-card:hover{border-color:rgba(255,77,0,.3);transform:translateY(-2px);}
+.lp-feat-icon{font-size:28px;margin-bottom:14px;}
+.lp-feat-title{font-size:15px;font-weight:700;color:#e0e4eb;margin-bottom:8px;}
+.lp-feat-desc{font-size:13px;color:#5c6478;line-height:1.55;}
+.lp-price-card{background:#1c1f27;border:2px solid rgba(255,77,0,.3);border-radius:18px;padding:40px 36px;max-width:400px;margin:0 auto;box-shadow:0 0 48px rgba(255,77,0,.08);}
+.lp-price-badge{background:rgba(255,77,0,.12);color:var(--accent);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:20px;}
+.lp-price-amount{font-family:'Bebas Neue',sans-serif;font-size:64px;letter-spacing:1px;color:#fff;line-height:1;}
+.lp-price-amount sup{font-size:26px;vertical-align:super;}
+.lp-price-period{font-size:13px;color:#5c6478;margin-top:4px;margin-bottom:28px;}
+.lp-price-list{list-style:none;text-align:left;margin-bottom:32px;}
+.lp-price-list li{padding:9px 0;font-size:14px;color:#8a93a8;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:8px;}
+.lp-price-list li:last-child{border-bottom:none;}
+.lp-price-list li::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0;}
+.lp-footer{text-align:center;padding:28px 48px;border-top:1px solid rgba(255,255,255,.05);font-size:12px;color:#3a4050;background:#0e1015;}
+@media(max-width:960px){.lp-features-grid{grid-template-columns:repeat(2,1fr);}.lp-nav{padding:14px 24px;}}
+@media(max-width:640px){
+  .lp-nav,.lp-hero,.lp-section,.lp-section.alt,.lp-footer{padding-left:20px;padding-right:20px;}
+  .lp-features-grid{grid-template-columns:1fr;}
+  .lp-hero{padding-top:56px;padding-bottom:40px;}
+  .lp-hero-btns{flex-direction:column;align-items:center;}
+  .lp-btn-primary,.lp-btn-secondary{width:100%;max-width:300px;text-align:center;}
+  .lp-price-card{padding:28px 20px;}
+  .lp-section{padding:56px 20px;}
+}
 </style>
 </head>
 <body>
+
+<!-- LANDING PAGE -->
+<div id="landing-page" style="display:none;">
+  <nav class="lp-nav">
+    <div class="lp-logo">
+      <div class="lp-logo-icon">🏍</div>
+      <span class="lp-logo-text">MOTO<span>LEILÃO</span></span>
+    </div>
+    <a href="#login" class="lp-btn-secondary" style="padding:8px 22px;font-size:13px;">Entrar</a>
+  </nav>
+
+  <section class="lp-hero">
+    <div class="lp-hero-tag">
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--accent);animation:p 1.5s infinite;flex-shrink:0;"></div>
+      ATUALIZADO DIARIAMENTE
+    </div>
+    <h2>Encontre motos em leilão<br>abaixo da <span>FIPE</span></h2>
+    <p>Monitore leilões de motos em tempo real, compare preços com a tabela FIPE e descubra os melhores negócios antes de qualquer um.</p>
+    <div class="lp-hero-btns">
+      <a href="https://pay.kiwify.com.br/d0fkD1p" target="_blank" rel="noopener" class="lp-btn-primary">Assinar por R$19,90/mês</a>
+      <a href="#login" class="lp-btn-secondary">Já tenho conta</a>
+    </div>
+  </section>
+
+  <section class="lp-section alt">
+    <div class="lp-section-label">O que você encontra</div>
+    <div class="lp-section-title">TUDO QUE VOCÊ PRECISA PARA ARREMATAR BEM</div>
+    <div class="lp-features-grid">
+      <div class="lp-feat-card">
+        <div class="lp-feat-icon">🏍️</div>
+        <div class="lp-feat-title">Múltiplos leilões</div>
+        <div class="lp-feat-desc">Sodré Santoro, Superbid, VIP Leilões, Copart e mais — tudo em um único painel atualizado automaticamente.</div>
+      </div>
+      <div class="lp-feat-card">
+        <div class="lp-feat-icon">📊</div>
+        <div class="lp-feat-title">Comparação FIPE</div>
+        <div class="lp-feat-desc">Veja em tempo real se o lance está abaixo ou acima do valor de mercado antes de dar o seu lance.</div>
+      </div>
+      <div class="lp-feat-card">
+        <div class="lp-feat-icon">📈</div>
+        <div class="lp-feat-title">Histórico de preços</div>
+        <div class="lp-feat-desc">Saiba quanto o modelo foi arrematado anteriormente e calcule com segurança o seu limite de lance.</div>
+      </div>
+      <div class="lp-feat-card">
+        <div class="lp-feat-icon">🔍</div>
+        <div class="lp-feat-title">Filtros avançados</div>
+        <div class="lp-feat-desc">Filtre por marca, condição, porte e % da FIPE para achar exatamente o que você procura.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section" style="text-align:center;">
+    <div class="lp-section-label">Plano</div>
+    <div class="lp-section-title">ACESSO COMPLETO</div>
+    <div class="lp-price-card">
+      <div class="lp-price-badge">MENSAL</div>
+      <div class="lp-price-amount"><sup>R$</sup>19<span style="font-size:34px;vertical-align:baseline;">,90</span></div>
+      <div class="lp-price-period">por mês · cancele quando quiser</div>
+      <ul class="lp-price-list">
+        <li>Todos os leilões monitorados</li>
+        <li>Comparação com tabela FIPE</li>
+        <li>Histórico de arrematações</li>
+        <li>Filtros avançados por marca e condição</li>
+        <li>Atualizações diárias automáticas</li>
+      </ul>
+      <a href="https://pay.kiwify.com.br/d0fkD1p" target="_blank" rel="noopener" class="lp-btn-primary" style="display:block;text-align:center;width:100%;">Assinar agora</a>
+    </div>
+  </section>
+
+  <footer class="lp-footer">
+    © 2026 MotoLeilão — Monitor de leilões de motos
+  </footer>
+</div>
 
 <!-- LOGIN -->
 <div id="login-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;align-items:center;justify-content:center;">
@@ -810,6 +931,24 @@ function esconderLogin() {
   document.getElementById('logout-btn').style.display = '';
 }
 
+function mostrarLanding() {
+  document.getElementById('landing-page').style.display = 'block';
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('app-header').style.display = 'none';
+  document.querySelector('.tabs').style.display = 'none';
+  document.querySelector('.stats').style.display = 'none';
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  history.replaceState(null, '', location.pathname);
+}
+
+function esconderLanding() {
+  document.getElementById('landing-page').style.display = 'none';
+  document.getElementById('app-header').style.display = '';
+  document.querySelector('.tabs').style.display = '';
+  document.querySelector('.stats').style.display = '';
+  document.querySelectorAll('.page').forEach(p => p.style.display = '');
+}
+
 async function checkAuth() {
   // Supabase envia access_token no hash após convite ou recuperação de senha
   console.log('[checkAuth] hash completo:', location.hash);
@@ -820,19 +959,28 @@ async function checkAuth() {
     console.log('[checkAuth] type extraído:', type, '| token extraído:', token);
     if ((type === 'invite' || type === 'recovery') && token) {
       history.replaceState(null, '', location.pathname + location.search);
+      esconderLanding();
       mostrarDefinirSenha(token);
       return;
     }
   }
-  if (!authToken) { mostrarLogin(); return; }
+  const hash = location.hash;
+  if (!authToken) {
+    if (hash === '#login') { esconderLanding(); mostrarLogin(); }
+    else if (!hash || hash === '#' || hash === '') { mostrarLanding(); }
+    else { esconderLanding(); mostrarLogin(); }
+    return;
+  }
   try {
     await verificarAssinatura(authEmail);
+    esconderLanding();
     esconderLogin();
     carregarDados();
   } catch(e) {
     authToken = null; authEmail = null;
     localStorage.removeItem('supaAuthToken');
     localStorage.removeItem('supaAuthEmail');
+    esconderLanding();
     mostrarLogin(e.message);
   }
 }
@@ -915,7 +1063,7 @@ function fazerLogout() {
   document.getElementById('logout-btn').style.display = 'none';
   const userEl = document.getElementById('login-user-info');
   if (userEl) userEl.textContent = '';
-  mostrarLogin();
+  mostrarLanding();
 }
 
 // ===================== DEFINIR SENHA (invite / recovery) =====================
@@ -1105,7 +1253,16 @@ const HASH_TO_PAGE = {'#leiloes':'leiloes','#fipe':'analise','#historico':'histo
 let _initialHashHandled = false;
 
 function navigateToHash(hash) {
-  if(!hash || hash === '#' || hash === '') { showPage('leiloes', null, true); return; }
+  if(!hash || hash === '#' || hash === '') {
+    if(authToken) showPage('leiloes', null, true);
+    else mostrarLanding();
+    return;
+  }
+  if(hash === '#login') {
+    if(authToken) { history.replaceState(null, '', '#leiloes'); showPage('leiloes', null, true); }
+    else { esconderLanding(); mostrarLogin(); }
+    return;
+  }
   if(hash.startsWith('#moto-')) {
     const id = parseInt(hash.slice(6));
     if(!isNaN(id)) { abrirFichaMoto(id); return; }
