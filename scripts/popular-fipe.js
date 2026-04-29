@@ -105,25 +105,38 @@ function scoreModelo(nome, termo) {
   return cobertura * 100 - excesso * 2;
 }
 
+let _debugDone = false;
+
 async function buscarFipe(marca, modelo, ano) {
   // Carrega marcas
   if (!_marcas) {
-    _marcas = await apiFetch(`${FIPE_BASE}/brands`);
+    const rawMarcas = await apiFetch(`${FIPE_BASE}/brands`);
+    if (!_debugDone) {
+      console.log('\n[DEBUG] Raw response /brands:', JSON.stringify(rawMarcas).slice(0, 300));
+      console.log('[DEBUG] Type:', Array.isArray(rawMarcas) ? `array[${rawMarcas?.length}]` : typeof rawMarcas);
+      if (rawMarcas && rawMarcas[0]) console.log('[DEBUG] Primeiro item:', JSON.stringify(rawMarcas[0]));
+      _debugDone = true;
+    }
+    _marcas = rawMarcas;
     if (!_marcas) return null;
   }
 
   const marcaLimpa = normFipe(marca.replace(/\/[a-z]+\d*/gi, '').trim());
-  const marcaObj = _marcas.find(x => normFipe(x.nome) === marcaLimpa)
-    || _marcas.find(x => normFipe(x.nome).includes(marcaLimpa))
-    || _marcas.find(x => marcaLimpa.includes(normFipe(x.nome)));
+  const marcaObj = _marcas.find(x => normFipe(x.name) === marcaLimpa)
+    || _marcas.find(x => normFipe(x.name).includes(marcaLimpa))
+    || _marcas.find(x => marcaLimpa.includes(normFipe(x.name)));
   if (!marcaObj) return null;
 
   // Carrega modelos
-  if (!_modelosCache[marcaObj.codigo]) {
-    const r = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.codigo}/models`);
-    _modelosCache[marcaObj.codigo] = r ? r.models : [];
+  if (!_modelosCache[marcaObj.code]) {
+    const r = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.code}/models`);
+    if (Object.keys(_modelosCache).length === 0) {
+      console.log(`\n[DEBUG] Raw response /models (${marcaObj.name}):`, JSON.stringify(r).slice(0, 400));
+      console.log('[DEBUG] Chaves do objeto:', r ? Object.keys(r) : 'null');
+    }
+    _modelosCache[marcaObj.code] = r ? (r.models ?? r.modelos ?? r) : [];
   }
-  const modelos = _modelosCache[marcaObj.codigo];
+  const modelos = _modelosCache[marcaObj.code];
 
   // Termos de busca
   const sinonKey1 = `${marcaLimpa}|${normFipe(modelo)}`;
@@ -154,7 +167,7 @@ async function buscarFipe(marca, modelo, ano) {
   let modeloObj = null;
   for (const tentativa of tentativas) {
     const scored = modelos
-      .map(x => ({ x, score: scoreModelo(x.nome, tentativa) }))
+      .map(x => ({ x, score: scoreModelo(x.name, tentativa) }))
       .filter(x => x.score > 0)
       .sort((a, b) => b.score - a.score);
     const nTokens = normFipe(tentativa).split(/\s+/).filter(p => p.length > 0).length;
@@ -167,9 +180,9 @@ async function buscarFipe(marca, modelo, ano) {
   if (!modeloObj) return null;
 
   // Carrega anos
-  const anosKey = `${marcaObj.codigo}_${modeloObj.codigo}`;
+  const anosKey = `${marcaObj.code}_${modeloObj.code}`;
   if (!_anosCache[anosKey]) {
-    const r = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.codigo}/models/${modeloObj.codigo}/years`);
+    const r = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.code}/models/${modeloObj.code}/years`);
     _anosCache[anosKey] = r || [];
   }
   const anos = _anosCache[anosKey];
@@ -177,14 +190,14 @@ async function buscarFipe(marca, modelo, ano) {
 
   // Encontra ano
   const anoFab = (ano || '').split('/')[0].replace(/\D/g, '');
-  let anoObj = anos.find(a => a.nome.startsWith(anoFab))
-    || anos.find(a => a.nome.includes(anoFab));
-  
+  let anoObj = anos.find(a => a.name.startsWith(anoFab))
+    || anos.find(a => a.name.includes(anoFab));
+
   if (!anoObj && anoFab) {
     const target = parseInt(anoFab);
     const comAno = anos.map(a => ({
       a,
-      y: parseInt((a.nome.match(/^(\d{4})/) || [])[1] || 0)
+      y: parseInt((a.name.match(/^(\d{4})/) || [])[1] || 0)
     })).filter(x => x.y);
     comAno.sort((a, b) => Math.abs(a.y - target) - Math.abs(b.y - target));
     if (comAno.length && Math.abs(comAno[0].y - target) <= 3) anoObj = comAno[0].a;
@@ -193,17 +206,17 @@ async function buscarFipe(marca, modelo, ano) {
   if (!anoObj) return null;
 
   // Busca valor
-  const dados = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.codigo}/models/${modeloObj.codigo}/years/${anoObj.codigo}`);
+  const dados = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.code}/models/${modeloObj.code}/years/${anoObj.code}`);
   if (!dados || !dados.Valor) return null;
   
   const val = parseFloat(dados.Valor.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
   
   return {
     valor: val,
-    marcaCodigo: marcaObj.codigo,
-    modeloCodigo: modeloObj.codigo,
+    marcaCodigo: marcaObj.code,
+    modeloCodigo: modeloObj.code,
     codigoFipe: dados.CodigoFipe,
-    modeloNome: modeloObj.nome,
+    modeloNome: modeloObj.name,
   };
 }
 
