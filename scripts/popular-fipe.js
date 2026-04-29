@@ -8,7 +8,7 @@
 
 const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
 const SUPA_KEY = process.env.SUPABASE_KEY;
-const FIPE_BASE = 'https://parallelum.com.br/fipe/api/v1/motos';
+const FIPE_BASE = 'https://fipe.parallelum.com.br/api/v2/motorcycles';
 
 if (!SUPA_KEY) { console.error('❌ SUPABASE_KEY não definido'); process.exit(1); }
 
@@ -38,7 +38,7 @@ const SINONIMOS = {
 };
 
 const FIPE_HEADERS = process.env.FIPE_TOKEN
-  ? { 'Authorization': `Bearer ${process.env.FIPE_TOKEN}` }
+  ? { 'X-Subscription-Token': process.env.FIPE_TOKEN }
   : {};
 
 async function apiFetch(url) {
@@ -108,7 +108,7 @@ function scoreModelo(nome, termo) {
 async function buscarFipe(marca, modelo, ano) {
   // Carrega marcas
   if (!_marcas) {
-    _marcas = await apiFetch(`${FIPE_BASE}/marcas`);
+    _marcas = await apiFetch(`${FIPE_BASE}/brands`);
     if (!_marcas) return null;
   }
 
@@ -120,8 +120,8 @@ async function buscarFipe(marca, modelo, ano) {
 
   // Carrega modelos
   if (!_modelosCache[marcaObj.codigo]) {
-    const r = await apiFetch(`${FIPE_BASE}/marcas/${marcaObj.codigo}/modelos`);
-    _modelosCache[marcaObj.codigo] = r ? r.modelos : [];
+    const r = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.codigo}/models`);
+    _modelosCache[marcaObj.codigo] = r ? r.models : [];
   }
   const modelos = _modelosCache[marcaObj.codigo];
 
@@ -169,7 +169,7 @@ async function buscarFipe(marca, modelo, ano) {
   // Carrega anos
   const anosKey = `${marcaObj.codigo}_${modeloObj.codigo}`;
   if (!_anosCache[anosKey]) {
-    const r = await apiFetch(`${FIPE_BASE}/marcas/${marcaObj.codigo}/modelos/${modeloObj.codigo}/anos`);
+    const r = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.codigo}/models/${modeloObj.codigo}/years`);
     _anosCache[anosKey] = r || [];
   }
   const anos = _anosCache[anosKey];
@@ -193,7 +193,7 @@ async function buscarFipe(marca, modelo, ano) {
   if (!anoObj) return null;
 
   // Busca valor
-  const dados = await apiFetch(`${FIPE_BASE}/marcas/${marcaObj.codigo}/modelos/${modeloObj.codigo}/anos/${anoObj.codigo}`);
+  const dados = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.codigo}/models/${modeloObj.codigo}/years/${anoObj.codigo}`);
   if (!dados || !dados.Valor) return null;
   
   const val = parseFloat(dados.Valor.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));

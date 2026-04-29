@@ -9,14 +9,14 @@
 
 const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
 const SUPA_KEY = process.env.SUPABASE_KEY;
-const FIPE_BASE = 'https://parallelum.com.br/fipe/api/v1/motos';
+const FIPE_BASE = 'https://fipe.parallelum.com.br/api/v2/motorcycles';
 
 if (!SUPA_KEY) { console.error('❌ SUPABASE_KEY não definido'); process.exit(1); }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 const FIPE_HEADERS = process.env.FIPE_TOKEN
-  ? { 'Authorization': `Bearer ${process.env.FIPE_TOKEN}` }
+  ? { 'X-Subscription-Token': process.env.FIPE_TOKEN }
   : {};
 
 async function apiFetch(url) {
@@ -108,7 +108,7 @@ async function main() {
     process.stdout.write(`[${i+1}/${paraAtualizar.length}] lookup: ${r.lookup_key} ... `);
 
     try {
-      const url = `${FIPE_BASE}/marcas/${r.marca_codigo}/modelos/${r.modelo_codigo}/anos/${r.ano_modelo}-1`;
+      const url = `${FIPE_BASE}/brands/${r.marca_codigo}/models/${r.modelo_codigo}/years/${r.ano_modelo}-1`;
       const dados = await apiFetch(url);
 
       if (dados && dados.Valor) {
