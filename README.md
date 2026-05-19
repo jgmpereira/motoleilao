@@ -1,7 +1,8 @@
 # MotoLeilão — Mapa do Projeto
 
 Dashboard de monitoramento de leilões de moto.
-**URL:** https://jgmpereira.github.io/motoleilao
+**URL:** https://xn--motoleio-xza.com.br (motoleião.com.br) — HTTPS ativo
+**URL legada:** https://jgmpereira.github.io/motoleilao (redireciona)
 **Repositório:** https://github.com/jgmpereira/motoleilao
 **Supabase:** https://ntlwhwmtsyniinbkwjgg.supabase.co
 
@@ -359,8 +360,21 @@ localStorage → Supabase (fipe_valores) → API externa
 ### 🔲 Próximos passos — divulgação
 1. Postar no Instagram/TikTok — vídeo curto mostrando o dashboard ao vivo: abrindo leilão, vendo % FIPE, filtrando por condição
 2. Grupo no WhatsApp ou Telegram — canal para assinantes com dicas de leilão e alertas de lotes abaixo de 50% FIPE
-3. SEO básico — adicionar `<meta>` de descrição e OG tags na landing para compartilhamento em redes sociais
-4. Teste com primeiros pagantes — validar fluxo completo: compra no Kiwify → webhook → email → login → dashboard
+3. Teste com primeiros pagantes — validar fluxo completo: compra no Kiwify → webhook → email → login → dashboard
+
+---
+
+## Domínio próprio & SEO (Mai/2026)
+
+### ✅ Feito
+- **Domínio próprio:** `motoleião.com.br` (`xn--motoleio-xza.com.br`) apontando para o GitHub Pages
+- **HTTPS:** ativo — Enforce HTTPS marcado no GitHub Pages
+- **Resend:** domínio `xn--motoleio-xza.com.br` verificado — envio de emails liberado para qualquer destinatário; remetente padrão `contato@xn--motoleio-xza.com.br` (atualizado em `supabase/functions/kiwify-webhook/index.ts`)
+- **SEO:** meta tags de descrição, palavras-chave e Open Graph adicionadas em `index.html`
+- **Google Search Console:** propriedade cadastrada
+
+### 🔲 Pendente
+- Verificação DNS do Google Search Console para `xn--motoleio-xza.com.br`
 
 ---
 

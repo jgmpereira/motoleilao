@@ -3,7 +3,8 @@
 ## O que é
 Dashboard de monitoramento de leilões de motos com sistema de assinaturas.
 
-- **Site:** https://jgmpereira.github.io/motoleilao
+- **Site:** https://xn--motoleio-xza.com.br (motoleião.com.br) — HTTPS ativo (Enforce HTTPS no GitHub Pages)
+- **Site legado (redireciona):** https://jgmpereira.github.io/motoleilao
 - **Repositório:** https://github.com/jgmpereira/motoleilao (branch: `main`)
 - **Supabase:** https://ntlwhwmtsyniinbkwjgg.supabase.co
 - **Supabase CLI:** `/tmp/supabase/supabase`
@@ -31,7 +32,7 @@ Dashboard de monitoramento de leilões de motos com sistema de assinaturas.
 - **Não instalar dependências pesadas** — projeto sem bundler; imports via CDN se necessário.
 - **Não alterar schema do Supabase** sem verificar impacto no RLS e nos scrapers.
 - **Não modificar branch `main` sem testar** o scraper/função afetada antes.
-- **Email via Resend:** plano gratuito só envia para o email do owner — não prometer envio para outros emails sem domínio verificado.
+- **Email via Resend:** domínio `xn--motoleio-xza.com.br` verificado; envio liberado para qualquer destinatário. Remetente padrão: `contato@xn--motoleio-xza.com.br`.
 
 ---
 
@@ -186,6 +187,7 @@ Motos com `arrematado` registrado **não são deletadas** ao reimportar ou delet
 
 - **Webhook Kiwify:** `https://ntlwhwmtsyniinbkwjgg.supabase.co/functions/v1/kiwify-webhook?token=tkv7tkdm8ns`
 - **Eventos tratados:** `order_approved` (cria usuário) → `order_refunded` / `subscription_canceled` (cancela)
+- **Remetente de email (Resend):** `contato@xn--motoleio-xza.com.br` (domínio verificado)
 - **Usuários VIP:** lista de emails com bypass de verificação de assinatura
 - **Fluxo de primeiro login:** troca de senha obrigatória antes de acessar o app
 - **Assinatura expirada:** tela dark com cadeado; token salvo no localStorage para recuperar sessão após reativar
@@ -195,7 +197,7 @@ Motos com `arrematado` registrado **não são deletadas** ao reimportar ou delet
 ## Pendências ativas
 
 - [ ] **`scripts/popular-fipe.js`** — corrigir parsing: resposta de modelos é array direto, não objeto (idem para anos)
-- [ ] **Resend domínio** — verificar domínio para envio de emails para outros endereços (bloqueado no plano gratuito)
+- [ ] **Google Search Console** — verificação DNS pendente para `xn--motoleio-xza.com.br`
 - [ ] **Arrematados outros leilões** — implementar scraper de encerrados para Superbid, VIP, Copart, Freitas, Milan
 
 ---
