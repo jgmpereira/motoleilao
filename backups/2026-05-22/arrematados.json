@@ -8531,5 +8531,7663 @@
     "valor": 6800,
     "data_registro": "2026-04-20T23:36:20.916448+00:00",
     "status_arrematado": "vendido"
+  },
+  {
+    "id": 1424,
+    "moto_id": 13335,
+    "valor": 5800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1425,
+    "moto_id": 13336,
+    "valor": 20600,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1426,
+    "moto_id": 13337,
+    "valor": 12400,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1427,
+    "moto_id": 13338,
+    "valor": 9200,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1428,
+    "moto_id": 13394,
+    "valor": 11000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1429,
+    "moto_id": 13339,
+    "valor": 12900,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1430,
+    "moto_id": 13340,
+    "valor": 15800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1431,
+    "moto_id": 13341,
+    "valor": 7800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1432,
+    "moto_id": 13342,
+    "valor": 7100,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1433,
+    "moto_id": 13343,
+    "valor": 12200,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1434,
+    "moto_id": 13344,
+    "valor": 6800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1435,
+    "moto_id": 13345,
+    "valor": 12200,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1436,
+    "moto_id": 13346,
+    "valor": 16400,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1437,
+    "moto_id": 13347,
+    "valor": 22000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1438,
+    "moto_id": 13348,
+    "valor": 15000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1439,
+    "moto_id": 13349,
+    "valor": 11800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1440,
+    "moto_id": 13350,
+    "valor": 9600,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1441,
+    "moto_id": 13351,
+    "valor": 7200,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1442,
+    "moto_id": 13352,
+    "valor": 12000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1443,
+    "moto_id": 13353,
+    "valor": 9000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1444,
+    "moto_id": 13354,
+    "valor": 7000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1445,
+    "moto_id": 13355,
+    "valor": 16400,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1446,
+    "moto_id": 13356,
+    "valor": 15800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1447,
+    "moto_id": 13357,
+    "valor": 8800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1448,
+    "moto_id": 13358,
+    "valor": 12400,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1449,
+    "moto_id": 13359,
+    "valor": 8400,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1450,
+    "moto_id": 13360,
+    "valor": 5400,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1451,
+    "moto_id": 13361,
+    "valor": 8400,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1452,
+    "moto_id": 13362,
+    "valor": 5400,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1453,
+    "moto_id": 13363,
+    "valor": 8800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1454,
+    "moto_id": 13364,
+    "valor": 12800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1455,
+    "moto_id": 13366,
+    "valor": 6000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1456,
+    "moto_id": 13367,
+    "valor": 13400,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1457,
+    "moto_id": 13368,
+    "valor": 3800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1458,
+    "moto_id": 13369,
+    "valor": 24800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1459,
+    "moto_id": 13370,
+    "valor": 10200,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1460,
+    "moto_id": 13371,
+    "valor": 9000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1461,
+    "moto_id": 13372,
+    "valor": 18400,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1462,
+    "moto_id": 13373,
+    "valor": 7800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1463,
+    "moto_id": 13374,
+    "valor": 15200,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1464,
+    "moto_id": 13375,
+    "valor": 13400,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1465,
+    "moto_id": 13376,
+    "valor": 11000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1466,
+    "moto_id": 13377,
+    "valor": 11800,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1467,
+    "moto_id": 13378,
+    "valor": 26000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1468,
+    "moto_id": 13379,
+    "valor": 5600,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1469,
+    "moto_id": 13380,
+    "valor": 12600,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1470,
+    "moto_id": 13381,
+    "valor": 11600,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1471,
+    "moto_id": 13382,
+    "valor": 11000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1472,
+    "moto_id": 13384,
+    "valor": 58600,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1473,
+    "moto_id": 13385,
+    "valor": 44200,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1474,
+    "moto_id": 13386,
+    "valor": 11000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1475,
+    "moto_id": 13387,
+    "valor": 8000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1476,
+    "moto_id": 13388,
+    "valor": 7200,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1477,
+    "moto_id": 13389,
+    "valor": 13200,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1478,
+    "moto_id": 13390,
+    "valor": 10000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1479,
+    "moto_id": 13391,
+    "valor": 10600,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1480,
+    "moto_id": 13392,
+    "valor": 11000,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1481,
+    "moto_id": 13393,
+    "valor": 11200,
+    "data_registro": "2026-04-22T23:39:59.833562+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1482,
+    "moto_id": 13725,
+    "valor": 7800,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1483,
+    "moto_id": 13726,
+    "valor": 8600,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1484,
+    "moto_id": 13727,
+    "valor": 29400,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1485,
+    "moto_id": 13728,
+    "valor": 12800,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1486,
+    "moto_id": 13729,
+    "valor": 82600,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1487,
+    "moto_id": 13730,
+    "valor": 10400,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1488,
+    "moto_id": 13731,
+    "valor": 7000,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1489,
+    "moto_id": 13732,
+    "valor": 12800,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1490,
+    "moto_id": 13733,
+    "valor": 6600,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1491,
+    "moto_id": 13734,
+    "valor": 5400,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1492,
+    "moto_id": 13735,
+    "valor": 20600,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1493,
+    "moto_id": 13736,
+    "valor": 11200,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1494,
+    "moto_id": 13737,
+    "valor": 9000,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1495,
+    "moto_id": 13738,
+    "valor": 9200,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1496,
+    "moto_id": 13739,
+    "valor": 10200,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1497,
+    "moto_id": 13740,
+    "valor": 10000,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1498,
+    "moto_id": 13741,
+    "valor": 15300,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1499,
+    "moto_id": 13742,
+    "valor": 14800,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1500,
+    "moto_id": 13743,
+    "valor": 11300,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1501,
+    "moto_id": 13744,
+    "valor": 14200,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1502,
+    "moto_id": 13754,
+    "valor": 10900,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1503,
+    "moto_id": 13745,
+    "valor": 8500,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1504,
+    "moto_id": 13746,
+    "valor": 3000,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1505,
+    "moto_id": 13747,
+    "valor": 3500,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1506,
+    "moto_id": 13748,
+    "valor": 13400,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1507,
+    "moto_id": 13749,
+    "valor": 13400,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1508,
+    "moto_id": 13750,
+    "valor": 6200,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1509,
+    "moto_id": 13751,
+    "valor": 25400,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1510,
+    "moto_id": 13752,
+    "valor": 7400,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1511,
+    "moto_id": 13753,
+    "valor": 8800,
+    "data_registro": "2026-04-23T23:38:06.293308+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1512,
+    "moto_id": 14077,
+    "valor": 13500,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1513,
+    "moto_id": 14040,
+    "valor": 16400,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1514,
+    "moto_id": 14041,
+    "valor": 6600,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1515,
+    "moto_id": 14078,
+    "valor": 26000,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1516,
+    "moto_id": 14042,
+    "valor": 7500,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1517,
+    "moto_id": 14079,
+    "valor": 43000,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1518,
+    "moto_id": 14080,
+    "valor": 13800,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1519,
+    "moto_id": 14081,
+    "valor": 48000,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1520,
+    "moto_id": 14082,
+    "valor": 32000,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1521,
+    "moto_id": 14083,
+    "valor": 17500,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1522,
+    "moto_id": 14084,
+    "valor": 29000,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1523,
+    "moto_id": 14085,
+    "valor": 27500,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1524,
+    "moto_id": 14043,
+    "valor": 13200,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1525,
+    "moto_id": 14044,
+    "valor": 14600,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1526,
+    "moto_id": 14045,
+    "valor": 7800,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1527,
+    "moto_id": 14046,
+    "valor": 14400,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1528,
+    "moto_id": 14047,
+    "valor": 7600,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1529,
+    "moto_id": 14048,
+    "valor": 8800,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1530,
+    "moto_id": 14049,
+    "valor": 14000,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1531,
+    "moto_id": 14050,
+    "valor": 9200,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1532,
+    "moto_id": 14051,
+    "valor": 5200,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1533,
+    "moto_id": 14052,
+    "valor": 8300,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1534,
+    "moto_id": 14053,
+    "valor": 12400,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1535,
+    "moto_id": 14054,
+    "valor": 13800,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1536,
+    "moto_id": 14055,
+    "valor": 10600,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1537,
+    "moto_id": 14056,
+    "valor": 40500,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1538,
+    "moto_id": 14057,
+    "valor": 9600,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1539,
+    "moto_id": 14058,
+    "valor": 3800,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1540,
+    "moto_id": 14059,
+    "valor": 16400,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1541,
+    "moto_id": 14060,
+    "valor": 18600,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1542,
+    "moto_id": 14061,
+    "valor": 33500,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1543,
+    "moto_id": 14062,
+    "valor": 5400,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1544,
+    "moto_id": 14063,
+    "valor": 8000,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1545,
+    "moto_id": 14064,
+    "valor": 8800,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1546,
+    "moto_id": 14065,
+    "valor": 8600,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1547,
+    "moto_id": 14066,
+    "valor": 5800,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1548,
+    "moto_id": 14067,
+    "valor": 9600,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1549,
+    "moto_id": 14068,
+    "valor": 44800,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1550,
+    "moto_id": 14069,
+    "valor": 16200,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1551,
+    "moto_id": 14070,
+    "valor": 10200,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1552,
+    "moto_id": 14071,
+    "valor": 7400,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1553,
+    "moto_id": 14072,
+    "valor": 9200,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1554,
+    "moto_id": 14073,
+    "valor": 6200,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1555,
+    "moto_id": 14074,
+    "valor": 18600,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1556,
+    "moto_id": 14075,
+    "valor": 23800,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1557,
+    "moto_id": 14076,
+    "valor": 7200,
+    "data_registro": "2026-04-24T23:33:59.839402+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1558,
+    "moto_id": 15036,
+    "valor": 15700,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1559,
+    "moto_id": 15037,
+    "valor": 18000,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1560,
+    "moto_id": 15038,
+    "valor": 24000,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1561,
+    "moto_id": 15039,
+    "valor": 11600,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1562,
+    "moto_id": 15040,
+    "valor": 23500,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1563,
+    "moto_id": 15041,
+    "valor": 7200,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1564,
+    "moto_id": 15042,
+    "valor": 39400,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1565,
+    "moto_id": 15043,
+    "valor": 10000,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1566,
+    "moto_id": 15044,
+    "valor": 16400,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1567,
+    "moto_id": 15045,
+    "valor": 16500,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1568,
+    "moto_id": 15046,
+    "valor": 17100,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1569,
+    "moto_id": 15054,
+    "valor": 11200,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1570,
+    "moto_id": 15048,
+    "valor": 32800,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1571,
+    "moto_id": 15049,
+    "valor": 24300,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1572,
+    "moto_id": 15050,
+    "valor": 9300,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1573,
+    "moto_id": 15051,
+    "valor": 7400,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1574,
+    "moto_id": 15052,
+    "valor": 17700,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1575,
+    "moto_id": 15053,
+    "valor": 57700,
+    "data_registro": "2026-04-25T23:30:16.058772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1576,
+    "moto_id": 16388,
+    "valor": 3400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1577,
+    "moto_id": 16389,
+    "valor": 17000,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1578,
+    "moto_id": 16390,
+    "valor": 11200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1579,
+    "moto_id": 16391,
+    "valor": 4100,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1580,
+    "moto_id": 16392,
+    "valor": 8450,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1581,
+    "moto_id": 16393,
+    "valor": 4400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1582,
+    "moto_id": 16394,
+    "valor": 11500,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1583,
+    "moto_id": 16395,
+    "valor": 9500,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1584,
+    "moto_id": 16396,
+    "valor": 10200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1585,
+    "moto_id": 16397,
+    "valor": 3600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1586,
+    "moto_id": 16398,
+    "valor": 21400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1587,
+    "moto_id": 16399,
+    "valor": 27200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1588,
+    "moto_id": 16400,
+    "valor": 8200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1589,
+    "moto_id": 16401,
+    "valor": 22000,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1590,
+    "moto_id": 16402,
+    "valor": 30200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1591,
+    "moto_id": 16403,
+    "valor": 10600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1592,
+    "moto_id": 16404,
+    "valor": 8600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1593,
+    "moto_id": 16463,
+    "valor": 9800,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1594,
+    "moto_id": 16405,
+    "valor": 8600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1595,
+    "moto_id": 16406,
+    "valor": 7200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1596,
+    "moto_id": 16407,
+    "valor": 7000,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1597,
+    "moto_id": 16408,
+    "valor": 9600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1598,
+    "moto_id": 16409,
+    "valor": 9400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1599,
+    "moto_id": 16410,
+    "valor": 23800,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1600,
+    "moto_id": 16411,
+    "valor": 27800,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1601,
+    "moto_id": 16412,
+    "valor": 18800,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1602,
+    "moto_id": 16413,
+    "valor": 19000,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1603,
+    "moto_id": 16414,
+    "valor": 16600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1604,
+    "moto_id": 16415,
+    "valor": 25600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1605,
+    "moto_id": 16416,
+    "valor": 18800,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1606,
+    "moto_id": 16417,
+    "valor": 20000,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1607,
+    "moto_id": 16418,
+    "valor": 9200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1608,
+    "moto_id": 16419,
+    "valor": 10400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1609,
+    "moto_id": 16420,
+    "valor": 19200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1610,
+    "moto_id": 16421,
+    "valor": 10800,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1611,
+    "moto_id": 16422,
+    "valor": 11400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1612,
+    "moto_id": 16423,
+    "valor": 11400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1613,
+    "moto_id": 16424,
+    "valor": 16400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1614,
+    "moto_id": 16425,
+    "valor": 10200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1615,
+    "moto_id": 16426,
+    "valor": 13400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1616,
+    "moto_id": 16427,
+    "valor": 10600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1617,
+    "moto_id": 16428,
+    "valor": 18800,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1618,
+    "moto_id": 16429,
+    "valor": 5400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1619,
+    "moto_id": 16430,
+    "valor": 13400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1620,
+    "moto_id": 16431,
+    "valor": 9600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1621,
+    "moto_id": 16432,
+    "valor": 9300,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1622,
+    "moto_id": 16433,
+    "valor": 6200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1623,
+    "moto_id": 16434,
+    "valor": 18400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1624,
+    "moto_id": 16435,
+    "valor": 12400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1625,
+    "moto_id": 16436,
+    "valor": 18800,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1626,
+    "moto_id": 16437,
+    "valor": 7300,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1627,
+    "moto_id": 16438,
+    "valor": 12800,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1628,
+    "moto_id": 16439,
+    "valor": 12000,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1629,
+    "moto_id": 16440,
+    "valor": 5200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1630,
+    "moto_id": 16441,
+    "valor": 10400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1631,
+    "moto_id": 16442,
+    "valor": 9000,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1632,
+    "moto_id": 16443,
+    "valor": 9000,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1633,
+    "moto_id": 16444,
+    "valor": 6600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1634,
+    "moto_id": 16445,
+    "valor": 9200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1635,
+    "moto_id": 16446,
+    "valor": 7400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1636,
+    "moto_id": 16447,
+    "valor": 7200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1637,
+    "moto_id": 16448,
+    "valor": 20000,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1638,
+    "moto_id": 16449,
+    "valor": 10000,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1639,
+    "moto_id": 16450,
+    "valor": 9400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1640,
+    "moto_id": 16451,
+    "valor": 10200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1641,
+    "moto_id": 16452,
+    "valor": 11600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1642,
+    "moto_id": 16453,
+    "valor": 6400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1643,
+    "moto_id": 16454,
+    "valor": 8800,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1644,
+    "moto_id": 16455,
+    "valor": 15600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1645,
+    "moto_id": 16456,
+    "valor": 13300,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1646,
+    "moto_id": 16457,
+    "valor": 10000,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1647,
+    "moto_id": 16458,
+    "valor": 11200,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1648,
+    "moto_id": 16459,
+    "valor": 6600,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1649,
+    "moto_id": 16460,
+    "valor": 10400,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1650,
+    "moto_id": 16461,
+    "valor": 15800,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1651,
+    "moto_id": 16462,
+    "valor": 8000,
+    "data_registro": "2026-04-27T23:44:26.737034+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1652,
+    "moto_id": 17042,
+    "valor": 6000,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1653,
+    "moto_id": 17043,
+    "valor": 10800,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1654,
+    "moto_id": 17044,
+    "valor": 8200,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1655,
+    "moto_id": 17045,
+    "valor": 9400,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1656,
+    "moto_id": 17046,
+    "valor": 23500,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1657,
+    "moto_id": 17047,
+    "valor": 19800,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1658,
+    "moto_id": 17048,
+    "valor": 10000,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1659,
+    "moto_id": 17049,
+    "valor": 18800,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1660,
+    "moto_id": 17050,
+    "valor": 7000,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1661,
+    "moto_id": 17051,
+    "valor": 33800,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1662,
+    "moto_id": 17052,
+    "valor": 11800,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1663,
+    "moto_id": 17053,
+    "valor": 17200,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1664,
+    "moto_id": 17054,
+    "valor": 29200,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1665,
+    "moto_id": 17055,
+    "valor": 23800,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1666,
+    "moto_id": 17056,
+    "valor": 10600,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1667,
+    "moto_id": 17057,
+    "valor": 5600,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1668,
+    "moto_id": 17058,
+    "valor": 13400,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1669,
+    "moto_id": 17059,
+    "valor": 5800,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1670,
+    "moto_id": 17060,
+    "valor": 24400,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1671,
+    "moto_id": 17061,
+    "valor": 13400,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1672,
+    "moto_id": 17062,
+    "valor": 12000,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1673,
+    "moto_id": 17063,
+    "valor": 14800,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1674,
+    "moto_id": 17064,
+    "valor": 19600,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1675,
+    "moto_id": 17065,
+    "valor": 7700,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1676,
+    "moto_id": 17066,
+    "valor": 7400,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1677,
+    "moto_id": 17067,
+    "valor": 6000,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1678,
+    "moto_id": 17069,
+    "valor": 5400,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1679,
+    "moto_id": 17070,
+    "valor": 11100,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1680,
+    "moto_id": 17071,
+    "valor": 9400,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1681,
+    "moto_id": 17072,
+    "valor": 8000,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1682,
+    "moto_id": 17073,
+    "valor": 4200,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1683,
+    "moto_id": 17074,
+    "valor": 6800,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1684,
+    "moto_id": 17076,
+    "valor": 13700,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1685,
+    "moto_id": 17077,
+    "valor": 6600,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1686,
+    "moto_id": 17078,
+    "valor": 21600,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1687,
+    "moto_id": 17079,
+    "valor": 8200,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1688,
+    "moto_id": 17080,
+    "valor": 6400,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1689,
+    "moto_id": 17081,
+    "valor": 22400,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1690,
+    "moto_id": 17082,
+    "valor": 23800,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1691,
+    "moto_id": 17083,
+    "valor": 14200,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1692,
+    "moto_id": 17084,
+    "valor": 18400,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1693,
+    "moto_id": 17085,
+    "valor": 7400,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1694,
+    "moto_id": 17086,
+    "valor": 13200,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1695,
+    "moto_id": 17087,
+    "valor": 12800,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1696,
+    "moto_id": 17088,
+    "valor": 9800,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1697,
+    "moto_id": 17089,
+    "valor": 9400,
+    "data_registro": "2026-04-28T23:47:10.769264+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1698,
+    "moto_id": 17634,
+    "valor": 35400,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1699,
+    "moto_id": 17635,
+    "valor": 2100,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1700,
+    "moto_id": 17636,
+    "valor": 17000,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1701,
+    "moto_id": 17637,
+    "valor": 5600,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1702,
+    "moto_id": 17638,
+    "valor": 21600,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1703,
+    "moto_id": 17677,
+    "valor": 65800,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1704,
+    "moto_id": 17639,
+    "valor": 10200,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1705,
+    "moto_id": 17640,
+    "valor": 8600,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1706,
+    "moto_id": 17641,
+    "valor": 16200,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1707,
+    "moto_id": 17642,
+    "valor": 16200,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1708,
+    "moto_id": 17643,
+    "valor": 5000,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1709,
+    "moto_id": 17644,
+    "valor": 5600,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1710,
+    "moto_id": 17645,
+    "valor": 3800,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1711,
+    "moto_id": 17646,
+    "valor": 3600,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1712,
+    "moto_id": 17647,
+    "valor": 6200,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1713,
+    "moto_id": 17648,
+    "valor": 6800,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1714,
+    "moto_id": 17649,
+    "valor": 8200,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1715,
+    "moto_id": 17650,
+    "valor": 7200,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1716,
+    "moto_id": 17651,
+    "valor": 9600,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1717,
+    "moto_id": 17652,
+    "valor": 13200,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1718,
+    "moto_id": 17653,
+    "valor": 17400,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1719,
+    "moto_id": 17654,
+    "valor": 11600,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1720,
+    "moto_id": 17655,
+    "valor": 3400,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1721,
+    "moto_id": 17656,
+    "valor": 22000,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1722,
+    "moto_id": 17657,
+    "valor": 20200,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1723,
+    "moto_id": 17658,
+    "valor": 14400,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1724,
+    "moto_id": 17659,
+    "valor": 28000,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1725,
+    "moto_id": 17660,
+    "valor": 17600,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1726,
+    "moto_id": 17661,
+    "valor": 15400,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1727,
+    "moto_id": 17662,
+    "valor": 30800,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1728,
+    "moto_id": 17663,
+    "valor": 9200,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1729,
+    "moto_id": 17664,
+    "valor": 9200,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1730,
+    "moto_id": 17665,
+    "valor": 16600,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1731,
+    "moto_id": 17666,
+    "valor": 8200,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1732,
+    "moto_id": 17667,
+    "valor": 14800,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1733,
+    "moto_id": 17668,
+    "valor": 23400,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1734,
+    "moto_id": 17669,
+    "valor": 14800,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1735,
+    "moto_id": 17670,
+    "valor": 61000,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1736,
+    "moto_id": 17671,
+    "valor": 17800,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1737,
+    "moto_id": 17672,
+    "valor": 8000,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1738,
+    "moto_id": 17673,
+    "valor": 13400,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1739,
+    "moto_id": 17678,
+    "valor": 14400,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1740,
+    "moto_id": 17674,
+    "valor": 31800,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1741,
+    "moto_id": 17675,
+    "valor": 12200,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1742,
+    "moto_id": 17676,
+    "valor": 7400,
+    "data_registro": "2026-04-29T23:46:32.423772+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2735,
+    "moto_id": 28600,
+    "valor": 16000,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2736,
+    "moto_id": 28601,
+    "valor": 9600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2737,
+    "moto_id": 28602,
+    "valor": 4800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2738,
+    "moto_id": 28603,
+    "valor": 11400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2739,
+    "moto_id": 28604,
+    "valor": 12000,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2740,
+    "moto_id": 28605,
+    "valor": 13500,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2741,
+    "moto_id": 28606,
+    "valor": 12400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2742,
+    "moto_id": 28607,
+    "valor": 13400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2743,
+    "moto_id": 28608,
+    "valor": 11000,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2744,
+    "moto_id": 28609,
+    "valor": 32800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2745,
+    "moto_id": 28610,
+    "valor": 8000,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2746,
+    "moto_id": 28611,
+    "valor": 6800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2747,
+    "moto_id": 28612,
+    "valor": 7400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2748,
+    "moto_id": 28613,
+    "valor": 9000,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2749,
+    "moto_id": 28614,
+    "valor": 8400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2750,
+    "moto_id": 28615,
+    "valor": 10400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2751,
+    "moto_id": 28616,
+    "valor": 17000,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2752,
+    "moto_id": 28617,
+    "valor": 19400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2753,
+    "moto_id": 28618,
+    "valor": 17800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2754,
+    "moto_id": 28619,
+    "valor": 10200,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2755,
+    "moto_id": 28663,
+    "valor": 10800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2756,
+    "moto_id": 28620,
+    "valor": 4800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2757,
+    "moto_id": 28621,
+    "valor": 59600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2758,
+    "moto_id": 28622,
+    "valor": 38600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2759,
+    "moto_id": 28623,
+    "valor": 8800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2760,
+    "moto_id": 28624,
+    "valor": 34400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2761,
+    "moto_id": 28625,
+    "valor": 10800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2762,
+    "moto_id": 28626,
+    "valor": 9600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2763,
+    "moto_id": 28627,
+    "valor": 15000,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2764,
+    "moto_id": 28628,
+    "valor": 21200,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2765,
+    "moto_id": 28629,
+    "valor": 19600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2766,
+    "moto_id": 28630,
+    "valor": 13200,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2767,
+    "moto_id": 28631,
+    "valor": 14200,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2768,
+    "moto_id": 28632,
+    "valor": 13600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2769,
+    "moto_id": 28633,
+    "valor": 6800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2770,
+    "moto_id": 28634,
+    "valor": 8400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2771,
+    "moto_id": 28635,
+    "valor": 6400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2772,
+    "moto_id": 28636,
+    "valor": 12600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2773,
+    "moto_id": 28637,
+    "valor": 13600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2774,
+    "moto_id": 28638,
+    "valor": 5800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2775,
+    "moto_id": 28639,
+    "valor": 7600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2776,
+    "moto_id": 28640,
+    "valor": 20600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2777,
+    "moto_id": 28641,
+    "valor": 6600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2778,
+    "moto_id": 28642,
+    "valor": 6400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2779,
+    "moto_id": 28643,
+    "valor": 3000,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1790,
+    "moto_id": 18150,
+    "valor": 5000,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1791,
+    "moto_id": 18151,
+    "valor": 6400,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1792,
+    "moto_id": 18152,
+    "valor": 8400,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1793,
+    "moto_id": 18153,
+    "valor": 13800,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1794,
+    "moto_id": 18154,
+    "valor": 10400,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1795,
+    "moto_id": 18155,
+    "valor": 8050,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1796,
+    "moto_id": 18156,
+    "valor": 13400,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1797,
+    "moto_id": 18157,
+    "valor": 10000,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1798,
+    "moto_id": 18158,
+    "valor": 10800,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1799,
+    "moto_id": 18159,
+    "valor": 10600,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1800,
+    "moto_id": 18160,
+    "valor": 7700,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1801,
+    "moto_id": 18161,
+    "valor": 20000,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1802,
+    "moto_id": 18162,
+    "valor": 16600,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1803,
+    "moto_id": 18164,
+    "valor": 34700,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1804,
+    "moto_id": 18165,
+    "valor": 35100,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1805,
+    "moto_id": 18166,
+    "valor": 41800,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1806,
+    "moto_id": 18167,
+    "valor": 9000,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1807,
+    "moto_id": 18168,
+    "valor": 7000,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1808,
+    "moto_id": 18169,
+    "valor": 11000,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1809,
+    "moto_id": 18170,
+    "valor": 9000,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1810,
+    "moto_id": 18171,
+    "valor": 7600,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1811,
+    "moto_id": 18172,
+    "valor": 12000,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1812,
+    "moto_id": 18173,
+    "valor": 15400,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1813,
+    "moto_id": 18174,
+    "valor": 9200,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1814,
+    "moto_id": 18175,
+    "valor": 35000,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1815,
+    "moto_id": 18176,
+    "valor": 13000,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1816,
+    "moto_id": 18177,
+    "valor": 13000,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1817,
+    "moto_id": 18178,
+    "valor": 13200,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1818,
+    "moto_id": 18179,
+    "valor": 13200,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1819,
+    "moto_id": 18180,
+    "valor": 13200,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1820,
+    "moto_id": 18181,
+    "valor": 13800,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1821,
+    "moto_id": 18182,
+    "valor": 5800,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1822,
+    "moto_id": 18183,
+    "valor": 5600,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1823,
+    "moto_id": 18184,
+    "valor": 7400,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1824,
+    "moto_id": 18185,
+    "valor": 35600,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1825,
+    "moto_id": 18186,
+    "valor": 13100,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1826,
+    "moto_id": 18187,
+    "valor": 16400,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1827,
+    "moto_id": 18188,
+    "valor": 16500,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1828,
+    "moto_id": 18189,
+    "valor": 11600,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1829,
+    "moto_id": 18190,
+    "valor": 9400,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1830,
+    "moto_id": 18191,
+    "valor": 15500,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1831,
+    "moto_id": 18192,
+    "valor": 6400,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1832,
+    "moto_id": 18193,
+    "valor": 11200,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1833,
+    "moto_id": 18194,
+    "valor": 10200,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1834,
+    "moto_id": 18195,
+    "valor": 19800,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1835,
+    "moto_id": 18196,
+    "valor": 16800,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1836,
+    "moto_id": 18197,
+    "valor": 10600,
+    "data_registro": "2026-05-02T23:35:41.375906+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1837,
+    "moto_id": 20668,
+    "valor": 8800,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1838,
+    "moto_id": 20669,
+    "valor": 5200,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1839,
+    "moto_id": 20670,
+    "valor": 19200,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1840,
+    "moto_id": 20671,
+    "valor": 14200,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1841,
+    "moto_id": 20672,
+    "valor": 9400,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1842,
+    "moto_id": 20673,
+    "valor": 10000,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1843,
+    "moto_id": 20674,
+    "valor": 9250,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1844,
+    "moto_id": 20675,
+    "valor": 5200,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1845,
+    "moto_id": 20676,
+    "valor": 13400,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1846,
+    "moto_id": 20677,
+    "valor": 18000,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1847,
+    "moto_id": 20678,
+    "valor": 14800,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1848,
+    "moto_id": 20679,
+    "valor": 13000,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1849,
+    "moto_id": 20680,
+    "valor": 8500,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1850,
+    "moto_id": 20681,
+    "valor": 17750,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1851,
+    "moto_id": 20682,
+    "valor": 7000,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1852,
+    "moto_id": 20683,
+    "valor": 33800,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1853,
+    "moto_id": 20684,
+    "valor": 10400,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1854,
+    "moto_id": 20685,
+    "valor": 3600,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1855,
+    "moto_id": 20686,
+    "valor": 9800,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1856,
+    "moto_id": 20687,
+    "valor": 18200,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1857,
+    "moto_id": 20688,
+    "valor": 4600,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1858,
+    "moto_id": 20689,
+    "valor": 8800,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1859,
+    "moto_id": 20690,
+    "valor": 2400,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1860,
+    "moto_id": 20691,
+    "valor": 28000,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1861,
+    "moto_id": 20692,
+    "valor": 6600,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1862,
+    "moto_id": 20693,
+    "valor": 10200,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1863,
+    "moto_id": 20694,
+    "valor": 27800,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1864,
+    "moto_id": 20695,
+    "valor": 6800,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1865,
+    "moto_id": 20696,
+    "valor": 11600,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1866,
+    "moto_id": 20697,
+    "valor": 11800,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1867,
+    "moto_id": 20698,
+    "valor": 36600,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1868,
+    "moto_id": 20699,
+    "valor": 15200,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1869,
+    "moto_id": 20700,
+    "valor": 4400,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1870,
+    "moto_id": 20701,
+    "valor": 53600,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1871,
+    "moto_id": 20702,
+    "valor": 25000,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1872,
+    "moto_id": 20703,
+    "valor": 36000,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1873,
+    "moto_id": 20704,
+    "valor": 10400,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1874,
+    "moto_id": 20705,
+    "valor": 24600,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1875,
+    "moto_id": 20706,
+    "valor": 8200,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1876,
+    "moto_id": 20707,
+    "valor": 11400,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1877,
+    "moto_id": 20708,
+    "valor": 6600,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1878,
+    "moto_id": 20709,
+    "valor": 6400,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1879,
+    "moto_id": 20710,
+    "valor": 5200,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1880,
+    "moto_id": 20711,
+    "valor": 4600,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1881,
+    "moto_id": 20712,
+    "valor": 8500,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1882,
+    "moto_id": 20713,
+    "valor": 14600,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1883,
+    "moto_id": 20714,
+    "valor": 23200,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1884,
+    "moto_id": 20715,
+    "valor": 18800,
+    "data_registro": "2026-05-04T23:44:45.248563+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1885,
+    "moto_id": 21250,
+    "valor": 6600,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1886,
+    "moto_id": 21251,
+    "valor": 14600,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1887,
+    "moto_id": 21252,
+    "valor": 7800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1888,
+    "moto_id": 21253,
+    "valor": 34000,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1889,
+    "moto_id": 21254,
+    "valor": 23000,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1890,
+    "moto_id": 21255,
+    "valor": 29200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1891,
+    "moto_id": 21256,
+    "valor": 14400,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1892,
+    "moto_id": 21257,
+    "valor": 9200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1893,
+    "moto_id": 21258,
+    "valor": 22200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1894,
+    "moto_id": 21259,
+    "valor": 7400,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1895,
+    "moto_id": 21260,
+    "valor": 7800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1896,
+    "moto_id": 21261,
+    "valor": 31000,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1897,
+    "moto_id": 21262,
+    "valor": 76800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1898,
+    "moto_id": 21263,
+    "valor": 82800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1899,
+    "moto_id": 21264,
+    "valor": 6200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1900,
+    "moto_id": 21265,
+    "valor": 10200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1901,
+    "moto_id": 21266,
+    "valor": 9600,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1902,
+    "moto_id": 21267,
+    "valor": 17600,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1903,
+    "moto_id": 21268,
+    "valor": 7800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1904,
+    "moto_id": 21269,
+    "valor": 5600,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1905,
+    "moto_id": 21270,
+    "valor": 6400,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1906,
+    "moto_id": 21271,
+    "valor": 18200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1907,
+    "moto_id": 21272,
+    "valor": 8200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1908,
+    "moto_id": 21273,
+    "valor": 32800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1909,
+    "moto_id": 21274,
+    "valor": 15800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1910,
+    "moto_id": 21275,
+    "valor": 15600,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1911,
+    "moto_id": 21276,
+    "valor": 22200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1912,
+    "moto_id": 21277,
+    "valor": 16600,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1913,
+    "moto_id": 21278,
+    "valor": 12600,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1914,
+    "moto_id": 21279,
+    "valor": 16200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1915,
+    "moto_id": 21280,
+    "valor": 9200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1916,
+    "moto_id": 21281,
+    "valor": 22600,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1917,
+    "moto_id": 21282,
+    "valor": 28200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1918,
+    "moto_id": 21283,
+    "valor": 9400,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1919,
+    "moto_id": 21284,
+    "valor": 13400,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1920,
+    "moto_id": 21285,
+    "valor": 7200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1921,
+    "moto_id": 21286,
+    "valor": 8800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1922,
+    "moto_id": 21287,
+    "valor": 5800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1923,
+    "moto_id": 21288,
+    "valor": 14200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1924,
+    "moto_id": 21289,
+    "valor": 7400,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1925,
+    "moto_id": 21290,
+    "valor": 11400,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1926,
+    "moto_id": 21291,
+    "valor": 9000,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1927,
+    "moto_id": 21292,
+    "valor": 11500,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1928,
+    "moto_id": 21293,
+    "valor": 12600,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1929,
+    "moto_id": 21294,
+    "valor": 4800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1930,
+    "moto_id": 21295,
+    "valor": 20800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1931,
+    "moto_id": 21296,
+    "valor": 18000,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1932,
+    "moto_id": 21297,
+    "valor": 5800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1933,
+    "moto_id": 21298,
+    "valor": 3400,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1934,
+    "moto_id": 21299,
+    "valor": 32600,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1935,
+    "moto_id": 21300,
+    "valor": 3600,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1936,
+    "moto_id": 21301,
+    "valor": 8200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1937,
+    "moto_id": 21302,
+    "valor": 4400,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1938,
+    "moto_id": 21303,
+    "valor": 8200,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1939,
+    "moto_id": 21304,
+    "valor": 8400,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1940,
+    "moto_id": 21305,
+    "valor": 5800,
+    "data_registro": "2026-05-05T23:41:10.591828+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1941,
+    "moto_id": 21952,
+    "valor": 25000,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1942,
+    "moto_id": 21920,
+    "valor": 12600,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1943,
+    "moto_id": 21921,
+    "valor": 3700,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1944,
+    "moto_id": 21953,
+    "valor": 8600,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1945,
+    "moto_id": 21922,
+    "valor": 7200,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1946,
+    "moto_id": 21954,
+    "valor": 10600,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1947,
+    "moto_id": 21923,
+    "valor": 47800,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1948,
+    "moto_id": 21951,
+    "valor": 4400,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1949,
+    "moto_id": 21924,
+    "valor": 35600,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1950,
+    "moto_id": 21925,
+    "valor": 21800,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1951,
+    "moto_id": 21926,
+    "valor": 4750,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1952,
+    "moto_id": 21927,
+    "valor": 8800,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1953,
+    "moto_id": 21928,
+    "valor": 9400,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1954,
+    "moto_id": 21929,
+    "valor": 5200,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1955,
+    "moto_id": 21930,
+    "valor": 27100,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1956,
+    "moto_id": 21931,
+    "valor": 9800,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1957,
+    "moto_id": 21932,
+    "valor": 7200,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1958,
+    "moto_id": 21933,
+    "valor": 6000,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1959,
+    "moto_id": 21934,
+    "valor": 13000,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1960,
+    "moto_id": 21935,
+    "valor": 18800,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1961,
+    "moto_id": 21936,
+    "valor": 17400,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1962,
+    "moto_id": 21955,
+    "valor": 13200,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1963,
+    "moto_id": 21938,
+    "valor": 19800,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1964,
+    "moto_id": 21939,
+    "valor": 5000,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1965,
+    "moto_id": 21940,
+    "valor": 8400,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1966,
+    "moto_id": 21956,
+    "valor": 14800,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1967,
+    "moto_id": 21950,
+    "valor": 6200,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1968,
+    "moto_id": 21942,
+    "valor": 6400,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1969,
+    "moto_id": 21943,
+    "valor": 19200,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1970,
+    "moto_id": 21944,
+    "valor": 12800,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1971,
+    "moto_id": 21945,
+    "valor": 17600,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1972,
+    "moto_id": 21946,
+    "valor": 9800,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1973,
+    "moto_id": 21947,
+    "valor": 15800,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1974,
+    "moto_id": 21957,
+    "valor": 49600,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1975,
+    "moto_id": 21958,
+    "valor": 12500,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1976,
+    "moto_id": 21959,
+    "valor": 39100,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1977,
+    "moto_id": 21949,
+    "valor": 9800,
+    "data_registro": "2026-05-06T23:42:23.826571+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1978,
+    "moto_id": 22575,
+    "valor": 14800,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1979,
+    "moto_id": 22554,
+    "valor": 43600,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1980,
+    "moto_id": 22555,
+    "valor": 8400,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1981,
+    "moto_id": 22556,
+    "valor": 14600,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1982,
+    "moto_id": 22557,
+    "valor": 7200,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1983,
+    "moto_id": 22558,
+    "valor": 5800,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1984,
+    "moto_id": 22559,
+    "valor": 14400,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1985,
+    "moto_id": 22560,
+    "valor": 8400,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1986,
+    "moto_id": 22561,
+    "valor": 7800,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1987,
+    "moto_id": 22562,
+    "valor": 44800,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1988,
+    "moto_id": 22563,
+    "valor": 53600,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1989,
+    "moto_id": 22564,
+    "valor": 11200,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1990,
+    "moto_id": 22565,
+    "valor": 39000,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1991,
+    "moto_id": 22566,
+    "valor": 32800,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1992,
+    "moto_id": 22567,
+    "valor": 10200,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1993,
+    "moto_id": 22568,
+    "valor": 12600,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1994,
+    "moto_id": 22569,
+    "valor": 15600,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1995,
+    "moto_id": 22570,
+    "valor": 11000,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1996,
+    "moto_id": 22571,
+    "valor": 14600,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 1997,
+    "moto_id": 22572,
+    "valor": 6000,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1998,
+    "moto_id": 22573,
+    "valor": 27200,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 1999,
+    "moto_id": 22574,
+    "valor": 13800,
+    "data_registro": "2026-05-07T23:45:19.737345+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2000,
+    "moto_id": 23212,
+    "valor": 6000,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2001,
+    "moto_id": 23213,
+    "valor": 25000,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2002,
+    "moto_id": 23214,
+    "valor": 8600,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2003,
+    "moto_id": 23215,
+    "valor": 20300,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2004,
+    "moto_id": 23216,
+    "valor": 13000,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2005,
+    "moto_id": 23217,
+    "valor": 6600,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2006,
+    "moto_id": 23218,
+    "valor": 38500,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2007,
+    "moto_id": 23219,
+    "valor": 7000,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2008,
+    "moto_id": 23220,
+    "valor": 9000,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2009,
+    "moto_id": 23221,
+    "valor": 18400,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2010,
+    "moto_id": 23222,
+    "valor": 4800,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2011,
+    "moto_id": 23223,
+    "valor": 7600,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2012,
+    "moto_id": 23224,
+    "valor": 4800,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2013,
+    "moto_id": 23225,
+    "valor": 5400,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2014,
+    "moto_id": 23226,
+    "valor": 8800,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2015,
+    "moto_id": 23227,
+    "valor": 5000,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2016,
+    "moto_id": 23228,
+    "valor": 8400,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2017,
+    "moto_id": 23229,
+    "valor": 5800,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2018,
+    "moto_id": 23230,
+    "valor": 6800,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2019,
+    "moto_id": 23231,
+    "valor": 10200,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2020,
+    "moto_id": 23232,
+    "valor": 5600,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2021,
+    "moto_id": 23233,
+    "valor": 9400,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2022,
+    "moto_id": 23234,
+    "valor": 9600,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2023,
+    "moto_id": 23235,
+    "valor": 9600,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2024,
+    "moto_id": 23236,
+    "valor": 10800,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2025,
+    "moto_id": 23237,
+    "valor": 8000,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2026,
+    "moto_id": 23238,
+    "valor": 10800,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2027,
+    "moto_id": 23239,
+    "valor": 6200,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2028,
+    "moto_id": 23240,
+    "valor": 24600,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2029,
+    "moto_id": 23241,
+    "valor": 8400,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2030,
+    "moto_id": 23242,
+    "valor": 19400,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2031,
+    "moto_id": 23243,
+    "valor": 16000,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2032,
+    "moto_id": 23244,
+    "valor": 16400,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2033,
+    "moto_id": 23245,
+    "valor": 16400,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2034,
+    "moto_id": 23246,
+    "valor": 11600,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2035,
+    "moto_id": 23247,
+    "valor": 23000,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2036,
+    "moto_id": 23248,
+    "valor": 20600,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2037,
+    "moto_id": 23249,
+    "valor": 7600,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2038,
+    "moto_id": 23250,
+    "valor": 15800,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2039,
+    "moto_id": 23251,
+    "valor": 15000,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2040,
+    "moto_id": 23252,
+    "valor": 10200,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2041,
+    "moto_id": 23253,
+    "valor": 7200,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2042,
+    "moto_id": 23254,
+    "valor": 48400,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2043,
+    "moto_id": 23255,
+    "valor": 15400,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2044,
+    "moto_id": 23256,
+    "valor": 2600,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2045,
+    "moto_id": 23257,
+    "valor": 13800,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2046,
+    "moto_id": 23258,
+    "valor": 3800,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2047,
+    "moto_id": 23259,
+    "valor": 6600,
+    "data_registro": "2026-05-08T23:49:31.943881+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2048,
+    "moto_id": 23928,
+    "valor": 8100,
+    "data_registro": "2026-05-09T23:39:17.75207+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2049,
+    "moto_id": 23929,
+    "valor": 11200,
+    "data_registro": "2026-05-09T23:39:17.75207+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2050,
+    "moto_id": 23930,
+    "valor": 8600,
+    "data_registro": "2026-05-09T23:39:17.75207+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2051,
+    "moto_id": 23931,
+    "valor": 13100,
+    "data_registro": "2026-05-09T23:39:17.75207+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2052,
+    "moto_id": 23932,
+    "valor": 3500,
+    "data_registro": "2026-05-09T23:39:17.75207+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2053,
+    "moto_id": 23933,
+    "valor": 7300,
+    "data_registro": "2026-05-09T23:39:17.75207+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2054,
+    "moto_id": 23934,
+    "valor": 7100,
+    "data_registro": "2026-05-09T23:39:17.75207+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2780,
+    "moto_id": 28644,
+    "valor": 4800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2781,
+    "moto_id": 28645,
+    "valor": 28800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2782,
+    "moto_id": 28646,
+    "valor": 19800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2783,
+    "moto_id": 28647,
+    "valor": 5400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2784,
+    "moto_id": 28648,
+    "valor": 5400,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2785,
+    "moto_id": 28649,
+    "valor": 15600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2786,
+    "moto_id": 28650,
+    "valor": 7600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2787,
+    "moto_id": 28651,
+    "valor": 7600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2788,
+    "moto_id": 28652,
+    "valor": 8000,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2789,
+    "moto_id": 28653,
+    "valor": 14000,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2790,
+    "moto_id": 28654,
+    "valor": 10800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2791,
+    "moto_id": 28655,
+    "valor": 13650,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2792,
+    "moto_id": 28656,
+    "valor": 11200,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2793,
+    "moto_id": 28657,
+    "valor": 16600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2794,
+    "moto_id": 28658,
+    "valor": 10200,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2795,
+    "moto_id": 28659,
+    "valor": 7600,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2796,
+    "moto_id": 28660,
+    "valor": 13800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2797,
+    "moto_id": 28661,
+    "valor": 5200,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2798,
+    "moto_id": 28662,
+    "valor": 12800,
+    "data_registro": "2026-05-18T23:58:20.812022+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2103,
+    "moto_id": 25629,
+    "valor": 78500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2104,
+    "moto_id": 25630,
+    "valor": 69000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2105,
+    "moto_id": 25631,
+    "valor": 115500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2106,
+    "moto_id": 25632,
+    "valor": 29500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2107,
+    "moto_id": 25633,
+    "valor": 36200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2108,
+    "moto_id": 25634,
+    "valor": 9000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2109,
+    "moto_id": 25635,
+    "valor": 8600,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2110,
+    "moto_id": 25636,
+    "valor": 18600,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2111,
+    "moto_id": 25637,
+    "valor": 24500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2112,
+    "moto_id": 25638,
+    "valor": 33100,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2113,
+    "moto_id": 25639,
+    "valor": 16300,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2114,
+    "moto_id": 25640,
+    "valor": 14900,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2115,
+    "moto_id": 25641,
+    "valor": 45500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2116,
+    "moto_id": 25642,
+    "valor": 29500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2117,
+    "moto_id": 25643,
+    "valor": 16700,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2118,
+    "moto_id": 25644,
+    "valor": 28500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2119,
+    "moto_id": 25646,
+    "valor": 22000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2120,
+    "moto_id": 25647,
+    "valor": 28500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2121,
+    "moto_id": 25648,
+    "valor": 10700,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2122,
+    "moto_id": 25649,
+    "valor": 10000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2123,
+    "moto_id": 25650,
+    "valor": 35000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2124,
+    "moto_id": 25651,
+    "valor": 32500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2125,
+    "moto_id": 25652,
+    "valor": 36400,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2126,
+    "moto_id": 25654,
+    "valor": 21200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2127,
+    "moto_id": 25655,
+    "valor": 61200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2128,
+    "moto_id": 25656,
+    "valor": 53300,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2129,
+    "moto_id": 25657,
+    "valor": 29200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2130,
+    "moto_id": 25658,
+    "valor": 19000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2131,
+    "moto_id": 25659,
+    "valor": 18300,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2132,
+    "moto_id": 25660,
+    "valor": 23200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2133,
+    "moto_id": 25661,
+    "valor": 28000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2134,
+    "moto_id": 25662,
+    "valor": 48000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2135,
+    "moto_id": 25663,
+    "valor": 38500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2136,
+    "moto_id": 25664,
+    "valor": 38200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2137,
+    "moto_id": 25665,
+    "valor": 52000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2138,
+    "moto_id": 25667,
+    "valor": 56500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2139,
+    "moto_id": 25668,
+    "valor": 23500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2140,
+    "moto_id": 25669,
+    "valor": 46900,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2141,
+    "moto_id": 25670,
+    "valor": 51500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2142,
+    "moto_id": 25671,
+    "valor": 51200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2143,
+    "moto_id": 25672,
+    "valor": 49000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2144,
+    "moto_id": 25673,
+    "valor": 46000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2145,
+    "moto_id": 25693,
+    "valor": 10500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2146,
+    "moto_id": 25674,
+    "valor": 46000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2147,
+    "moto_id": 25675,
+    "valor": 70500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2148,
+    "moto_id": 25676,
+    "valor": 48800,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2149,
+    "moto_id": 25677,
+    "valor": 15200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2150,
+    "moto_id": 25678,
+    "valor": 43000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2151,
+    "moto_id": 25680,
+    "valor": 37200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2152,
+    "moto_id": 25681,
+    "valor": 33500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2153,
+    "moto_id": 25682,
+    "valor": 30000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2154,
+    "moto_id": 25683,
+    "valor": 46000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2155,
+    "moto_id": 25684,
+    "valor": 38500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2156,
+    "moto_id": 25685,
+    "valor": 75500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2157,
+    "moto_id": 25686,
+    "valor": 24000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2158,
+    "moto_id": 25687,
+    "valor": 14500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2159,
+    "moto_id": 25688,
+    "valor": 43500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2160,
+    "moto_id": 25692,
+    "valor": 38500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2161,
+    "moto_id": 25689,
+    "valor": 14000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2162,
+    "moto_id": 25690,
+    "valor": 34500,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2163,
+    "moto_id": 25691,
+    "valor": 55000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2164,
+    "moto_id": 25596,
+    "valor": 8600,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2165,
+    "moto_id": 25597,
+    "valor": 10400,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2166,
+    "moto_id": 25598,
+    "valor": 6600,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2167,
+    "moto_id": 25599,
+    "valor": 10000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2168,
+    "moto_id": 25600,
+    "valor": 12200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2169,
+    "moto_id": 25601,
+    "valor": 6200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2170,
+    "moto_id": 25602,
+    "valor": 13400,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2171,
+    "moto_id": 25603,
+    "valor": 5000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2172,
+    "moto_id": 25604,
+    "valor": 8800,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2173,
+    "moto_id": 25605,
+    "valor": 9000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2174,
+    "moto_id": 25606,
+    "valor": 17400,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2175,
+    "moto_id": 25607,
+    "valor": 18000,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2176,
+    "moto_id": 25608,
+    "valor": 8600,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2177,
+    "moto_id": 25609,
+    "valor": 7200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2178,
+    "moto_id": 25610,
+    "valor": 9200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2179,
+    "moto_id": 25611,
+    "valor": 5800,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2180,
+    "moto_id": 25612,
+    "valor": 9400,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2181,
+    "moto_id": 25613,
+    "valor": 4800,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2182,
+    "moto_id": 25614,
+    "valor": 8200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2183,
+    "moto_id": 25615,
+    "valor": 3800,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2184,
+    "moto_id": 25616,
+    "valor": 7200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2185,
+    "moto_id": 25617,
+    "valor": 12600,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2186,
+    "moto_id": 25618,
+    "valor": 5600,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2187,
+    "moto_id": 25619,
+    "valor": 6800,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2188,
+    "moto_id": 25620,
+    "valor": 6800,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2189,
+    "moto_id": 25621,
+    "valor": 14200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2190,
+    "moto_id": 25622,
+    "valor": 4400,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2191,
+    "moto_id": 25623,
+    "valor": 10800,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2192,
+    "moto_id": 25624,
+    "valor": 8200,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2193,
+    "moto_id": 25625,
+    "valor": 10800,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2194,
+    "moto_id": 25626,
+    "valor": 4600,
+    "data_registro": "2026-05-12T23:53:05.358155+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2243,
+    "moto_id": 25021,
+    "valor": 6000,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2244,
+    "moto_id": 25022,
+    "valor": 13100,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2245,
+    "moto_id": 25023,
+    "valor": 11000,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2246,
+    "moto_id": 25024,
+    "valor": 18100,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2247,
+    "moto_id": 25025,
+    "valor": 10000,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2248,
+    "moto_id": 25026,
+    "valor": 7000,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2249,
+    "moto_id": 25027,
+    "valor": 12800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2250,
+    "moto_id": 25028,
+    "valor": 9400,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2251,
+    "moto_id": 25029,
+    "valor": 8600,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2252,
+    "moto_id": 25030,
+    "valor": 7600,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2253,
+    "moto_id": 25031,
+    "valor": 7800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2254,
+    "moto_id": 25032,
+    "valor": 33600,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2255,
+    "moto_id": 25033,
+    "valor": 8400,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2256,
+    "moto_id": 25034,
+    "valor": 8000,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2257,
+    "moto_id": 25035,
+    "valor": 3400,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2258,
+    "moto_id": 25036,
+    "valor": 4800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2259,
+    "moto_id": 25037,
+    "valor": 62200,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2260,
+    "moto_id": 25038,
+    "valor": 47400,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2261,
+    "moto_id": 25039,
+    "valor": 2200,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2262,
+    "moto_id": 25040,
+    "valor": 15800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2263,
+    "moto_id": 25041,
+    "valor": 23000,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2264,
+    "moto_id": 25042,
+    "valor": 35000,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2265,
+    "moto_id": 25043,
+    "valor": 3200,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2266,
+    "moto_id": 25044,
+    "valor": 15400,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2267,
+    "moto_id": 25045,
+    "valor": 10200,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2268,
+    "moto_id": 25046,
+    "valor": 9600,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2269,
+    "moto_id": 25047,
+    "valor": 7400,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2270,
+    "moto_id": 25048,
+    "valor": 13400,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2271,
+    "moto_id": 25049,
+    "valor": 5000,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2272,
+    "moto_id": 25050,
+    "valor": 8200,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2273,
+    "moto_id": 25051,
+    "valor": 6200,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2274,
+    "moto_id": 25052,
+    "valor": 7400,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2275,
+    "moto_id": 25053,
+    "valor": 8000,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2276,
+    "moto_id": 25054,
+    "valor": 25500,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2277,
+    "moto_id": 25055,
+    "valor": 11800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2278,
+    "moto_id": 25056,
+    "valor": 50000,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2279,
+    "moto_id": 25057,
+    "valor": 26200,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2280,
+    "moto_id": 25058,
+    "valor": 6800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2281,
+    "moto_id": 25059,
+    "valor": 12800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2282,
+    "moto_id": 25060,
+    "valor": 49900,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2283,
+    "moto_id": 25061,
+    "valor": 20800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2284,
+    "moto_id": 25062,
+    "valor": 11800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2285,
+    "moto_id": 25063,
+    "valor": 8600,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2286,
+    "moto_id": 25064,
+    "valor": 4600,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2287,
+    "moto_id": 25065,
+    "valor": 19800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2288,
+    "moto_id": 25066,
+    "valor": 24800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2289,
+    "moto_id": 25067,
+    "valor": 17800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2290,
+    "moto_id": 25068,
+    "valor": 17800,
+    "data_registro": "2026-05-13T23:51:06.399929+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2829,
+    "moto_id": 29416,
+    "valor": 25000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2830,
+    "moto_id": 29380,
+    "valor": 6600,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2831,
+    "moto_id": 29381,
+    "valor": 22400,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2832,
+    "moto_id": 29417,
+    "valor": 35500,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2833,
+    "moto_id": 29382,
+    "valor": 5200,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2834,
+    "moto_id": 29418,
+    "valor": 17000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2835,
+    "moto_id": 29383,
+    "valor": 34000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2836,
+    "moto_id": 29384,
+    "valor": 9000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2837,
+    "moto_id": 29385,
+    "valor": 7200,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2838,
+    "moto_id": 29419,
+    "valor": 23000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2301,
+    "moto_id": 26134,
+    "valor": 2800,
+    "data_registro": "2026-05-13T23:51:11.142613+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2839,
+    "moto_id": 29420,
+    "valor": 2200,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2840,
+    "moto_id": 29387,
+    "valor": 5500,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2304,
+    "moto_id": 26137,
+    "valor": 5000,
+    "data_registro": "2026-05-13T23:51:11.142613+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2841,
+    "moto_id": 29421,
+    "valor": 83000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2842,
+    "moto_id": 29388,
+    "valor": 7600,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2843,
+    "moto_id": 29389,
+    "valor": 8600,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2844,
+    "moto_id": 29390,
+    "valor": 5400,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2309,
+    "moto_id": 26142,
+    "valor": 28200,
+    "data_registro": "2026-05-13T23:51:11.142613+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2845,
+    "moto_id": 29391,
+    "valor": 7900,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2846,
+    "moto_id": 29392,
+    "valor": 10200,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2312,
+    "moto_id": 26145,
+    "valor": 17800,
+    "data_registro": "2026-05-13T23:51:11.142613+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2847,
+    "moto_id": 29393,
+    "valor": 37900,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2848,
+    "moto_id": 29394,
+    "valor": 7700,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2849,
+    "moto_id": 29395,
+    "valor": 66700,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2850,
+    "moto_id": 29396,
+    "valor": 24000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2851,
+    "moto_id": 29397,
+    "valor": 10200,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2852,
+    "moto_id": 29398,
+    "valor": 14800,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2853,
+    "moto_id": 29399,
+    "valor": 13000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2854,
+    "moto_id": 29400,
+    "valor": 5000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2855,
+    "moto_id": 29401,
+    "valor": 10800,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2856,
+    "moto_id": 29402,
+    "valor": 14000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2857,
+    "moto_id": 29403,
+    "valor": 4600,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2858,
+    "moto_id": 29404,
+    "valor": 7900,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2325,
+    "moto_id": 26159,
+    "valor": 4400,
+    "data_registro": "2026-05-13T23:51:11.142613+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2859,
+    "moto_id": 29405,
+    "valor": 5000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2860,
+    "moto_id": 29406,
+    "valor": 9800,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2861,
+    "moto_id": 29407,
+    "valor": 11400,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2862,
+    "moto_id": 29408,
+    "valor": 21400,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2863,
+    "moto_id": 29409,
+    "valor": 23000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2864,
+    "moto_id": 29410,
+    "valor": 6800,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2865,
+    "moto_id": 29411,
+    "valor": 14000,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2866,
+    "moto_id": 29412,
+    "valor": 6600,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2867,
+    "moto_id": 29413,
+    "valor": 12200,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2868,
+    "moto_id": 29414,
+    "valor": 10200,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2869,
+    "moto_id": 29415,
+    "valor": 11600,
+    "data_registro": "2026-05-21T00:01:39.924975+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2900,
+    "moto_id": 29922,
+    "valor": 10600,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2901,
+    "moto_id": 29923,
+    "valor": 15400,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2902,
+    "moto_id": 29924,
+    "valor": 10000,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2903,
+    "moto_id": 29925,
+    "valor": 25600,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2904,
+    "moto_id": 29926,
+    "valor": 28200,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2905,
+    "moto_id": 29927,
+    "valor": 23600,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2906,
+    "moto_id": 29928,
+    "valor": 25600,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2907,
+    "moto_id": 29929,
+    "valor": 20200,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2908,
+    "moto_id": 29930,
+    "valor": 13000,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2909,
+    "moto_id": 29931,
+    "valor": 32800,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2910,
+    "moto_id": 29932,
+    "valor": 16200,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2911,
+    "moto_id": 29933,
+    "valor": 14600,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2912,
+    "moto_id": 29934,
+    "valor": 7800,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2913,
+    "moto_id": 29935,
+    "valor": 10400,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2914,
+    "moto_id": 29936,
+    "valor": 21200,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2915,
+    "moto_id": 29937,
+    "valor": 73800,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2916,
+    "moto_id": 29938,
+    "valor": 11000,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2917,
+    "moto_id": 29939,
+    "valor": 14200,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2918,
+    "moto_id": 29940,
+    "valor": 12000,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2919,
+    "moto_id": 29941,
+    "valor": 15400,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2920,
+    "moto_id": 29942,
+    "valor": 13600,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2921,
+    "moto_id": 29943,
+    "valor": 3200,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2922,
+    "moto_id": 29944,
+    "valor": 6800,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2923,
+    "moto_id": 29945,
+    "valor": 8600,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2924,
+    "moto_id": 29946,
+    "valor": 17400,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2925,
+    "moto_id": 29947,
+    "valor": 11400,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2926,
+    "moto_id": 29948,
+    "valor": 3200,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2927,
+    "moto_id": 29949,
+    "valor": 14000,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2928,
+    "moto_id": 29950,
+    "valor": 2200,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2929,
+    "moto_id": 29951,
+    "valor": 20200,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2930,
+    "moto_id": 29952,
+    "valor": 7200,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2931,
+    "moto_id": 29953,
+    "valor": 8400,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2932,
+    "moto_id": 29954,
+    "valor": 15400,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2933,
+    "moto_id": 29955,
+    "valor": 22000,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2934,
+    "moto_id": 29956,
+    "valor": 14200,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2935,
+    "moto_id": 29957,
+    "valor": 14600,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2936,
+    "moto_id": 29958,
+    "valor": 15400,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2937,
+    "moto_id": 29959,
+    "valor": 16800,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2938,
+    "moto_id": 29960,
+    "valor": 22400,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2939,
+    "moto_id": 29961,
+    "valor": 21000,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2940,
+    "moto_id": 29962,
+    "valor": 13800,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2941,
+    "moto_id": 29963,
+    "valor": 9800,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2942,
+    "moto_id": 29964,
+    "valor": 8400,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2943,
+    "moto_id": 29965,
+    "valor": 15400,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2944,
+    "moto_id": 29966,
+    "valor": 12200,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2945,
+    "moto_id": 29967,
+    "valor": 5800,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2946,
+    "moto_id": 29968,
+    "valor": 8400,
+    "data_registro": "2026-05-21T23:54:29.912328+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2947,
+    "moto_id": 28980,
+    "valor": 13000,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2948,
+    "moto_id": 28981,
+    "valor": 13600,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2949,
+    "moto_id": 28982,
+    "valor": 8600,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2950,
+    "moto_id": 28983,
+    "valor": 9200,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2951,
+    "moto_id": 28984,
+    "valor": 10400,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2952,
+    "moto_id": 28986,
+    "valor": 10400,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2953,
+    "moto_id": 28987,
+    "valor": 11000,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2954,
+    "moto_id": 28988,
+    "valor": 8600,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2955,
+    "moto_id": 28989,
+    "valor": 20600,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2956,
+    "moto_id": 28990,
+    "valor": 39000,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2957,
+    "moto_id": 28991,
+    "valor": 11600,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2958,
+    "moto_id": 28992,
+    "valor": 6600,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2959,
+    "moto_id": 28993,
+    "valor": 8800,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2960,
+    "moto_id": 28994,
+    "valor": 13400,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2961,
+    "moto_id": 28995,
+    "valor": 8000,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2962,
+    "moto_id": 28996,
+    "valor": 15000,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2963,
+    "moto_id": 28997,
+    "valor": 5400,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2964,
+    "moto_id": 28998,
+    "valor": 8400,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2965,
+    "moto_id": 28999,
+    "valor": 9200,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2966,
+    "moto_id": 29000,
+    "valor": 11200,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2967,
+    "moto_id": 29001,
+    "valor": 5800,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2968,
+    "moto_id": 29002,
+    "valor": 10200,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2969,
+    "moto_id": 29003,
+    "valor": 5800,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2970,
+    "moto_id": 29004,
+    "valor": 13600,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2971,
+    "moto_id": 29005,
+    "valor": 8600,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2972,
+    "moto_id": 29006,
+    "valor": 9400,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2973,
+    "moto_id": 29007,
+    "valor": 10400,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2974,
+    "moto_id": 29008,
+    "valor": 8600,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2975,
+    "moto_id": 29009,
+    "valor": 12800,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2976,
+    "moto_id": 29010,
+    "valor": 14600,
+    "data_registro": "2026-05-21T23:54:32.680534+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2552,
+    "moto_id": 26174,
+    "valor": 23000,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2553,
+    "moto_id": 26175,
+    "valor": 8200,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2554,
+    "moto_id": 26176,
+    "valor": 27500,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2555,
+    "moto_id": 26128,
+    "valor": 9300,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2556,
+    "moto_id": 26129,
+    "valor": 10400,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2557,
+    "moto_id": 26177,
+    "valor": 2600,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2558,
+    "moto_id": 26131,
+    "valor": 15000,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2559,
+    "moto_id": 26178,
+    "valor": 7400,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2560,
+    "moto_id": 26179,
+    "valor": 20000,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2561,
+    "moto_id": 26133,
+    "valor": 8400,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2562,
+    "moto_id": 26135,
+    "valor": 9400,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2563,
+    "moto_id": 26136,
+    "valor": 5400,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2564,
+    "moto_id": 26138,
+    "valor": 6400,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2565,
+    "moto_id": 26139,
+    "valor": 4000,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2566,
+    "moto_id": 26140,
+    "valor": 10000,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2567,
+    "moto_id": 26141,
+    "valor": 11200,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2568,
+    "moto_id": 26143,
+    "valor": 17000,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2569,
+    "moto_id": 26144,
+    "valor": 10200,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2570,
+    "moto_id": 26146,
+    "valor": 10600,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2571,
+    "moto_id": 26147,
+    "valor": 8600,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2572,
+    "moto_id": 26149,
+    "valor": 8800,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2573,
+    "moto_id": 26150,
+    "valor": 37600,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2574,
+    "moto_id": 26151,
+    "valor": 19600,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2575,
+    "moto_id": 26152,
+    "valor": 10400,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2576,
+    "moto_id": 26153,
+    "valor": 7600,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2577,
+    "moto_id": 26154,
+    "valor": 3600,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2578,
+    "moto_id": 26155,
+    "valor": 7800,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2579,
+    "moto_id": 26156,
+    "valor": 11400,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2580,
+    "moto_id": 26157,
+    "valor": 3600,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2581,
+    "moto_id": 26158,
+    "valor": 10800,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2582,
+    "moto_id": 26160,
+    "valor": 20200,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2583,
+    "moto_id": 26161,
+    "valor": 8000,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2584,
+    "moto_id": 26162,
+    "valor": 10000,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2585,
+    "moto_id": 26163,
+    "valor": 14600,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2586,
+    "moto_id": 26164,
+    "valor": 13400,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2587,
+    "moto_id": 26165,
+    "valor": 11200,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2588,
+    "moto_id": 26166,
+    "valor": 64600,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2589,
+    "moto_id": 26167,
+    "valor": 26200,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2590,
+    "moto_id": 26168,
+    "valor": 58500,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2591,
+    "moto_id": 26169,
+    "valor": 9200,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2592,
+    "moto_id": 26170,
+    "valor": 6500,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2593,
+    "moto_id": 26171,
+    "valor": 10400,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2594,
+    "moto_id": 26172,
+    "valor": 11200,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2595,
+    "moto_id": 26173,
+    "valor": 6600,
+    "data_registro": "2026-05-16T23:43:05.239922+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2596,
+    "moto_id": 26655,
+    "valor": 28000,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2597,
+    "moto_id": 26656,
+    "valor": 24600,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2598,
+    "moto_id": 26657,
+    "valor": 11800,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2599,
+    "moto_id": 26658,
+    "valor": 9000,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2600,
+    "moto_id": 26659,
+    "valor": 10400,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2601,
+    "moto_id": 26660,
+    "valor": 35400,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2602,
+    "moto_id": 26661,
+    "valor": 27100,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2603,
+    "moto_id": 26662,
+    "valor": 8800,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2604,
+    "moto_id": 26663,
+    "valor": 12600,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2605,
+    "moto_id": 26664,
+    "valor": 8000,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2606,
+    "moto_id": 26665,
+    "valor": 13200,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2607,
+    "moto_id": 26666,
+    "valor": 7500,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2608,
+    "moto_id": 26654,
+    "valor": 7200,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2609,
+    "moto_id": 26668,
+    "valor": 14600,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2610,
+    "moto_id": 26669,
+    "valor": 6400,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2611,
+    "moto_id": 26670,
+    "valor": 4100,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2612,
+    "moto_id": 26671,
+    "valor": 15400,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2613,
+    "moto_id": 26672,
+    "valor": 9200,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2614,
+    "moto_id": 26673,
+    "valor": 9800,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2615,
+    "moto_id": 26674,
+    "valor": 42000,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2616,
+    "moto_id": 26675,
+    "valor": 41200,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2617,
+    "moto_id": 26653,
+    "valor": 20400,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2618,
+    "moto_id": 26676,
+    "valor": 23200,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2619,
+    "moto_id": 26677,
+    "valor": 13800,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2620,
+    "moto_id": 26681,
+    "valor": 12400,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2621,
+    "moto_id": 26682,
+    "valor": 12200,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2622,
+    "moto_id": 26683,
+    "valor": 9200,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2623,
+    "moto_id": 26684,
+    "valor": 10000,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2624,
+    "moto_id": 26695,
+    "valor": 9800,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2625,
+    "moto_id": 26686,
+    "valor": 6400,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2626,
+    "moto_id": 26687,
+    "valor": 9000,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2627,
+    "moto_id": 26688,
+    "valor": 8200,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2628,
+    "moto_id": 26689,
+    "valor": 10200,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2629,
+    "moto_id": 26690,
+    "valor": 16200,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2630,
+    "moto_id": 26691,
+    "valor": 9200,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2631,
+    "moto_id": 26692,
+    "valor": 11600,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2632,
+    "moto_id": 26694,
+    "valor": 9000,
+    "data_registro": "2026-05-16T23:43:08.491799+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2633,
+    "moto_id": 27247,
+    "valor": 7600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2634,
+    "moto_id": 27248,
+    "valor": 27000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2635,
+    "moto_id": 27249,
+    "valor": 22000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2636,
+    "moto_id": 27162,
+    "valor": 15600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2637,
+    "moto_id": 27250,
+    "valor": 89000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2638,
+    "moto_id": 27251,
+    "valor": 9600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2639,
+    "moto_id": 27252,
+    "valor": 7200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2640,
+    "moto_id": 27253,
+    "valor": 21500,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2641,
+    "moto_id": 27254,
+    "valor": 21200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2642,
+    "moto_id": 27255,
+    "valor": 25000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2643,
+    "moto_id": 27163,
+    "valor": 16400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2644,
+    "moto_id": 27164,
+    "valor": 11200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2645,
+    "moto_id": 27165,
+    "valor": 11400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2646,
+    "moto_id": 27166,
+    "valor": 8200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2647,
+    "moto_id": 27256,
+    "valor": 21500,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2648,
+    "moto_id": 27257,
+    "valor": 22700,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2649,
+    "moto_id": 27167,
+    "valor": 8200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2650,
+    "moto_id": 27168,
+    "valor": 28800,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2651,
+    "moto_id": 27169,
+    "valor": 5000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2652,
+    "moto_id": 27170,
+    "valor": 7400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2653,
+    "moto_id": 27171,
+    "valor": 10000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2654,
+    "moto_id": 27172,
+    "valor": 7600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2655,
+    "moto_id": 27173,
+    "valor": 22000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2656,
+    "moto_id": 27243,
+    "valor": 8600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2657,
+    "moto_id": 27174,
+    "valor": 20000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2658,
+    "moto_id": 27175,
+    "valor": 42400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2659,
+    "moto_id": 27176,
+    "valor": 14000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2660,
+    "moto_id": 27177,
+    "valor": 6800,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2661,
+    "moto_id": 27178,
+    "valor": 6400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2662,
+    "moto_id": 27179,
+    "valor": 11200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2663,
+    "moto_id": 27180,
+    "valor": 6200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2664,
+    "moto_id": 27181,
+    "valor": 10500,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2665,
+    "moto_id": 27182,
+    "valor": 38000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2666,
+    "moto_id": 27183,
+    "valor": 9600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2667,
+    "moto_id": 27184,
+    "valor": 13000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2668,
+    "moto_id": 27186,
+    "valor": 35400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2669,
+    "moto_id": 27187,
+    "valor": 10500,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2670,
+    "moto_id": 27188,
+    "valor": 10200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2671,
+    "moto_id": 27189,
+    "valor": 62500,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2672,
+    "moto_id": 27190,
+    "valor": 12400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2673,
+    "moto_id": 27191,
+    "valor": 15600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2674,
+    "moto_id": 27192,
+    "valor": 11000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2675,
+    "moto_id": 27193,
+    "valor": 15400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2676,
+    "moto_id": 27194,
+    "valor": 8400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2677,
+    "moto_id": 27195,
+    "valor": 4500,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2678,
+    "moto_id": 27196,
+    "valor": 6600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2679,
+    "moto_id": 27197,
+    "valor": 42500,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2680,
+    "moto_id": 27245,
+    "valor": 11800,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2681,
+    "moto_id": 27198,
+    "valor": 9400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2682,
+    "moto_id": 27199,
+    "valor": 11500,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2683,
+    "moto_id": 27161,
+    "valor": 14200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2684,
+    "moto_id": 27200,
+    "valor": 8400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2685,
+    "moto_id": 27201,
+    "valor": 19800,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2686,
+    "moto_id": 27202,
+    "valor": 7100,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2687,
+    "moto_id": 27203,
+    "valor": 7600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2688,
+    "moto_id": 27204,
+    "valor": 8000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2689,
+    "moto_id": 27205,
+    "valor": 11800,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2690,
+    "moto_id": 27206,
+    "valor": 8400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2691,
+    "moto_id": 27207,
+    "valor": 13400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2692,
+    "moto_id": 27208,
+    "valor": 6600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2693,
+    "moto_id": 27209,
+    "valor": 11800,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2694,
+    "moto_id": 27210,
+    "valor": 14200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2695,
+    "moto_id": 27211,
+    "valor": 11200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2696,
+    "moto_id": 27212,
+    "valor": 15600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2697,
+    "moto_id": 27213,
+    "valor": 8100,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2698,
+    "moto_id": 27214,
+    "valor": 9700,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2699,
+    "moto_id": 27215,
+    "valor": 17800,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2700,
+    "moto_id": 27216,
+    "valor": 18200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2701,
+    "moto_id": 27217,
+    "valor": 7400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2702,
+    "moto_id": 27218,
+    "valor": 21000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2703,
+    "moto_id": 27219,
+    "valor": 9400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2704,
+    "moto_id": 27220,
+    "valor": 13500,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2705,
+    "moto_id": 27221,
+    "valor": 7200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2706,
+    "moto_id": 27222,
+    "valor": 6000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2707,
+    "moto_id": 27223,
+    "valor": 7800,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2708,
+    "moto_id": 27224,
+    "valor": 9500,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2709,
+    "moto_id": 27225,
+    "valor": 11000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2710,
+    "moto_id": 27226,
+    "valor": 14000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2711,
+    "moto_id": 27227,
+    "valor": 7000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2712,
+    "moto_id": 27228,
+    "valor": 9400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2713,
+    "moto_id": 27229,
+    "valor": 10200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2714,
+    "moto_id": 27230,
+    "valor": 5200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2715,
+    "moto_id": 27231,
+    "valor": 25600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2716,
+    "moto_id": 27232,
+    "valor": 7000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2717,
+    "moto_id": 27233,
+    "valor": 7600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2718,
+    "moto_id": 27234,
+    "valor": 4200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2719,
+    "moto_id": 27235,
+    "valor": 5200,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2720,
+    "moto_id": 27236,
+    "valor": 9600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2721,
+    "moto_id": 27237,
+    "valor": 11600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2722,
+    "moto_id": 27244,
+    "valor": 20000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2723,
+    "moto_id": 27239,
+    "valor": 12000,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "vendido"
+  },
+  {
+    "id": 2724,
+    "moto_id": 27240,
+    "valor": 5600,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2725,
+    "moto_id": 27241,
+    "valor": 16400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2726,
+    "moto_id": 27242,
+    "valor": 8400,
+    "data_registro": "2026-05-16T23:43:15.996295+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2727,
+    "moto_id": 27790,
+    "valor": 5500,
+    "data_registro": "2026-05-16T23:43:17.430244+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2728,
+    "moto_id": 27791,
+    "valor": 1300,
+    "data_registro": "2026-05-16T23:43:17.430244+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2729,
+    "moto_id": 27792,
+    "valor": 4100,
+    "data_registro": "2026-05-16T23:43:17.430244+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2730,
+    "moto_id": 27793,
+    "valor": 20900,
+    "data_registro": "2026-05-16T23:43:17.430244+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2731,
+    "moto_id": 27794,
+    "valor": 7100,
+    "data_registro": "2026-05-16T23:43:17.430244+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2732,
+    "moto_id": 27795,
+    "valor": 12800,
+    "data_registro": "2026-05-16T23:43:17.430244+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2733,
+    "moto_id": 27796,
+    "valor": 13100,
+    "data_registro": "2026-05-16T23:43:17.430244+00:00",
+    "status_arrematado": "condicional"
+  },
+  {
+    "id": 2734,
+    "moto_id": 27797,
+    "valor": 3200,
+    "data_registro": "2026-05-16T23:43:17.430244+00:00",
+    "status_arrematado": "condicional"
   }
 ]
