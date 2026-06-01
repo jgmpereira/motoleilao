@@ -134,6 +134,7 @@ Ficam em `.env` na raiz (recriar se Codespaces resetar) e nos Secrets do reposit
 | `scrapers/freitas.js` | Freitas | Fetch HTML + regex, sem Playwright | 6h20 diário |
 | `scrapers/vip.js` | VIP Leilões | Cookie via redirect 302 + POST paginado | 6h40 diário |
 | `scrapers/superbid.js` | Superbid | REST JSON paginado, 3 estratégias de parsing | 7h diário |
+| `scrapers/superbid-encerrados.js` | Superbid (encerrados) | Página SSR `/oferta/{id}` (`__NEXT_DATA__`); sinal `hasBids`, valor = `currentMaxBid` | 21h diário |
 | `scrapers/copart.js` | Copart | **Playwright obrigatório** — WAF Imperva bloqueia fetch direto | 6h50 diário |
 | `scripts/popular-fipe.js` | FIPE | API v2 parallelum + `X-Subscription-Token` | Dia 1/mês 7h |
 | `scripts/backup-supabase.js` | Backup | Exporta tabelas críticas → `backups/YYYY-MM-DD/` | 3h diário |
@@ -143,6 +144,8 @@ Ficam em `.env` na raiz (recriar se Codespaces resetar) e nos Secrets do reposit
 **Copart:** usa `page.evaluate(fetch(...))` para paginar com a sessão/cookies do Playwright (bypassa WAF). Se o Angular mudar o endpoint ou formato DataTables, precisa recapturar o body template manualmente.
 
 **Sodré encerrados:** só processa leilões com `encerrado=false`. Para reprocessar um já encerrado, setar `encerrado=false` manualmente no Supabase.
+
+**Superbid encerrados:** NÃO usa o feed `searchType=closed` (pool de SEO randômico, não-paginável e desatualizado). Busca cada oferta por `www.superbid.net/oferta/{offerId}` (offerId vem de `motos.url`) e lê `props.pageProps.offerDetails.offers[0]` do `__NEXT_DATA__`. É idempotente (pula motos já arrematadas) e não depende da flag `encerrado` — processa janela de 7 dias para evitar corrida com o `superbid.js` ativo (que fecha leilões passados às 7h). `winnerBid` só popula dias depois → usar `hasBids` como sinal. `statusId 11` = condicional; demais encerrados com lances = vendido. **Obs:** o `superbid.js` ativo gera linhas de moto duplicadas apontando para poucos offerIds — o encerrados grava o resultado correto por moto, mas a duplicação é upstream.
 
 **popular-fipe.js (bug pendente):** a API v2 do parallelum retorna modelos como **array direto**, não objeto. O script está tentando acessar como objeto — precisa corrigir para usar o array direto. O mesmo pode valer para anos.
 
@@ -198,7 +201,8 @@ Motos com `arrematado` registrado **não são deletadas** ao reimportar ou delet
 
 - [ ] **`scripts/popular-fipe.js`** — corrigir parsing: resposta de modelos é array direto, não objeto (idem para anos)
 - [ ] **Google Search Console** — verificação DNS pendente para `xn--motoleio-xza.com.br`
-- [ ] **Arrematados outros leilões** — implementar scraper de encerrados para Superbid, VIP, Copart, Freitas, Milan
+- [ ] **Arrematados outros leilões** — implementar scraper de encerrados para VIP, Copart, Freitas, Milan (Superbid ✅ feito)
+- [ ] **Superbid motos duplicadas** — o `superbid.js` ativo gera múltiplas linhas de moto apontando para o mesmo `offerId` (visto em vários leilões). Investigar/corrigir o parsing/agrupamento
 
 ---
 

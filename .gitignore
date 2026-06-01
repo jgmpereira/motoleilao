@@ -1,0 +1,9 @@
+# Variáveis de ambiente (secrets — nunca commitar)
+.env
+.env.*
+
+# Dependências
+node_modules/
+
+# Temporários do Supabase CLI
+supabase/.temp/
