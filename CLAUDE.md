@@ -202,7 +202,8 @@ Motos com `arrematado` registrado **não são deletadas** ao reimportar ou delet
 - [ ] **`scripts/popular-fipe.js`** — corrigir parsing: resposta de modelos é array direto, não objeto (idem para anos)
 - [ ] **Google Search Console** — verificação DNS pendente para `xn--motoleio-xza.com.br`
 - [ ] **Arrematados outros leilões** — implementar scraper de encerrados para VIP, Copart, Freitas, Milan (Superbid ✅ feito)
-- [ ] **Superbid motos duplicadas** — o `superbid.js` ativo gera múltiplas linhas de moto apontando para o mesmo `offerId` (visto em vários leilões). Investigar/corrigir o parsing/agrupamento
+
+> **Resolvido:** duplicação de motos no `superbid.js` — a paginação por `start` do endpoint `seo/offers` é furada (retorna páginas sobrepostas/repetidas, ex. `start=30` == `start=90`), o que acumulava a mesma oferta várias vezes. Corrigido: busca única com `pageSize=total` + dedupe por `offer.id`. Leilões encerrados antigos (com motos duplicadas já gravadas antes do fix) não são autocorrigidos.
 
 ---
 

@@ -27,7 +27,6 @@ const OFFER_QUERY_HOST = 'offer-query.superbid.net';
 const OFFER_QUERY_BASE = '/seo/offers/?locale=pt_BR&portalId=%5B2%2C15%5D' +
   '&requestOrigin=marketplace&timeZoneId=UTC&searchType=opened' +
   '&urlSeo=https%3A%2F%2Fwww.superbid.net%2Fcategorias%2Fcarros-motos%2Fmotos';
-const PAGE_SIZE = 30;
 
 if (!SUPA_KEY) {
   console.error('❌  SUPABASE_KEY não definido');
@@ -273,36 +272,42 @@ async function main() {
   console.log(`    API: ${OFFER_QUERY_HOST}`);
   console.log(`    Supabase: ${SUPA_URL}`);
 
-  // ── 1. Busca primeira página para descobrir o total ───────────────────────
-  console.log('\n🌐 Buscando primeira página...');
+  // ── 1. Descobre o total de lotes ──────────────────────────────────────────
+  console.log('\n🌐 Buscando total de lotes...');
   const url0 = `https://${OFFER_QUERY_HOST}${OFFER_QUERY_BASE}&start=0`;
   const res0 = await httpGet(url0);
-  if (res0.status !== 200) throw new Error(`HTTP ${res0.status} na primeira página`);
+  if (res0.status !== 200) throw new Error(`HTTP ${res0.status} na primeira requisição`);
 
-  const data0 = JSON.parse(res0.body);
-  const total = data0.total || 0;
-  const totalPages = Math.ceil(total / PAGE_SIZE);
-  console.log(`   ${total} motos encontradas → ${totalPages} páginas`);
+  const total = JSON.parse(res0.body).total || 0;
+  console.log(`   ${total} lotes de moto no feed`);
 
-  // ── 2. Coleta todas as páginas ────────────────────────────────────────────
-  const allOffers = [...(data0.offers || [])];
-  console.log(`   Página 1: ${allOffers.length} lotes`);
-
-  for (let page = 1; page < totalPages; page++) {
-    const url = `https://${OFFER_QUERY_HOST}${OFFER_QUERY_BASE}&start=${page * PAGE_SIZE}`;
-    const res  = await httpGet(url);
-    if (res.status !== 200) {
-      console.warn(`   ⚠️  Página ${page + 1} retornou HTTP ${res.status}, pulando`);
-      continue;
-    }
-    const data = JSON.parse(res.body);
-    const offers = data.offers || [];
-    allOffers.push(...offers);
-    console.log(`   Página ${page + 1}: ${offers.length} lotes`);
-    await new Promise(r => setTimeout(r, 300));
+  if (total === 0) {
+    console.log('ℹ️  Nenhum lote encontrado. Encerrando.');
+    return;
   }
 
-  console.log(`\n   Total coletado: ${allOffers.length} lotes`);
+  // ── 2. Coleta TODOS os lotes numa única requisição ────────────────────────
+  // A paginação por `start` deste endpoint é furada: retorna páginas
+  // sobrepostas/repetidas (ex.: start=30 == start=90), o que fazia o scraper
+  // acumular a mesma oferta várias vezes → motos duplicadas no banco.
+  // Solução: buscar tudo com pageSize=total e deduplicar por offer.id.
+  const urlAll = `https://${OFFER_QUERY_HOST}${OFFER_QUERY_BASE}&pageSize=${total}&start=0`;
+  const resAll = await httpGet(urlAll);
+  if (resAll.status !== 200) throw new Error(`HTTP ${resAll.status} ao buscar lotes`);
+
+  const rawOffers = JSON.parse(resAll.body).offers || [];
+
+  // Dedupe defensivo por offer.id (uma oferta = um lote = uma moto)
+  const offersById = new Map();
+  for (const o of rawOffers) {
+    if (o && o.id != null && !offersById.has(o.id)) offersById.set(o.id, o);
+  }
+  const allOffers = [...offersById.values()];
+
+  console.log(`   Coletados ${rawOffers.length} lotes → ${allOffers.length} distintos`);
+  if (allOffers.length < total) {
+    console.warn(`   ⚠️  Esperados ${total}, obtidos ${allOffers.length} — cobertura possivelmente incompleta`);
+  }
 
   if (allOffers.length === 0) {
     console.log('ℹ️  Nenhum lote encontrado. Encerrando.');
