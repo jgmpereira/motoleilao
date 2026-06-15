@@ -324,15 +324,26 @@ async function main() {
   };
 
   async function fetchPage(pageNum) {
-    const res = await httpRequest({
-      hostname: VIP_HOST,
-      path: `${SEARCH_PATH}${pageNum}`,
-      method: 'POST',
-      headers: COMMON_HEADERS,
-    }, POST_BODY);
-    if (res.status === 403) return null; // bloqueado pelo anti-bot, parar paginação
-    if (res.status !== 200) throw new Error(`Página ${pageNum} retornou HTTP ${res.status}`);
-    return res.body;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const res = await httpRequest({
+        hostname: VIP_HOST,
+        path: `${SEARCH_PATH}${pageNum}`,
+        method: 'POST',
+        headers: COMMON_HEADERS,
+      }, POST_BODY);
+      if (res.status === 403) return null;
+      if (res.status === 429) {
+        if (attempt === 0) {
+          console.log(`   Página ${pageNum}: rate limit (429), aguardando 25s...`);
+          await new Promise(r => setTimeout(r, 25_000));
+          continue;
+        }
+        console.log(`   Página ${pageNum}: rate limit (429) persistente — parando paginação`);
+        return null;
+      }
+      if (res.status !== 200) throw new Error(`Página ${pageNum} retornou HTTP ${res.status}`);
+      return res.body;
+    }
   }
 
   console.log('\n🌐 Buscando página 1 para contar resultados...');
@@ -350,11 +361,11 @@ async function main() {
   console.log(`   Página 1: ${page1Lots.length} lotes`);
 
   for (let pn = 2; pn <= totalPages; pn++) {
-    // Pausa aleatória entre 1.2s e 2.8s para evitar bloqueio anti-bot
-    await new Promise(r => setTimeout(r, 1200 + Math.random() * 1600));
+    // Pausa aleatória entre 2.5s e 5s para evitar bloqueio anti-bot
+    await new Promise(r => setTimeout(r, 2500 + Math.random() * 2500));
     const html = await fetchPage(pn);
     if (html === null) {
-      console.log(`   Página ${pn}: bloqueado (403) — parando paginação com ${allLots.length} lotes coletados`);
+      console.log(`   Página ${pn}: bloqueado — parando paginação com ${allLots.length} lotes coletados`);
       break;
     }
     const lots = parseCards(html);
