@@ -241,7 +241,7 @@ tbody tr:hover{background:var(--s2);}
 .seg-esportiva{background:rgba(255,77,0,.12);color:var(--accent);}
 #motos-filter-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:149;}
 #motos-filter-overlay.open{display:block;}
-#motos-filter-drawer{position:fixed;left:-275px;top:0;height:100%;width:275px;background:var(--s1);border-right:1px solid var(--border);z-index:150;transition:left .25s;box-shadow:4px 0 20px rgba(0,0,0,.25);overflow-y:auto;padding:16px 14px;}
+#motos-filter-drawer{position:fixed;left:-100%;top:0;height:100%;width:100%;background:var(--s1);z-index:150;transition:left .25s;overflow-y:auto;padding:20px 18px;}
 #motos-filter-drawer.open{left:0;}
 #motos-mobile-bar{display:none;align-items:center;gap:8px;flex:1;min-width:0;}
 
@@ -680,9 +680,9 @@ tbody tr:hover{background:var(--s2);}
   <!-- Overlay e drawer de filtros mobile para page-motos -->
   <div id="motos-filter-overlay" onclick="toggleMotosFilters()"></div>
   <div id="motos-filter-drawer">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;">🔍 Filtros</div>
-      <button onclick="toggleMotosFilters()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0;line-height:1;">✕</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--text);">🔍 Filtros</div>
+      <button onclick="toggleMotosFilters()" style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;padding:7px 14px;">✕ Fechar</button>
     </div>
     <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px;">Condição</div>
     <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">
@@ -1840,7 +1840,7 @@ function renderGridMotos() {
   const leileosAtivos = [...new Set(motos.map(m => m.leilao_id))].length;
   document.getElementById('gm-count').textContent = motos.length;
   document.getElementById('gm-leiloes-count').textContent = leileosAtivos;
-  document.getElementById('gm-result-label').textContent = `${motos.length} moto${motos.length !== 1 ? 's' : ''} em ${leileosAtivos} leilão${leileosAtivos !== 1 ? 'ões' : ''}`;
+  document.getElementById('gm-result-label').textContent = `${motos.length} moto${motos.length !== 1 ? 's' : ''} em ${leileosAtivos} leilã${leileosAtivos !== 1 ? 'ões' : 'o'}`;
 
   if (!motos.length) {
     grid.innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted);">Nenhuma moto encontrada com esses filtros.</div>';
