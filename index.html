@@ -3041,10 +3041,11 @@ function getSegmento(m) {
   // Supersportiva — pista/racing
   if (/\bcbr\s*(600|1000)|cbr\s*650r/.test(txt)) return 'esportiva';
   if (/ninja\s*zx|zx.?[46]r|zx.?6r|zx.?10r/.test(txt)) return 'esportiva';
+  if (/ninja\s*[23]\d\d/.test(txt)) return 'esportiva'; // Ninja 250/300 — carenagem full
   if (/\bgsxr\b|gsx.?r\s*\d/.test(txt)) return 'esportiva';
   if (/\bs\s*1000\s*rr|\bs1000rr/.test(txt)) return 'esportiva';
   if (/panigal|\b1199\b|\b1299\b|streetfighter\s*v4|\b848\b/.test(txt)) return 'esportiva';
-  if (/\byzf\s*r[16]\b|\br1\b/.test(txt) && cc >= 600) return 'esportiva';
+  if (/\byzf\s*r\d+\b/.test(txt)) return 'esportiva'; // R1, R3, R6, R7, R15 — todas carenadas
   if (/daytona/.test(txt) && cc >= 600) return 'esportiva';
   if (/\bf4\s*1000|\bf4r/.test(txt)) return 'esportiva';
 
