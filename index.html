@@ -229,7 +229,7 @@ tbody tr:hover{background:var(--s2);}
   .motos-filters{display:none!important;}
   #motos-mobile-bar{display:flex;}
   .motos-header{position:sticky;top:var(--sticky-top,97px);z-index:50;background:var(--s1);}
-  #app-header .btn-accent,#app-header .btn-green{display:none;}
+  #app-header .btn-accent,#app-header .btn-green,#app-header .btn-ghost,#app-header #logout-btn{display:none!important;}
 }
 
 /* Segmento — tags e overlay/drawer para page-motos mobile */
@@ -1461,7 +1461,7 @@ function updateStickyOffsets() {
   const h = document.getElementById('app-header');
   const t = document.querySelector('.tabs');
   if(!h || !t) return;
-  document.documentElement.style.setProperty('--sticky-top', (h.offsetHeight + t.offsetHeight) + 'px');
+  document.documentElement.style.setProperty('--sticky-top', (h.offsetHeight + t.offsetHeight + 4) + 'px');
 }
 window.addEventListener('resize', updateStickyOffsets);
 window.addEventListener('hashchange', () => navigateToHash(location.hash));
@@ -2094,6 +2094,7 @@ async function deletarLeilao(id, nome) {
 function abrirLeilao(id, skipHash) {
   currentLeilao = LEILOES.find(l => l.id === id);
   if(!currentLeilao) return;
+  window.scrollTo(0, 0);
   filtroMoto = 'todos';
   filtroPorte = '';
   filtroMonta = '';
