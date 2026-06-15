@@ -228,7 +228,7 @@ tbody tr:hover{background:var(--s2);}
   #gm-topbar{position:sticky;top:0;z-index:50;background:var(--s1);padding:8px 0;margin-bottom:8px;margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px;}
   .motos-filters{display:none!important;}
   #motos-mobile-bar{display:flex;}
-  .motos-header{position:sticky;top:0;z-index:50;background:var(--s1);}
+  .motos-header{position:sticky;top:97px;z-index:50;background:var(--s1);}
 }
 
 /* Segmento — tags e overlay/drawer para page-motos mobile */
@@ -5035,6 +5035,11 @@ async function deletarArrematado(motoId, btn) {
 
 // ===================== STATS =====================
 function updateStats() {
+  const ativos = LEILOES.filter(l=>!l.encerrado).length;
+  document.getElementById('stat-leiloes').textContent = LEILOES.length;
+  document.getElementById('stat-leiloes-sub').textContent = `${ativos} ativo${ativos !== 1 ? 's' : ''}`;
+  document.getElementById('stat-motos').textContent = MOTOS.length;
+  document.getElementById('stat-motos-sub').textContent = `${ativos} leilões ativos`;
   const arr = MOTOS.filter(m => ARREMATADOS[m.id]);
   document.getElementById('stat-arr').textContent = arr.length;
   const comFipe = arr.filter(m => m.fipe_csv||fipeCache[fipeKey(m)]);
