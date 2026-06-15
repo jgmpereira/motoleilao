@@ -228,7 +228,8 @@ tbody tr:hover{background:var(--s2);}
   #gm-topbar{position:sticky;top:0;z-index:50;background:var(--s1);padding:8px 0;margin-bottom:8px;margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px;}
   .motos-filters{display:none!important;}
   #motos-mobile-bar{display:flex;}
-  .motos-header{position:sticky;top:97px;z-index:50;background:var(--s1);}
+  .motos-header{position:sticky;top:var(--sticky-top,97px);z-index:50;background:var(--s1);}
+  #app-header .btn-accent,#app-header .btn-green{display:none;}
 }
 
 /* Segmento — tags e overlay/drawer para page-motos mobile */
@@ -1347,6 +1348,7 @@ async function carregarDados() {
     });
 
     hideLoading();
+    updateStickyOffsets();
     updateStats();
     renderLeiloes();
     renderGridMotos();
@@ -1455,6 +1457,13 @@ function navigateToHash(hash) {
   else showPage('leiloes', null, true);
 }
 
+function updateStickyOffsets() {
+  const h = document.getElementById('app-header');
+  const t = document.querySelector('.tabs');
+  if(!h || !t) return;
+  document.documentElement.style.setProperty('--sticky-top', (h.offsetHeight + t.offsetHeight) + 'px');
+}
+window.addEventListener('resize', updateStickyOffsets);
 window.addEventListener('hashchange', () => navigateToHash(location.hash));
 window.addEventListener('popstate', () => {
   if(location.hash.startsWith('#moto-')) return;
