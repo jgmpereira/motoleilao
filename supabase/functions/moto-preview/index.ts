@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
   const ogDesc = 'Encontre motos em leilão abaixo da FIPE. Veja esta e centenas de outras no MotoLeilão.';
   const foto = moto.foto || `${SITE}/og-default.png`;
   const linkSite = `${SITE}/#moto-${moto.id}`;
+  const ogUrl = `${SUPA_URL}/functions/v1/moto-preview?id=${moto.id}`;
 
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -59,7 +60,7 @@ Deno.serve(async (req) => {
 <meta property="og:title" content="${esc(ogTitle)}">
 <meta property="og:description" content="${esc(ogDesc)}">
 <meta property="og:image" content="${esc(foto)}">
-<meta property="og:url" content="${esc(req.url)}">
+<meta property="og:url" content="${esc(ogUrl)}">
 <meta property="og:locale" content="pt_BR">
 
 <!-- Twitter -->
