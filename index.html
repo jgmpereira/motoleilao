@@ -448,8 +448,8 @@ tbody tr:hover{background:var(--s2);}
     <div class="live"><div class="ldot"></div>MONITORANDO</div>
     <span class="fipe-status" id="fipe-global-status"></span>
     <span id="login-user-info" style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
-    <button class="btn btn-accent btn-sm" onclick="abrirModalImportar()">📥 Importar</button>
-    <button class="btn btn-green btn-sm" onclick="abrirModalLeilao()">+ Leilão</button>
+    <button id="btn-importar" class="btn btn-accent btn-sm" onclick="abrirModalImportar()" style="display:none;">📥 Importar</button>
+    <button id="btn-novo-leilao" class="btn btn-green btn-sm" onclick="abrirModalLeilao()" style="display:none;">+ Leilão</button>
     <button class="btn btn-ghost btn-sm" onclick="showPage('analise')">📊 Análise</button>
     <button class="btn btn-ghost btn-sm" id="logout-btn" onclick="fazerLogout()" title="Sair" style="display:none;">🚪 Sair</button>
   </div>
@@ -1257,6 +1257,8 @@ function fazerLogout() {
   const userEl = document.getElementById('login-user-info');
   if (userEl) userEl.textContent = '';
   document.getElementById('tab-admin').style.display = 'none';
+  document.getElementById('btn-importar').style.display = 'none';
+  document.getElementById('btn-novo-leilao').style.display = 'none';
   mostrarLanding();
 }
 
@@ -5481,8 +5483,11 @@ function showToast(msg, icon='✅') {
 const ADMIN_EMAIL = 'jgmpereira123@gmail.com';
 
 function initAdmin() {
-  const tab = document.getElementById('tab-admin');
-  if (tab) tab.style.display = authEmail === ADMIN_EMAIL ? '' : 'none';
+  const isAdmin = authEmail === ADMIN_EMAIL;
+  const show = isAdmin ? '' : 'none';
+  document.getElementById('tab-admin').style.display = show;
+  document.getElementById('btn-importar').style.display = show;
+  document.getElementById('btn-novo-leilao').style.display = show;
 }
 
 async function renderAdminVips() {
