@@ -4,7 +4,7 @@ const ADMIN_EMAIL = 'jgmpereira123@gmail.com';
 
 const supabaseAdmin = createClient(
   Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  Deno.env.get('SERVICE_ROLE_KEY')!,
 );
 
 function generatePassword(length = 10): string {
@@ -100,35 +100,49 @@ async function enviarEmailVip(email: string, senha: string): Promise<void> {
   }
 }
 
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...CORS },
+  });
+}
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: CORS });
+  }
+
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response('Method not allowed', { status: 405, headers: CORS });
   }
 
   // Verifica que o chamador é o admin
   const authHeader = req.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response('Unauthorized', { status: 401, headers: CORS });
   }
   const token = authHeader.slice(7);
   const { data: { user }, error: authErr } = await supabaseAdmin.auth.getUser(token);
   if (authErr || user?.email !== ADMIN_EMAIL) {
-    return new Response('Forbidden', { status: 403 });
+    return new Response('Forbidden', { status: 403, headers: CORS });
   }
 
   let body: { email?: string };
   try {
     body = await req.json();
   } catch {
-    return new Response('Invalid JSON', { status: 400 });
+    return json({ error: 'Invalid JSON' }, 400);
   }
 
   const email = body.email?.trim().toLowerCase();
   if (!email) {
-    return new Response(JSON.stringify({ error: 'email obrigatório' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json({ error: 'email obrigatório' }, 400);
   }
 
   const password = generatePassword();
@@ -142,10 +156,7 @@ Deno.serve(async (req) => {
   const isNew = !createErr;
   if (createErr && !createErr.message.includes('already registered')) {
     console.error('[admin-invite-vip] erro ao criar usuário:', createErr.message);
-    return new Response(JSON.stringify({ error: createErr.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json({ error: createErr.message }, 500);
   }
 
   const { error: dbErr } = await supabaseAdmin.from('assinantes').upsert(
@@ -162,10 +173,7 @@ Deno.serve(async (req) => {
 
   if (dbErr) {
     console.error('[admin-invite-vip] erro ao salvar assinante:', dbErr.message);
-    return new Response(JSON.stringify({ error: dbErr.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json({ error: dbErr.message }, 500);
   }
 
   if (isNew) {
@@ -173,8 +181,5 @@ Deno.serve(async (req) => {
   }
 
   console.log(`[admin-invite-vip] ✅ VIP ${isNew ? 'criado' : 'promovido'}: ${email}`);
-  return new Response(JSON.stringify({ ok: true, isNew }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return json({ ok: true, isNew });
 });
