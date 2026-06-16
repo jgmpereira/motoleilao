@@ -326,6 +326,8 @@ localStorage → Supabase (fipe_valores) → API externa
 - Cilindrada inferida pelo nome do modelo quando não cadastrada
 - Monta inferida pela cilindrada quando não cadastrada
 - Busca global do topo removida (substituída pelo campo na sidebar)
+- **Filtro de segmento (Jun/2026):** 7 categorias — Urbana, Scooter, Trail, Naked, Custom, Adventure, Esportiva — classificadas automaticamente por palavras-chave no nome do modelo
+- **Mobile (Jun/2026):** stats ocultos com `display:none`; drawer de filtros substituído por `<dialog>` nativo (elimina problemas de `position:fixed` no iOS); botões Importar e +Leilão ocultos para não-admin
 
 ### 🔲 Próximos passos
 - Lance atual em tempo real
@@ -339,7 +341,8 @@ localStorage → Supabase (fipe_valores) → API externa
 - Plataforma de pagamento: Kiwify — plano mensal R$19,90
 - Autenticação: Supabase Auth
 - Tabela: `assinantes` (email, status, plano, data_inicio, data_cancelamento, kiwify_order_id)
-- Edge Function: `kiwify-webhook` — recebe eventos do Kiwify e cria/cancela usuários
+- Edge Function `kiwify-webhook` — recebe eventos do Kiwify e cria/cancela usuários
+- Edge Function `admin-invite-vip` — painel admin convida e revoga VIPs manualmente
 - URL do webhook: `https://ntlwhwmtsyniinbkwjgg.supabase.co/functions/v1/kiwify-webhook?token=tkv7tkdm8ns`
 
 ### ✅ Feito
@@ -353,9 +356,10 @@ localStorage → Supabase (fipe_valores) → API externa
 - Tela de login no dashboard — protege o acesso com email/senha via Supabase Auth
 - Troca de senha obrigatória no primeiro login — usuário é forçado a definir senha própria antes de acessar o app
 - Verificação de assinatura ativa — após login, checa `assinantes.status = ativo`; bloqueia acesso se inativo
-- Usuários VIP — lista de emails com acesso sem verificação de assinatura (bypass direto)
 - Landing page de vendas — página pública integrada no `index.html`, aparece na URL raiz antes do login; hero, 4 cards de funcionalidades, card de preço R$19,90/mês, botão Kiwify
 - Tela de assinatura expirada — tela dark com cadeado exibida quando `assinantes.status != ativo`; botão "Reativar assinatura" (Kiwify) e botão "Sair"; token salvo no localStorage para o usuário recuperar acesso após reativar sem precisar logar de novo
+- **Painel Admin (Jun/2026):** aba `⚙️ Admin` visível só para `jgmpereira123@gmail.com`; convida VIPs (cria no Auth + insere em assinantes + email via Resend) e revoga (deleta do Auth via `DELETE /auth/v1/admin/users/{id}` + apaga linha da tabela)
+- **RLS (Jun/2026):** `fipe_marcas` com RLS + policy de leitura pública; políticas `admin_select/update_assinantes` para o email admin
 
 ### 🔲 Próximos passos — divulgação
 1. Postar no Instagram/TikTok — vídeo curto mostrando o dashboard ao vivo: abrindo leilão, vendo % FIPE, filtrando por condição

@@ -156,10 +156,10 @@ Ficam em `.env` na raiz (recriar se Codespaces resetar) e nos Secrets do reposit
 ### Infraestrutura
 | Linha | Função | Descrição |
 |---|---|---|
-| 642 | `supaFetch` | Helper REST Supabase — trata 204/body vazio (`return=minimal`) |
-| 682 | `carregarDados` | Carrega leilões, motos, arrematados, fipeCache |
-| 765 | `showPage` | Troca de aba + hash routing |
-| 783 | `navigateToHash` | Lê hash da URL e navega |
+| ~1028 | `supaFetch` | Helper REST Supabase — trata 204/body vazio (`return=minimal`) |
+| ~1324 | `carregarDados` | Carrega leilões, motos, arrematados, fipeCache |
+| ~1406 | `showPage` | Troca de aba + hash routing |
+| ~1426 | `navigateToHash` | Lê hash da URL e navega |
 
 ### Hash routing
 ```
@@ -167,7 +167,31 @@ Ficam em `.env` na raiz (recriar se Codespaces resetar) e nos Secrets do reposit
 #motos-{id}      → abre leilão direto
 #fipe            → análise FIPE
 #historico       → histórico
+#admin           → painel admin (só para jgmpereira123@gmail.com)
 ```
+
+### Segmento de moto (Jun/2026)
+Classificação automática por palavras-chave no campo `modelo`:
+| Segmento | Palavras-chave (exemplos) |
+|---|---|
+| `esportiva` | cbr, r3, r6, ninja 300/400, mt-03, rs4 |
+| `scooter` | pcx, biz, lead, nmax, burgman |
+| `trail` | crosser, lander, tenere, falcon, bros |
+| `naked` | mt-07, mt-09, hornet, z400, duke |
+| `adventure` | versys, tiger, africa twin, gs |
+| `custom` | drag star, intruder, shadow, boulevard |
+| `commuter` | (fallback — qualquer outra) |
+
+Função `getSegmento(modelo, cilindrada)` — retorna o segmento. Filtro mobile via `<dialog>` com chips por segmento.
+
+### Painel Admin (Jun/2026)
+- Aba `⚙️ Admin` (`#tab-admin`) visível somente para `jgmpereira123@gmail.com`
+- Constante `ADMIN_EMAIL` no topo do bloco admin
+- `initAdmin()` — chamado em `carregarDados()`, mostra/esconde aba + botões Importar e +Leilão
+- `convidarVip(email)` — POST `/functions/v1/admin-invite-vip` com `{ email }`
+- `revogarVip(email)` — POST `/functions/v1/admin-invite-vip` com `{ action:'revoke', email }`; deleta do Auth + da tabela
+- `renderAdminVips()` — lista `assinantes?plano=eq.vip`
+- Botões `#btn-importar` e `#btn-novo-leilao` no header também ficam ocultos para não-admin
 
 ### FIPE — hierarquia de cache
 ```
@@ -186,12 +210,28 @@ Motos com `arrematado` registrado **não são deletadas** ao reimportar ou delet
 
 ---
 
+## Edge Functions
+
+| Função | URL | Descrição |
+|---|---|---|
+| `kiwify-webhook` | `.../functions/v1/kiwify-webhook?token=tkv7tkdm8ns` | Recebe eventos Kiwify; cria/cancela usuários |
+| `admin-invite-vip` | `.../functions/v1/admin-invite-vip` | Convida e revoga VIPs (requer JWT do admin) |
+
+### `admin-invite-vip` — detalhes
+- Valida JWT via `supabase.auth.getUser(token)` — rejeita com 403 se não for `jgmpereira123@gmail.com`
+- **`action` omitido (invite):** cria usuário no Auth (`email_confirm:true`, `senha_temporaria:true`), upsert em `assinantes` com `plano:'vip'`, envia email via Resend
+- **`action:'revoke'`:** busca UID via `GET /auth/v1/admin/users?filter={email}`, deleta via `DELETE /auth/v1/admin/users/{id}`, depois apaga linha em `assinantes`
+- CORS completo: `OPTIONS` preflight + headers em todas as respostas
+- Env vars: `SUPABASE_URL`, `SERVICE_ROLE_KEY`, `RESEND_API_KEY`
+
+---
+
 ## Monetização
 
 - **Webhook Kiwify:** `https://ntlwhwmtsyniinbkwjgg.supabase.co/functions/v1/kiwify-webhook?token=tkv7tkdm8ns`
 - **Eventos tratados:** `order_approved` (cria usuário) → `order_refunded` / `subscription_canceled` (cancela)
 - **Remetente de email (Resend):** `contato@xn--motoleio-xza.com.br` (domínio verificado)
-- **Usuários VIP:** lista de emails com bypass de verificação de assinatura
+- **Usuários VIP:** convidados pelo admin via painel `⚙️ Admin` (Edge Function `admin-invite-vip`)
 - **Fluxo de primeiro login:** troca de senha obrigatória antes de acessar o app
 - **Assinatura expirada:** tela dark com cadeado; token salvo no localStorage para recuperar sessão após reativar
 
@@ -213,3 +253,5 @@ Motos com `arrematado` registrado **não são deletadas** ao reimportar ou delet
 - Motos de marcas chinesas sem cobertura FIPE (JTZ, Haojian) sempre retornam "não encontrado"
 - Arquivo `.env` precisa ser recriado se o Codespaces for resetado
 - Se a Sodré mudar a URL da API novamente → scraper retorna 404 silencioso
+- Edge Function `admin-invite-vip` usa `SERVICE_ROLE_KEY` (não `SUPABASE_SERVICE_ROLE_KEY`) — variável de ambiente configurada no dashboard do Supabase
+- Migration `20260616120000_admin_rls_assinantes.sql` precisa ser aplicada manualmente no SQL editor do Supabase (políticas `admin_select_assinantes` e `admin_update_assinantes`)
