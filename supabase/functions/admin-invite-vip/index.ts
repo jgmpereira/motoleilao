@@ -133,7 +133,7 @@ Deno.serve(async (req) => {
     return new Response('Forbidden', { status: 403, headers: CORS });
   }
 
-  let body: { email?: string };
+  let body: { action?: string; email?: string };
   try {
     body = await req.json();
   } catch {
@@ -145,6 +145,42 @@ Deno.serve(async (req) => {
     return json({ error: 'email obrigatório' }, 400);
   }
 
+  // ── Revogar VIP ──────────────────────────────────────────────────────────────
+  if (body.action === 'revoke') {
+    // Atualiza status na tabela
+    const { error: dbErr } = await supabaseAdmin
+      .from('assinantes')
+      .update({ status: 'cancelado', data_cancelamento: new Date().toISOString() })
+      .eq('email', email);
+
+    if (dbErr) {
+      console.error('[admin-invite-vip] erro ao revogar assinante:', dbErr.message);
+      return json({ error: dbErr.message }, 500);
+    }
+
+    // Busca e deleta o usuário do Auth
+    const { data: { users }, error: listErr } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+    if (listErr) {
+      console.warn('[admin-invite-vip] não foi possível listar usuários Auth:', listErr.message);
+    } else {
+      const authUser = users.find((u) => u.email === email);
+      if (authUser) {
+        const { error: delErr } = await supabaseAdmin.auth.admin.deleteUser(authUser.id);
+        if (delErr) {
+          console.error('[admin-invite-vip] erro ao deletar usuário Auth:', delErr.message);
+          return json({ error: delErr.message }, 500);
+        }
+        console.log(`[admin-invite-vip] 🗑 usuário Auth deletado: ${email}`);
+      } else {
+        console.warn(`[admin-invite-vip] usuário Auth não encontrado para ${email}`);
+      }
+    }
+
+    console.log(`[admin-invite-vip] ⛔ VIP revogado: ${email}`);
+    return json({ ok: true });
+  }
+
+  // ── Convidar VIP (default) ────────────────────────────────────────────────────
   const password = generatePassword();
   const { error: createErr } = await supabaseAdmin.auth.admin.createUser({
     email,

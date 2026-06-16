@@ -5543,12 +5543,15 @@ async function convidarVip() {
 }
 
 async function revogarVip(email) {
-  if (!confirm(`Revogar acesso VIP de ${email}?`)) return;
+  if (!confirm(`Revogar acesso VIP de ${email}?\nIsso cancela a assinatura e deleta o login do usuário.`)) return;
   try {
-    await supaFetch(`assinantes?email=eq.${encodeURIComponent(email)}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: 'cancelado', data_cancelamento: new Date().toISOString() }),
+    const res = await fetch(`${SUPA_URL}/functions/v1/admin-invite-vip`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ action: 'revoke', email }),
     });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.statusText);
     await renderAdminVips();
   } catch(e) {
     alert('Erro ao revogar: ' + e.message);
