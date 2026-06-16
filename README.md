@@ -1,7 +1,7 @@
 # MotoLeilão — Mapa do Projeto
 
 Dashboard de monitoramento de leilões de moto.
-**URL:** https://xn--motoleio-xza.com.br (motoleião.com.br) — HTTPS ativo
+**URL:** https://motoleiloes.com.br — HTTPS ativo
 **URL legada:** https://jgmpereira.github.io/motoleilao (redireciona)
 **Repositório:** https://github.com/jgmpereira/motoleilao
 **Supabase:** https://ntlwhwmtsyniinbkwjgg.supabase.co
@@ -371,14 +371,14 @@ localStorage → Supabase (fipe_valores) → API externa
 ## Domínio próprio & SEO (Mai/2026)
 
 ### ✅ Feito
-- **Domínio próprio:** `motoleião.com.br` (`xn--motoleio-xza.com.br`) apontando para o GitHub Pages
+- **Domínio próprio:** `motoleiloes.com.br` apontando para o GitHub Pages
 - **HTTPS:** ativo — Enforce HTTPS marcado no GitHub Pages
-- **Resend:** domínio `xn--motoleio-xza.com.br` verificado — envio de emails liberado para qualquer destinatário; remetente padrão `contato@xn--motoleio-xza.com.br` (atualizado em `supabase/functions/kiwify-webhook/index.ts`)
+- **Resend:** domínio `motoleiloes.com.br` verificado — envio de emails liberado para qualquer destinatário; remetente padrão `contato@motoleiloes.com.br` (atualizado em `supabase/functions/kiwify-webhook/index.ts`)
 - **SEO:** meta tags de descrição, palavras-chave e Open Graph adicionadas em `index.html`
 - **Google Search Console:** propriedade cadastrada
 
 ### 🔲 Pendente
-- Verificação DNS do Google Search Console para `xn--motoleio-xza.com.br`
+- Verificação DNS do Google Search Console para `motoleiloes.com.br`
 
 ---
 

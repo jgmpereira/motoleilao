@@ -61,7 +61,7 @@ async function enviarEmailVip(email: string, senha: string): Promise<void> {
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
               <tr>
                 <td align="center">
-                  <a href="https://xn--motoleio-xza.com.br" style="display:inline-block;background:#ff4d00;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:.5px;padding:14px 36px;border-radius:8px;">Acessar o MotoLeilão →</a>
+                  <a href="https://motoleiloes.com.br" style="display:inline-block;background:#ff4d00;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:.5px;padding:14px 36px;border-radius:8px;">Acessar o MotoLeilão →</a>
                 </td>
               </tr>
             </table>
@@ -86,7 +86,7 @@ async function enviarEmailVip(email: string, senha: string): Promise<void> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'MotoLeilão <contato@xn--motoleio-xza.com.br>',
+      from: 'MotoLeilão <contato@motoleiloes.com.br>',
       to: [email],
       subject: 'Seu acesso VIP ao MotoLeilão está pronto!',
       html,

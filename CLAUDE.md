@@ -3,7 +3,7 @@
 ## O que é
 Dashboard de monitoramento de leilões de motos com sistema de assinaturas.
 
-- **Site:** https://xn--motoleio-xza.com.br (motoleião.com.br) — HTTPS ativo (Enforce HTTPS no GitHub Pages)
+- **Site:** https://motoleiloes.com.br — HTTPS ativo (Enforce HTTPS no GitHub Pages)
 - **Site legado (redireciona):** https://jgmpereira.github.io/motoleilao
 - **Repositório:** https://github.com/jgmpereira/motoleilao (branch: `main`)
 - **Supabase:** https://ntlwhwmtsyniinbkwjgg.supabase.co
@@ -32,7 +32,7 @@ Dashboard de monitoramento de leilões de motos com sistema de assinaturas.
 - **Não instalar dependências pesadas** — projeto sem bundler; imports via CDN se necessário.
 - **Não alterar schema do Supabase** sem verificar impacto no RLS e nos scrapers.
 - **Não modificar branch `main` sem testar** o scraper/função afetada antes.
-- **Email via Resend:** domínio `xn--motoleio-xza.com.br` verificado; envio liberado para qualquer destinatário. Remetente padrão: `contato@xn--motoleio-xza.com.br`.
+- **Email via Resend:** domínio `motoleiloes.com.br` verificado; envio liberado para qualquer destinatário. Remetente padrão: `contato@motoleiloes.com.br`.
 
 ---
 
@@ -230,7 +230,7 @@ Motos com `arrematado` registrado **não são deletadas** ao reimportar ou delet
 
 - **Webhook Kiwify:** `https://ntlwhwmtsyniinbkwjgg.supabase.co/functions/v1/kiwify-webhook?token=tkv7tkdm8ns`
 - **Eventos tratados:** `order_approved` (cria usuário) → `order_refunded` / `subscription_canceled` (cancela)
-- **Remetente de email (Resend):** `contato@xn--motoleio-xza.com.br` (domínio verificado)
+- **Remetente de email (Resend):** `contato@motoleiloes.com.br` (domínio verificado)
 - **Usuários VIP:** convidados pelo admin via painel `⚙️ Admin` (Edge Function `admin-invite-vip`)
 - **Fluxo de primeiro login:** troca de senha obrigatória antes de acessar o app
 - **Assinatura expirada:** tela dark com cadeado; token salvo no localStorage para recuperar sessão após reativar
@@ -240,7 +240,7 @@ Motos com `arrematado` registrado **não são deletadas** ao reimportar ou delet
 ## Pendências ativas
 
 - [ ] **`scripts/popular-fipe.js`** — corrigir parsing: resposta de modelos é array direto, não objeto (idem para anos)
-- [ ] **Google Search Console** — verificação DNS pendente para `xn--motoleio-xza.com.br`
+- [ ] **Google Search Console** — verificação DNS pendente para `motoleiloes.com.br`
 - [ ] **Arrematados outros leilões** — implementar scraper de encerrados para VIP, Copart, Freitas, Milan (Superbid ✅ feito)
 
 > **Resolvido:** duplicação de motos no `superbid.js` — a paginação por `start` do endpoint `seo/offers` é furada (retorna páginas sobrepostas/repetidas, ex. `start=30` == `start=90`), o que acumulava a mesma oferta várias vezes. Corrigido: busca única com `pageSize=total` + dedupe por `offer.id`. Leilões encerrados antigos (com motos duplicadas já gravadas antes do fix) não são autocorrigidos.

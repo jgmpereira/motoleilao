@@ -92,7 +92,7 @@ async function enviarEmailBoasVindas(email: string, senha: string): Promise<void
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'MotoLeilão <contato@xn--motoleio-xza.com.br>',
+      from: 'MotoLeilão <contato@motoleiloes.com.br>',
       to: [email],
       subject: 'Seu acesso ao MotoLeilão está pronto!',
       html,
