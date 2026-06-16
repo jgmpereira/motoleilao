@@ -461,6 +461,7 @@ tbody tr:hover{background:var(--s2);}
   <button class="tab" id="tab-motos" style="display:none" onclick="">🏍 Motos do Leilão</button>
   <button class="tab" id="tab-analise" onclick="showPage('analise',this)">📊 Análise FIPE</button>
   <button class="tab" id="tab-historico" onclick="showPage('historico',this)">📋 Histórico</button>
+  <button class="tab" id="tab-admin" style="display:none" onclick="showPage('admin',this)">⚙️ Admin</button>
 </div>
 
 <div id="stats-wrap">
@@ -838,6 +839,32 @@ tbody tr:hover{background:var(--s2);}
     <h2 id="hist-modal-title">HISTÓRICO</h2>
     <div style="color:var(--muted);font-size:12px;" id="hist-modal-sub"></div>
     <div class="hist-list" id="hist-modal-list"></div>
+  </div>
+</div>
+
+<!-- PAGE ADMIN -->
+<div id="page-admin" class="page">
+  <div style="max-width:620px;margin:28px auto;padding:0 16px;">
+
+    <!-- Convidar VIP -->
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">➕ Convidar VIP</div>
+      <div style="display:flex;gap:8px;">
+        <input id="admin-vip-email" type="email" placeholder="email@exemplo.com" class="finput" style="flex:1;min-width:0;">
+        <button onclick="convidarVip()" class="btn btn-accent" style="white-space:nowrap;">Convidar VIP</button>
+      </div>
+      <div id="admin-invite-msg" style="margin-top:10px;font-size:13px;display:none;padding:8px 12px;border-radius:6px;background:var(--s2);"></div>
+    </div>
+
+    <!-- Lista de VIPs -->
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;">👑 VIPs Cadastrados</div>
+        <button onclick="renderAdminVips()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;">↻ Atualizar</button>
+      </div>
+      <div id="admin-vips-list" style="font-size:13px;color:var(--muted);">carregando...</div>
+    </div>
+
   </div>
 </div>
 
@@ -1229,6 +1256,7 @@ function fazerLogout() {
   document.getElementById('logout-btn').style.display = 'none';
   const userEl = document.getElementById('login-user-info');
   if (userEl) userEl.textContent = '';
+  document.getElementById('tab-admin').style.display = 'none';
   mostrarLanding();
 }
 
@@ -1362,6 +1390,7 @@ async function carregarDados() {
       if(location.hash && location.hash !== '#') navigateToHash(location.hash);
     }
     // FIPE é buscada só quando usuário abre um leilão (evita rate limit da API)
+    initAdmin();
   } catch(err) {
     hideLoading();
     showToast('Erro ao carregar: ' + err.message, '❌');
@@ -1416,8 +1445,9 @@ function showPage(page, btn, skipHash) {
   if(page === 'historico') renderHistoricoGeral();
   if(page === 'agenda') renderAgenda();
   if(page === 'leiloes') renderGridMotos();
+  if(page === 'admin') renderAdminVips();
   if(!skipHash) {
-    const hash = {leiloes:'#leiloes', analise:'#fipe', historico:'#historico', motos:'#motos', agenda:'#agenda'}[page] || '#'+page;
+    const hash = {leiloes:'#leiloes', analise:'#fipe', historico:'#historico', motos:'#motos', agenda:'#agenda', admin:'#admin'}[page] || '#'+page;
     if(location.hash !== hash) history.pushState(null, '', hash);
   }
 }
@@ -5445,6 +5475,84 @@ function showToast(msg, icon='✅') {
   const t = document.getElementById('toast');
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ===================== ADMIN =====================
+const ADMIN_EMAIL = 'jgmpereira123@gmail.com';
+
+function initAdmin() {
+  const tab = document.getElementById('tab-admin');
+  if (tab) tab.style.display = authEmail === ADMIN_EMAIL ? '' : 'none';
+}
+
+async function renderAdminVips() {
+  const el = document.getElementById('admin-vips-list');
+  if (!el) return;
+  el.innerHTML = '<span style="color:var(--muted);">carregando...</span>';
+  try {
+    const vips = await supaFetch('assinantes?plano=eq.vip&order=data_inicio.desc');
+    if (!vips || !vips.length) {
+      el.innerHTML = '<span style="color:var(--muted);">Nenhum VIP cadastrado.</span>';
+      return;
+    }
+    el.innerHTML = vips.map(v => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);">${v.email}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+            status: <span style="color:${v.status==='ativo'?'var(--green)':'var(--red)'};">${v.status}</span>
+            &nbsp;·&nbsp;desde ${v.data_inicio ? v.data_inicio.slice(0,10) : '—'}
+          </div>
+        </div>
+        ${v.status === 'ativo'
+          ? `<button onclick="revogarVip('${v.email}')" style="padding:5px 12px;background:rgba(211,47,47,.08);border:1px solid rgba(211,47,47,.25);color:var(--red);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Revogar</button>`
+          : `<span style="font-size:11px;color:var(--muted);padding:5px 12px;border:1px solid var(--border);border-radius:6px;">${v.status}</span>`
+        }
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = `<span style="color:var(--red);">Erro: ${e.message}</span>`;
+  }
+}
+
+async function convidarVip() {
+  const input = document.getElementById('admin-vip-email');
+  const msg   = document.getElementById('admin-invite-msg');
+  const email = input.value.trim().toLowerCase();
+  if (!email) return;
+  msg.style.display = 'block';
+  msg.style.color = 'var(--muted)';
+  msg.textContent = 'Convidando...';
+  try {
+    const res = await fetch(`${SUPA_URL}/functions/v1/admin-invite-vip`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.statusText);
+    msg.style.color = 'var(--green)';
+    msg.textContent = data.isNew
+      ? `✓ VIP criado — email com credenciais enviado para ${email}`
+      : `✓ Assinante existente promovido a VIP: ${email}`;
+    input.value = '';
+    await renderAdminVips();
+  } catch(e) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = `Erro: ${e.message}`;
+  }
+}
+
+async function revogarVip(email) {
+  if (!confirm(`Revogar acesso VIP de ${email}?`)) return;
+  try {
+    await supaFetch(`assinantes?email=eq.${encodeURIComponent(email)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'cancelado', data_cancelamento: new Date().toISOString() }),
+    });
+    await renderAdminVips();
+  } catch(e) {
+    alert('Erro ao revogar: ' + e.message);
+  }
 }
 
 // ===================== INIT =====================
