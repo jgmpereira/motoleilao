@@ -242,8 +242,8 @@ tbody tr:hover{background:var(--s2);}
 .seg-esportiva{background:rgba(255,77,0,.12);color:var(--accent);}
 #motos-filter-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:249;}
 #motos-filter-overlay.open{display:block;}
-#motos-filter-drawer{position:fixed;left:-100vw;top:0;bottom:0;width:100vw;background:var(--s1);z-index:250;transition:left .25s;overflow-y:auto;padding:20px 18px;}
-#motos-filter-drawer.open{left:0;}
+#motos-filter-drawer{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;background:var(--s1);z-index:250;transform:translateY(100%);transition:transform .28s ease;overflow-y:auto;padding:20px 18px;}
+#motos-filter-drawer.open{transform:translateY(0);}
 #motos-mobile-bar{display:none;align-items:center;gap:8px;flex:1;min-width:0;}
 
 /* LANDING PAGE */
