@@ -893,8 +893,9 @@ tbody tr:hover{background:var(--s2);}
     </div>
     <div class="ficha-grid" id="ficha-grid"></div>
     <div id="ficha-leilao-info" style="background:var(--s2);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--muted);"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;">
+    <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap;">
       <button class="btn btn-ghost" onclick="fecharFichaMoto()">Fechar</button>
+      <button class="btn btn-ghost" id="ficha-btn-share" onclick="compartilharMoto()" title="Compartilhar no WhatsApp">📲 Compartilhar</button>
       <button class="btn btn-accent" id="ficha-btn-leilao" onclick="">Ver Leilão Completo</button>
     </div>
   </div>
@@ -5399,11 +5400,27 @@ function abrirFichaMoto(motoId) {
     btnLeilao.onclick = () => { fecharFichaMoto(); abrirLeilao(m.leilao_id); };
   }
 
+  const btnShare = document.getElementById('ficha-btn-share');
+  if(btnShare) btnShare.dataset.motoId = motoId;
   document.getElementById('modal-ficha-moto').classList.add('open');
 }
 function fecharFichaMoto() {
   document.getElementById('modal-ficha-moto').classList.remove('open');
   if(location.hash.startsWith('#moto-')) history.pushState(null, '', '#leiloes');
+}
+async function compartilharMoto() {
+  const btn = document.getElementById('ficha-btn-share');
+  const motoId = btn && btn.dataset.motoId;
+  if(!motoId) return;
+  const m = MOTOS.find(x => x.id == motoId);
+  const titulo = m ? `${m.marca} ${m.modelo}`.trim() : 'esta moto';
+  const link = `${SUPA_URL}/functions/v1/moto-preview?id=${motoId}`;
+  const texto = `🏍️ ${titulo} em leilão — veja na MotoLeilão:\n${link}`;
+  if(navigator.share) {
+    try { await navigator.share({ title: titulo, text: `${titulo} em leilão — veja na MotoLeilão`, url: link }); return; }
+    catch(_) {}
+  }
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
 // ===================== FILTROS HOME =====================
