@@ -433,6 +433,10 @@ tbody tr:hover{background:var(--s2);}
         <input id="confirmar-senha" type="password" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')confirmarDefinirSenha()">
       </div>
       <div id="definir-senha-erro" style="font-size:12px;min-height:20px;margin-bottom:10px;text-align:center;line-height:1.4;"></div>
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--muted);margin-bottom:12px;cursor:pointer;line-height:1.4;">
+        <input type="checkbox" id="aceite-termos" style="margin-top:2px;flex-shrink:0;cursor:pointer;">
+        <span>Li e aceito os <a href="#" onclick="abrirTermos();return false;" style="color:var(--accent);text-decoration:underline;">Termos de Uso</a> do MotoLeilão.</span>
+      </label>
       <button id="definir-senha-btn" onclick="confirmarDefinirSenha()" class="btn btn-accent" style="width:100%;padding:12px;font-size:14px;letter-spacing:.5px;">Definir Senha</button>
     </div>
   </div>
@@ -1092,12 +1096,66 @@ tbody tr:hover{background:var(--s2);}
   </div>
 </div>
 
+<!-- MODAL TERMOS DE USO -->
+<div class="modal-overlay" id="modal-termos" onclick="if(event.target===this)fecharTermos()">
+  <div class="modal-box" style="width:640px;max-width:96vw;max-height:82vh;display:flex;flex-direction:column;">
+    <button class="hist-close" onclick="fecharTermos()">✕</button>
+    <h2>TERMOS DE USO</h2>
+    <p style="font-size:11px;color:var(--muted);margin:-4px 0 12px;">Versão <span id="termos-versao-label"></span> — provisória, sujeita a revisão.</p>
+    <div id="termos-corpo" style="overflow-y:auto;font-size:13px;line-height:1.6;color:var(--text);padding-right:8px;"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+      <button class="btn btn-accent" onclick="fecharTermos()">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"><span id="toast-i">✅</span><span id="toast-m"></span></div>
 
 <script>
 // ===================== SUPABASE CONFIG =====================
 const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50bHdod210c3luaWluYmt3amdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTM4OTIsImV4cCI6MjA4ODg4OTg5Mn0.zZi8nMpKMcFvZe_uDLZQB3Jtb80UpkefKa3Q7M6mDwA';
+
+// ===================== TERMOS DE USO =====================
+const TERMOS_VERSAO = '1.0';
+const TERMOS_HTML = `
+<p><strong>1. Sobre o serviço.</strong> O MotoLeilão é uma plataforma de monitoramento e consulta de leilões de motocicletas. Reunimos e exibimos informações públicas sobre leilões de terceiros (lotes, valores de referência como FIPE, datas). Somos uma ferramenta informativa: não somos leiloeiros, não organizamos leilões e não intermediamos lances, pagamentos ou negociações.</p>
+<p><strong>2. Ausência de responsabilidade sobre as negociações.</strong> Toda negociação, lance, arremate, pagamento ou compra ocorre diretamente entre você e o leiloeiro/plataforma responsável, fora do MotoLeilão. O MotoLeilão não é parte dessas negociações e não se responsabiliza por prejuízos, divergências, vícios, defeitos, condição do veículo, documentação, valores ou prazos. As informações exibidas podem conter erros ou estar desatualizadas — confira sempre na fonte oficial antes de decidir. A decisão de participar e arrematar é exclusivamente sua, por sua conta e risco.</p>
+<p><strong>3. Uso da plataforma.</strong> Uso individual e para fins lícitos. Não compartilhe suas credenciais. O acesso pode ser suspenso em caso de uso indevido.</p>
+<p><strong>4. Assinatura.</strong> Acesso mediante assinatura processada por plataforma de pagamento terceira. Cobrança, renovação e cancelamento seguem as regras informadas na contratação.</p>
+<p><strong>5. Dados pessoais.</strong> Tratamos seus dados (como email) apenas para viabilizar acesso e suporte, conforme a LGPD.</p>
+<p><strong>6. Alterações.</strong> Estes termos podem ser atualizados; a versão vigente é sempre a exibida na plataforma.</p>
+<p><strong>7. Contato.</strong> Dúvidas: motoleiloes@zohomail.com</p>
+<p style="color:var(--muted);font-size:12px;">Ao marcar "Li e aceito os Termos de Uso", você declara que leu, entendeu e concorda integralmente com este documento.</p>
+`;
+
+function abrirTermos() {
+  document.getElementById('termos-versao-label').textContent = TERMOS_VERSAO;
+  document.getElementById('termos-corpo').innerHTML = TERMOS_HTML;
+  document.getElementById('modal-termos').classList.add('open');
+}
+function fecharTermos() { document.getElementById('modal-termos').classList.remove('open'); }
+
+async function registrarAceiteTermos(email, token) {
+  try {
+    await fetch(`${SUPA_URL}/rest/v1/aceites_termos`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({
+        email,
+        versao: TERMOS_VERSAO,
+        user_agent: navigator.userAgent.slice(0, 300),
+      }),
+    });
+  } catch (e) {
+    console.warn('[termos] falha ao registrar aceite:', e);
+  }
+}
 
 // ===================== SAC =====================
 function abrirModalSac() {
@@ -1382,6 +1440,11 @@ async function confirmarDefinirSenha() {
     errEl.textContent = 'As senhas não coincidem.';
     return;
   }
+  if (!document.getElementById('aceite-termos').checked) {
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = 'Você precisa aceitar os Termos de Uso para continuar.';
+    return;
+  }
   btn.disabled = true;
   btn.textContent = 'Salvando...';
   try {
@@ -1399,6 +1462,7 @@ async function confirmarDefinirSenha() {
     authToken = _pendingToken;
     authEmail = data.email;
     _pendingToken = null;
+    await registrarAceiteTermos(authEmail, authToken);
     await verificarAssinatura(authEmail);
     localStorage.setItem('supaAuthToken', authToken);
     localStorage.setItem('supaAuthEmail', authEmail);
