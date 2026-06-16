@@ -375,7 +375,12 @@ tbody tr:hover{background:var(--s2);}
   </section>
 
   <footer class="lp-footer">
-    © 2026 MotoLeilão — Monitor de leilões de motos
+    © 2026 MotoLeilão — Monitor de leilões de motos<br>
+    <span style="margin-top:8px;display:inline-block;">
+      <a href="mailto:motoleiloes@zohomail.com" style="color:#e67e22;text-decoration:none;">motoleiloes@zohomail.com</a>
+      &nbsp;·&nbsp;
+      <a href="#" onclick="abrirModalSac();return false;" style="color:#e67e22;text-decoration:none;">Fale conosco / Suporte</a>
+    </span>
   </footer>
 </div>
 
@@ -450,6 +455,7 @@ tbody tr:hover{background:var(--s2);}
     <span id="login-user-info" style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
     <button id="btn-importar" class="btn btn-accent btn-sm" onclick="abrirModalImportar()" style="display:none;">📥 Importar</button>
     <button id="btn-novo-leilao" class="btn btn-green btn-sm" onclick="abrirModalLeilao()" style="display:none;">+ Leilão</button>
+    <button class="btn btn-ghost btn-sm" onclick="abrirModalSac()">💬 Suporte</button>
     <button class="btn btn-ghost btn-sm" onclick="showPage('analise')">📊 Análise</button>
     <button class="btn btn-ghost btn-sm" id="logout-btn" onclick="fazerLogout()" title="Sair" style="display:none;">🚪 Sair</button>
   </div>
@@ -1048,12 +1054,95 @@ tbody tr:hover{background:var(--s2);}
   </div>
 </div>
 
+<!-- MODAL SAC -->
+<div class="modal-overlay" id="modal-sac" onclick="if(event.target===this)fecharModalSac()">
+  <div class="modal-box" style="width:500px;">
+    <h2>💬 Fale Conosco</h2>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Nome *</label>
+        <input id="sac-nome" type="text" class="input" placeholder="Seu nome" style="width:100%;box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Email *</label>
+        <input id="sac-email" type="email" class="input" placeholder="seu@email.com" style="width:100%;box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Assunto</label>
+        <select id="sac-assunto" class="input" style="width:100%;box-sizing:border-box;">
+          <option value="erro">Erro no sistema</option>
+          <option value="dúvida assinatura">Dúvida sobre assinatura</option>
+          <option value="dúvida leilão">Dúvida sobre leilão</option>
+          <option value="sugestão">Sugestão</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Mensagem *</label>
+        <textarea id="sac-mensagem" class="input" rows="5" placeholder="Descreva sua dúvida ou problema..." style="width:100%;box-sizing:border-box;resize:vertical;"></textarea>
+      </div>
+      <!-- honeypot - não preencher -->
+      <input id="sac-website" type="text" name="website" tabindex="-1" autocomplete="off" style="display:none;">
+      <div id="sac-feedback" style="font-size:13px;min-height:18px;"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-ghost" onclick="fecharModalSac()">Cancelar</button>
+      <button class="btn btn-accent" onclick="enviarSac()">✉️ Enviar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"><span id="toast-i">✅</span><span id="toast-m"></span></div>
 
 <script>
 // ===================== SUPABASE CONFIG =====================
 const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50bHdod210c3luaWluYmt3amdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTM4OTIsImV4cCI6MjA4ODg4OTg5Mn0.zZi8nMpKMcFvZe_uDLZQB3Jtb80UpkefKa3Q7M6mDwA';
+
+// ===================== SAC =====================
+function abrirModalSac() {
+  document.getElementById('sac-nome').value = '';
+  document.getElementById('sac-email').value = authEmail || '';
+  document.getElementById('sac-assunto').value = 'erro';
+  document.getElementById('sac-mensagem').value = '';
+  document.getElementById('sac-website').value = '';
+  document.getElementById('sac-feedback').textContent = '';
+  document.getElementById('modal-sac').classList.add('open');
+}
+function fecharModalSac() {
+  document.getElementById('modal-sac').classList.remove('open');
+}
+async function enviarSac() {
+  const nome = document.getElementById('sac-nome').value.trim();
+  const email = document.getElementById('sac-email').value.trim();
+  const assunto = document.getElementById('sac-assunto').value;
+  const mensagem = document.getElementById('sac-mensagem').value.trim();
+  const website = document.getElementById('sac-website').value;
+  const fb = document.getElementById('sac-feedback');
+  fb.style.color = '#e67e22';
+  if (!nome || !email || !mensagem) { fb.textContent = 'Preencha nome, email e mensagem.'; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { fb.textContent = 'Email inválido.'; return; }
+  fb.textContent = 'Enviando…';
+  try {
+    const res = await fetch(`${SUPA_URL}/functions/v1/enviar-sac`, {
+      method: 'POST',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${authToken || SUPA_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, email, assunto, mensagem, website }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data.ok) {
+      fb.style.color = '#2ecc71';
+      fb.textContent = 'Mensagem enviada! Responderemos em breve.';
+      setTimeout(fecharModalSac, 2000);
+    } else {
+      fb.style.color = '#e74c3c';
+      fb.textContent = data.error || 'Erro ao enviar. Tente novamente.';
+    }
+  } catch (e) {
+    fb.style.color = '#e74c3c';
+    fb.textContent = 'Falha de conexão. Tente novamente.';
+  }
+}
 
 // ===================== AUTH STATE =====================
 let authToken = null;
