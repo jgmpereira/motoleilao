@@ -4558,8 +4558,15 @@ function setFiltroSegmento(val, btn) {
 }
 
 function toggleMotosFilters() {
-  const isOpen = document.getElementById('motos-filter-drawer').classList.toggle('open');
-  document.getElementById('motos-filter-overlay').classList.toggle('open', isOpen);
+  const drawer = document.getElementById('motos-filter-drawer');
+  const overlay = document.getElementById('motos-filter-overlay');
+  // iOS fix: position:fixed falha dentro de stacking contexts; mover para body escapa isso
+  if (drawer.parentElement !== document.body) {
+    document.body.appendChild(overlay);
+    document.body.appendChild(drawer);
+  }
+  const isOpen = drawer.classList.toggle('open');
+  overlay.classList.toggle('open', isOpen);
   document.body.style.overflow = isOpen ? 'hidden' : '';
 }
 
