@@ -147,36 +147,51 @@ Deno.serve(async (req) => {
 
   // ── Revogar VIP ──────────────────────────────────────────────────────────────
   if (body.action === 'revoke') {
-    // Atualiza status na tabela
+    const SUPA_URL = Deno.env.get('SUPABASE_URL')!;
+    const SERVICE_KEY = Deno.env.get('SERVICE_ROLE_KEY')!;
+    const adminHeaders = { 'Authorization': `Bearer ${SERVICE_KEY}`, 'apikey': SERVICE_KEY };
+
+    // 1. Busca o usuário pelo email via API HTTP do GoTrue (filter faz busca exata por email)
+    const searchRes = await fetch(
+      `${SUPA_URL}/auth/v1/admin/users?filter=${encodeURIComponent(email)}&page=1&per_page=10`,
+      { headers: adminHeaders },
+    );
+    if (!searchRes.ok) {
+      const err = await searchRes.text();
+      console.error('[admin-invite-vip] erro ao buscar usuário Auth:', err);
+      return json({ error: `Erro ao buscar usuário: ${err}` }, 500);
+    }
+    const { users: authUsers } = await searchRes.json() as { users: { id: string; email: string }[] };
+    const authUser = authUsers.find((u) => u.email === email);
+
+    // 2. Deleta do Auth via DELETE /auth/v1/admin/users/{id}
+    if (authUser) {
+      const delRes = await fetch(
+        `${SUPA_URL}/auth/v1/admin/users/${authUser.id}`,
+        { method: 'DELETE', headers: adminHeaders },
+      );
+      if (!delRes.ok) {
+        const err = await delRes.text();
+        console.error('[admin-invite-vip] erro ao deletar usuário Auth:', err);
+        return json({ error: `Erro ao deletar usuário: ${err}` }, 500);
+      }
+      console.log(`[admin-invite-vip] 🗑 usuário Auth deletado: ${email} (id: ${authUser.id})`);
+    } else {
+      console.warn(`[admin-invite-vip] usuário Auth não encontrado para ${email}, prosseguindo`);
+    }
+
+    // 3. Deleta a linha da tabela assinantes
     const { error: dbErr } = await supabaseAdmin
       .from('assinantes')
-      .update({ status: 'cancelado', data_cancelamento: new Date().toISOString() })
+      .delete()
       .eq('email', email);
 
     if (dbErr) {
-      console.error('[admin-invite-vip] erro ao revogar assinante:', dbErr.message);
+      console.error('[admin-invite-vip] erro ao deletar assinante:', dbErr.message);
       return json({ error: dbErr.message }, 500);
     }
 
-    // Busca e deleta o usuário do Auth
-    const { data: { users }, error: listErr } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
-    if (listErr) {
-      console.warn('[admin-invite-vip] não foi possível listar usuários Auth:', listErr.message);
-    } else {
-      const authUser = users.find((u) => u.email === email);
-      if (authUser) {
-        const { error: delErr } = await supabaseAdmin.auth.admin.deleteUser(authUser.id);
-        if (delErr) {
-          console.error('[admin-invite-vip] erro ao deletar usuário Auth:', delErr.message);
-          return json({ error: delErr.message }, 500);
-        }
-        console.log(`[admin-invite-vip] 🗑 usuário Auth deletado: ${email}`);
-      } else {
-        console.warn(`[admin-invite-vip] usuário Auth não encontrado para ${email}`);
-      }
-    }
-
-    console.log(`[admin-invite-vip] ⛔ VIP revogado: ${email}`);
+    console.log(`[admin-invite-vip] ⛔ VIP removido por completo: ${email}`);
     return json({ ok: true });
   }
 

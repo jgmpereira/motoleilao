@@ -5543,7 +5543,7 @@ async function convidarVip() {
 }
 
 async function revogarVip(email) {
-  if (!confirm(`Revogar acesso VIP de ${email}?\nIsso cancela a assinatura e deleta o login do usuário.`)) return;
+  if (!confirm(`Apagar ${email} completamente?\nIsso remove o login do Supabase Auth e apaga o registro da tabela de assinantes. Ação irreversível.`)) return;
   try {
     const res = await fetch(`${SUPA_URL}/functions/v1/admin-invite-vip`, {
       method: 'POST',
