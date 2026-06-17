@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
 </body>
 </html>`;
 
-  return new Response(html, {
+  return new Response(new TextEncoder().encode(html), {
     status: 200,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
