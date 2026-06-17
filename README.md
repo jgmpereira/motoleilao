@@ -382,6 +382,45 @@ localStorage → Supabase (fipe_valores) → API externa
 
 ---
 
+## Sessão Jun/2026 — Features de engajamento & link compartilhável
+
+### ✅ Feito nesta sessão
+- **SAC / Fale Conosco:** Edge Function `enviar-sac` (POST `{nome,email,assunto,mensagem,website}`; honeypot anti-bot; envia via Resend de `contato@motoleiloes.com.br` com `reply_to` do cliente → caixa `motoleiloes@zohomail.com`). No `index.html`: modal `#modal-sac`, funções `abrirModalSac`/`fecharModalSac`/`enviarSac`, link "Fale conosco" no rodapé da landing + botão "💬 Suporte" no header do app. Email de contato público: `motoleiloes@zohomail.com` (Zoho Mail).
+- **Cupom de desconto:** resolvido sem código — usar o cupom nativo da Kiwify, aplicado no checkout dela. Não implementar campo no site (redundante e fraudável).
+- **Termo de aceite no 1º login:** tabela `aceites_termos` (id, email, versao, aceito_em, user_agent; RLS: insert pelo próprio email, select só admin). No `index.html`: `const TERMOS_VERSAO='1.0'`, `TERMOS_HTML` inline, funções `abrirTermos`/`fecharTermos`/`registrarAceiteTermos`, checkbox obrigatório `#aceite-termos` na tela de definir senha (bloqueia sem marcar), modal `#modal-termos` com `z-index:2147483647` (pra ficar acima do `#login-overlay`). Texto provisório v1.0 que exime a MotoLeilão de responsabilidade nas negociações — substituir pelo texto dos advogados quando pronto (subir a versão).
+
+### 🔨 Link de moto compartilhável (WhatsApp) — EM ANDAMENTO
+Objetivo: botão "Compartilhar" na ficha da moto que gera link com preview no WhatsApp (foto + título), abrindo página pública de prévia que empurra o não-assinante pra assinar.
+
+Já implementado:
+- Botão "📲 Compartilhar" no rodapé do modal `#modal-ficha-moto` (id da moto em `#ficha-btn-share` dataset; CSS `position:sticky;bottom:0` pra não sumir no mobile) + função `compartilharMoto()` (`navigator.share` no mobile, fallback `wa.me/?text=`).
+- Edge Function `supabase/functions/moto-preview` (HTML com og tags + página de prévia foto+modelo+botão Assinar; `TextEncoder` pra UTF-8; deploy com `--no-verify-jwt`). FUNCIONA no validador do Facebook (200 + foto), mas o preview NÃO aparece no WhatsApp.
+
+Diagnóstico: o problema é o host `supabase.co` — fica atrás da Cloudflare do Supabase (anti-bot `__cf_bm`), que o crawler do WhatsApp não vence. Teste que confirmou: colar `https://motoleiloes.com.br` no WhatsApp do celular MOSTRA preview (GitHub Pages, domínio próprio); colar o link `supabase.co` NÃO mostra. Logo, servir do próprio domínio resolve.
+
+### 🔲 Próximos passos — migrar link pra domínio próprio (Opção B: Cloudflare)
+Decisão: servir a página de prévia da moto por um Cloudflare Worker no subdomínio `link.motoleiloes.com.br`, pra ter foto da moto no preview.
+
+MÉTODO SEGURO (obrigatório): usar subdomínio, NÃO migrar nameservers. Adicionar só um registro CNAME `link` no registro.br apontando pra Cloudflare. Não tocar nos registros existentes (4 A do GitHub Pages, www, MX/TXT do Zoho, TXT do Resend/DMARC) — site e email ficam intactos. Pior caso de erro = só o subdomínio do link falha.
+
+Passos:
+1. Criar conta grátis na Cloudflare (`dash.cloudflare.com`).
+2. Criar Cloudflare Worker que replica a lógica da `moto-preview` (buscar moto no Supabase via REST, montar HTML com `og:image` = foto da moto, página de prévia). Reaproveitar `supabase/functions/moto-preview/index.ts` (adaptar de Deno.serve pro formato Worker `fetch`).
+3. Conectar o subdomínio `link.motoleiloes.com.br` ao Worker (custom domain/route na Cloudflare) → adicionar o CNAME no registro.br.
+4. No `index.html`, trocar a URL gerada em `compartilharMoto()` de `${SUPA_URL}/functions/v1/moto-preview?id=` para `https://link.motoleiloes.com.br/{id}`.
+5. Testar: validador do Facebook + WhatsApp do celular (link novo, esperar uns segundos antes de enviar).
+6. (Opcional) manter a Edge Function `moto-preview` como fallback.
+
+Notas técnicas:
+- Foto vem de CDNs diferentes (`photos.sodresantoro.com.br`, `ms.sbwebservices.net`) — ambos respondem 200 ao crawler; sem necessidade de proxy.
+- Muitas motos têm `foto: null` → fallback `og-default.png` (1200×630, já na raiz). Sem foto, mostra imagem genérica (não esconder o botão).
+- `fb:app_id` ausente no validador do Facebook é irrelevante (só analytics).
+
+### ⚠️ Limpeza pendente (segurança)
+- Revogar tokens de acesso pessoais do Supabase usados pra deploy via CLI (`sbp_...`) em `supabase.com/dashboard/account/tokens` — um foi exposto em chat. Gerar novo quando precisar deployar.
+
+---
+
 ## Como usar este README em nova conversa
 
 Cole no início do chat:
