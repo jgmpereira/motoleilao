@@ -385,39 +385,38 @@ localStorage → Supabase (fipe_valores) → API externa
 ## Sessão Jun/2026 — Features de engajamento & link compartilhável
 
 ### ✅ Feito nesta sessão
-- **SAC / Fale Conosco:** Edge Function `enviar-sac` (POST `{nome,email,assunto,mensagem,website}`; honeypot anti-bot; envia via Resend de `contato@motoleiloes.com.br` com `reply_to` do cliente → caixa `motoleiloes@zohomail.com`). No `index.html`: modal `#modal-sac`, funções `abrirModalSac`/`fecharModalSac`/`enviarSac`, link "Fale conosco" no rodapé da landing + botão "💬 Suporte" no header do app. Email de contato público: `motoleiloes@zohomail.com` (Zoho Mail).
-- **Cupom de desconto:** resolvido sem código — usar o cupom nativo da Kiwify, aplicado no checkout dela. Não implementar campo no site (redundante e fraudável).
-- **Termo de aceite no 1º login:** tabela `aceites_termos` (id, email, versao, aceito_em, user_agent; RLS: insert pelo próprio email, select só admin). No `index.html`: `const TERMOS_VERSAO='1.0'`, `TERMOS_HTML` inline, funções `abrirTermos`/`fecharTermos`/`registrarAceiteTermos`, checkbox obrigatório `#aceite-termos` na tela de definir senha (bloqueia sem marcar), modal `#modal-termos` com `z-index:2147483647` (pra ficar acima do `#login-overlay`). Texto provisório v1.0 que exime a MotoLeilão de responsabilidade nas negociações — substituir pelo texto dos advogados quando pronto (subir a versão).
+- **SAC / Fale Conosco:** Edge Function `enviar-sac` (POST `{nome,email,assunto,mensagem,website}`; honeypot anti-bot; envia via Resend de `contato@motoleiloes.com.br` com `reply_to` do cliente → caixa `motoleiloes@zohomail.com`). No `index.html`: modal `#modal-sac`, funções `abrirModalSac`/`fecharModalSac`/`enviarSac`, link "Fale conosco" no rodapé da landing + botão "💬 Suporte" no header do app. **Email de contato público: `motoleiloes@zohomail.com` (Zoho Mail).**
+- **Cupom de desconto:** resolvido **sem código** — usar o cupom nativo da Kiwify, aplicado no checkout dela. Não implementar campo no site (seria redundante e fraudável).
+- **Termo de aceite no 1º login:** tabela `aceites_termos` (id, email, versao, aceito_em, user_agent; RLS: insert pelo próprio email, select só admin). No `index.html`: `const TERMOS_VERSAO='1.0'`, `TERMOS_HTML` inline, funções `abrirTermos`/`fecharTermos`/`registrarAceiteTermos`, checkbox obrigatório `#aceite-termos` na tela de definir senha (bloqueia sem marcar), modal `#modal-termos` com `z-index:2147483647` (precisou disso pra ficar acima do `#login-overlay` que tem z-index 9999). Texto provisório (v1.0) que exime a MotoLeilão de responsabilidade nas negociações — **substituir pelo texto dos advogados quando pronto** (lembrar de subir a versão).
 
-### 🔨 Link de moto compartilhável (WhatsApp) — EM ANDAMENTO
-Objetivo: botão "Compartilhar" na ficha da moto que gera link com preview no WhatsApp (foto + título), abrindo página pública de prévia que empurra o não-assinante pra assinar.
+### ✅ Link de moto compartilhável (WhatsApp) — CONCLUÍDO (via Vercel)
+**Objetivo:** botão "Compartilhar" na ficha da moto que gera um link com preview no WhatsApp (foto + título), abrindo uma página pública de prévia que empurra o não-assinante pra assinar. **Funcionando de ponta a ponta no WhatsApp do celular.**
 
-Já implementado:
-- Botão "📲 Compartilhar" no rodapé do modal `#modal-ficha-moto` (id da moto em `#ficha-btn-share` dataset; CSS `position:sticky;bottom:0` pra não sumir no mobile) + função `compartilharMoto()` (`navigator.share` no mobile, fallback `wa.me/?text=`).
-- Edge Function `supabase/functions/moto-preview` (HTML com og tags + página de prévia foto+modelo+botão Assinar; `TextEncoder` pra UTF-8; deploy com `--no-verify-jwt`). FUNCIONA no validador do Facebook (200 + foto), mas o preview NÃO aparece no WhatsApp.
+**Como ficou:**
+- **Frontend (`index.html`):** botão "📲 Compartilhar" no rodapé do modal `#modal-ficha-moto` (id da moto em `#ficha-btn-share` dataset; CSS `position:sticky;bottom:0` pra não sumir no mobile) + função `compartilharMoto()` (usa `navigator.share` no mobile, fallback `wa.me/?text=`). O link gerado é `https://motoleilao-link.vercel.app/{motoId}`.
+- **Página de prévia:** **projeto Vercel separado** `motoleilao-link` (não está neste repo; vive em `~/motoleilao-link`). Função serverless `api/moto.js` que busca a moto no Supabase via REST (anon key) e monta HTML com og tags (`og:image` = foto da moto) + página visível com foto, título, botão "Ver na MotoLeilão" e "Já sou assinante". `vercel.json` reescreve `/{id}` → `/api/moto?id={id}` (URL bonita). Deploy: `cd ~/motoleilao-link && vercel --prod`.
+- URL pública atual: **`https://motoleilao-link.vercel.app/{id}`** (ex.: `/18150`).
 
-Diagnóstico: o problema é o host `supabase.co` — fica atrás da Cloudflare do Supabase (anti-bot `__cf_bm`), que o crawler do WhatsApp não vence. Teste que confirmou: colar `https://motoleiloes.com.br` no WhatsApp do celular MOSTRA preview (GitHub Pages, domínio próprio); colar o link `supabase.co` NÃO mostra. Logo, servir do próprio domínio resolve.
+**Por que Vercel e não Supabase/Cloudflare (histórico do diagnóstico):**
+- A Edge Function `supabase/functions/moto-preview` foi a 1ª tentativa. Servia tudo certo (200 + og tags no validador do Facebook), MAS o preview **não aparecia no WhatsApp**: o host `supabase.co` fica atrás da Cloudflare do Supabase (anti-bot `__cf_bm`) que o crawler do WhatsApp não vence. Confirmado: colar `motoleiloes.com.br` no WhatsApp mostra preview; colar link `supabase.co` não.
+- Cloudflare Workers foi descartado: no tier grátis exige migrar os **nameservers do domínio inteiro** pra usar subdomínio — risco de quebrar site + email (Zoho/Resend). Não vale.
+- **Vercel resolveu:** não tem anti-bot bloqueando o crawler, deploy simples, e dá URL grátis (`*.vercel.app`) sem mexer em DNS. A Edge Function `moto-preview` ficou **obsoleta** (pode apagar quando quiser; o frontend não usa mais).
 
-### 🔲 Próximos passos — migrar link pra domínio próprio (Opção B: Cloudflare)
-Decisão: servir a página de prévia da moto por um Cloudflare Worker no subdomínio `link.motoleiloes.com.br`, pra ter foto da moto no preview.
+**Notas técnicas:**
+- Foto pode vir de CDNs diferentes (`photos.sodresantoro.com.br`, `ms.sbwebservices.net`) — ambos respondem 200 ao crawler; sem necessidade de proxy.
+- Motos com `foto: null` → fallback `og-default.png` (1200×630, na raiz deste repo, servido de `motoleiloes.com.br`). Sem foto, mostra a imagem genérica (não esconde o botão).
+- WhatsApp **Web/Desktop** não renderiza preview de forma confiável (limitação da Meta) — testar sempre no **app do celular**, com link que o Whats ainda não viu.
+- A anon key do Supabase no `api/moto.js` é a mesma já pública no front-end (respeita RLS) — sem risco.
 
-MÉTODO SEGURO (obrigatório): usar subdomínio, NÃO migrar nameservers. Adicionar só um registro CNAME `link` no registro.br apontando pra Cloudflare. Não tocar nos registros existentes (4 A do GitHub Pages, www, MX/TXT do Zoho, TXT do Resend/DMARC) — site e email ficam intactos. Pior caso de erro = só o subdomínio do link falha.
-
-Passos:
-1. Criar conta grátis na Cloudflare (`dash.cloudflare.com`).
-2. Criar Cloudflare Worker que replica a lógica da `moto-preview` (buscar moto no Supabase via REST, montar HTML com `og:image` = foto da moto, página de prévia). Reaproveitar `supabase/functions/moto-preview/index.ts` (adaptar de Deno.serve pro formato Worker `fetch`).
-3. Conectar o subdomínio `link.motoleiloes.com.br` ao Worker (custom domain/route na Cloudflare) → adicionar o CNAME no registro.br.
-4. No `index.html`, trocar a URL gerada em `compartilharMoto()` de `${SUPA_URL}/functions/v1/moto-preview?id=` para `https://link.motoleiloes.com.br/{id}`.
-5. Testar: validador do Facebook + WhatsApp do celular (link novo, esperar uns segundos antes de enviar).
-6. (Opcional) manter a Edge Function `moto-preview` como fallback.
-
-Notas técnicas:
-- Foto vem de CDNs diferentes (`photos.sodresantoro.com.br`, `ms.sbwebservices.net`) — ambos respondem 200 ao crawler; sem necessidade de proxy.
-- Muitas motos têm `foto: null` → fallback `og-default.png` (1200×630, já na raiz). Sem foto, mostra imagem genérica (não esconder o botão).
-- `fb:app_id` ausente no validador do Facebook é irrelevante (só analytics).
+### 🔲 Opcional (não urgente) — URL bonita `link.motoleiloes.com.br`
+O recurso já funciona com a URL `motoleilao-link.vercel.app` (a URL fica escondida atrás do card de preview no WhatsApp, então o ganho é só estético). Se quiser a URL própria:
+1. No painel da Vercel (projeto `motoleilao-link`) → Settings → Domains → adicionar `link.motoleiloes.com.br`.
+2. A Vercel mostra um registro **CNAME** (ex.: `cname.vercel-dns.com`) → adicionar **só esse CNAME** `link` no registro.br. **Não mexer** nos registros existentes (A do GitHub Pages, www, Zoho, Resend) → site e email intactos.
+3. No `index.html`, trocar em `compartilharMoto()` a URL `https://motoleilao-link.vercel.app/${motoId}` por `https://link.motoleiloes.com.br/${motoId}`. Commit + push.
+4. Testar no WhatsApp do celular.
 
 ### ⚠️ Limpeza pendente (segurança)
-- Revogar tokens de acesso pessoais do Supabase usados pra deploy via CLI (`sbp_...`) em `supabase.com/dashboard/account/tokens` — um foi exposto em chat. Gerar novo quando precisar deployar.
+- **Revogar tokens de acesso pessoais do Supabase** usados pra deploy via CLI (`sbp_...`) em `supabase.com/dashboard/account/tokens` — um deles foi exposto em chat. Gerar novo quando precisar deployar.
 
 ---
 
