@@ -5414,7 +5414,7 @@ async function compartilharMoto() {
   if(!motoId) return;
   const m = MOTOS.find(x => x.id == motoId);
   const titulo = m ? `${m.marca} ${m.modelo}`.trim() : 'esta moto';
-  const link = `${SUPA_URL}/functions/v1/moto-preview?id=${motoId}`;
+  const link = `https://motoleilao-link.vercel.app/${motoId}`;
   const texto = `🏍️ ${titulo} em leilão — veja na MotoLeilão:\n${link}`;
   if(navigator.share) {
     try { await navigator.share({ title: titulo, text: `${titulo} em leilão — veja na MotoLeilão`, url: link }); return; }
