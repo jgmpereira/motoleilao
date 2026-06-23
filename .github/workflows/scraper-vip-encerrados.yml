@@ -1,0 +1,25 @@
+name: Scraper — VIP Encerrados
+
+on:
+  schedule:
+    - cron: '0 23 * * *'   # 20h BRT (23h UTC) todo dia
+  workflow_dispatch:
+
+jobs:
+  raspar:
+    runs-on: ubuntu-latest
+    name: Atualizar arrematados VIP
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Executar scraper
+        env:
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: node scrapers/vip-encerrados.js
