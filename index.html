@@ -584,6 +584,7 @@ tbody tr:hover{background:var(--s2);}
       <div id="gm-topbar" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <button id="gm-filtros-btn" onclick="toggleFiltrosMobile()" style="align-items:center;gap:5px;padding:5px 10px;background:var(--s1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;cursor:pointer;">🔍 Filtros</button>
+          <button id="gm-fav-btn" onclick="toggleVerFavoritos()" style="padding:5px 10px;background:var(--s1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;cursor:pointer;">🤍 Favoritos (0)</button>
           <span style="font-size:12px;color:var(--muted);" id="gm-result-label">Carregando...</span>
         </div>
         <select id="gm-sort" onchange="renderGridMotos()" style="background:var(--s1);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:6px;font-size:12px;">
@@ -1547,11 +1548,79 @@ async function carregarDados() {
     }
     // FIPE é buscada só quando usuário abre um leilão (evita rate limit da API)
     initAdmin();
+    carregarFavoritos();
   } catch(err) {
     hideLoading();
     showToast('Erro ao carregar: ' + err.message, '❌');
     console.error(err);
   }
+}
+
+// ===== FAVORITOS =====
+let FAVORITOS = new Set(); // moto_ids favoritados pelo usuário atual
+let verSoFavoritos = false;
+
+async function carregarFavoritos() {
+  FAVORITOS = new Set();
+  if (!authEmail) return;
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/favoritos?select=moto_id&email=eq.${encodeURIComponent(authEmail)}`, {
+      headers: { apikey: SUPA_KEY, Authorization: `Bearer ${authToken || SUPA_KEY}` }
+    });
+    const rows = await r.json();
+    if (Array.isArray(rows)) rows.forEach(x => FAVORITOS.add(String(x.moto_id)));
+  } catch(e) { console.warn('favoritos:', e); }
+  atualizarBotaoFavoritos();
+  renderGridMotos();
+}
+
+async function toggleFavorito(motoId, ev) {
+  if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+  if (!authEmail) { showToast('Faça login para favoritar'); return; }
+  const id = String(motoId);
+  const jaEra = FAVORITOS.has(id);
+  if (jaEra) FAVORITOS.delete(id); else FAVORITOS.add(id);
+  atualizarCoracoes(id);
+  atualizarBotaoFavoritos();
+  try {
+    if (jaEra) {
+      await fetch(`${SUPA_URL}/rest/v1/favoritos?email=eq.${encodeURIComponent(authEmail)}&moto_id=eq.${id}`, {
+        method: 'DELETE',
+        headers: { apikey: SUPA_KEY, Authorization: `Bearer ${authToken || SUPA_KEY}` }
+      });
+    } else {
+      await fetch(`${SUPA_URL}/rest/v1/favoritos`, {
+        method: 'POST',
+        headers: { apikey: SUPA_KEY, Authorization: `Bearer ${authToken || SUPA_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal,resolution=ignore-duplicates' },
+        body: JSON.stringify({ email: authEmail, moto_id: Number(id) })
+      });
+    }
+  } catch(e) {
+    if (jaEra) FAVORITOS.add(id); else FAVORITOS.delete(id);
+    atualizarCoracoes(id); atualizarBotaoFavoritos();
+    showToast('Erro ao salvar favorito');
+  }
+  if (verSoFavoritos) renderGridMotos();
+}
+
+function atualizarCoracoes(id) {
+  document.querySelectorAll(`[data-fav-id="${id}"]`).forEach(el => {
+    el.textContent = FAVORITOS.has(id) ? '❤️' : '🤍';
+  });
+}
+
+function atualizarBotaoFavoritos() {
+  const btn = document.getElementById('gm-fav-btn');
+  if (!btn) return;
+  btn.textContent = `${verSoFavoritos ? '❤️' : '🤍'} Favoritos (${FAVORITOS.size})`;
+  btn.style.borderColor = verSoFavoritos ? 'var(--accent)' : 'var(--border)';
+  btn.style.color = verSoFavoritos ? 'var(--accent)' : 'var(--text)';
+}
+
+function toggleVerFavoritos() {
+  verSoFavoritos = !verSoFavoritos;
+  atualizarBotaoFavoritos();
+  renderGridMotos();
 }
 
 function setLoading(msg) {
@@ -1968,6 +2037,9 @@ function renderGridMotos() {
     const leilao = LEILOES.find(l => l.id === m.leilao_id);
     if (!leilao || leilao.encerrado) return false;
 
+    // Filtro favoritos
+    if (verSoFavoritos && !FAVORITOS.has(String(m.id))) return false;
+
     // Filtro plataforma
     if (platsSel.length && !platsSel.includes(leilao.plataforma)) return false;
 
@@ -2078,7 +2150,10 @@ function renderGridMotos() {
         <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:5px;">📅 ${leilao?.nome || m.leilao_id}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid var(--border);">
           <div style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace;">${m.lance_inicial ? 'R$'+Number(m.lance_inicial).toLocaleString('pt-BR') : '—'}</div>
-          <div style="font-size:10px;color:var(--muted);">lance ini.</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="font-size:10px;color:var(--muted);">lance ini.</div>
+            <button data-fav-id="${m.id}" onclick="toggleFavorito(${m.id}, event)" style="background:none;border:none;cursor:pointer;font-size:15px;line-height:1;padding:0;">${FAVORITOS.has(String(m.id)) ? '❤️' : '🤍'}</button>
+          </div>
         </div>
       </div>
     </a>`;
