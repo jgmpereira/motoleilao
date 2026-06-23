@@ -471,6 +471,7 @@ tbody tr:hover{background:var(--s2);}
   <button class="tab" id="tab-motos" style="display:none" onclick="">🏍 Motos do Leilão</button>
   <button class="tab" id="tab-analise" onclick="showPage('analise',this)">📊 Análise FIPE</button>
   <button class="tab" id="tab-historico" onclick="showPage('historico',this)">📋 Histórico</button>
+  <button class="tab" id="tab-favoritos" onclick="showPage('favoritos',this)">❤️ Favoritos</button>
   <button class="tab" id="tab-admin" style="display:none" onclick="showPage('admin',this)">⚙️ Admin</button>
 </div>
 
@@ -840,6 +841,17 @@ tbody tr:hover{background:var(--s2);}
       <button onclick="limparHistFiltros()" style="margin-left:auto;background:rgba(255,77,0,.08);border:1px solid rgba(255,77,0,.25);color:var(--accent);font-size:11px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer;">✕ Limpar</button>
     </div>
     <div id="hist-geral-table"></div>
+  </div>
+</div>
+
+<!-- PAGE FAVORITOS -->
+<div id="page-favoritos" class="page">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <h2 style="font-size:18px;font-weight:700;">❤️ Minhas motos favoritas</h2>
+      <span style="font-size:12px;color:var(--muted);" id="fav-result-label"></span>
+    </div>
+    <div id="favoritos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:12px;"></div>
   </div>
 </div>
 
@@ -1601,6 +1613,7 @@ async function toggleFavorito(motoId, ev) {
     showToast('Erro ao salvar favorito');
   }
   if (verSoFavoritos) renderGridMotos();
+  if (document.getElementById('page-favoritos')?.classList.contains('active')) renderFavoritos();
 }
 
 function atualizarCoracoes(id) {
@@ -1671,14 +1684,15 @@ function showPage(page, btn, skipHash) {
   if(page === 'agenda') renderAgenda();
   if(page === 'leiloes') renderGridMotos();
   if(page === 'admin') renderAdminVips();
+  if(page === 'favoritos') renderFavoritos();
   if(!skipHash) {
-    const hash = {leiloes:'#leiloes', analise:'#fipe', historico:'#historico', motos:'#motos', agenda:'#agenda', admin:'#admin'}[page] || '#'+page;
+    const hash = {leiloes:'#leiloes', analise:'#fipe', historico:'#historico', motos:'#motos', agenda:'#agenda', admin:'#admin', favoritos:'#favoritos'}[page] || '#'+page;
     if(location.hash !== hash) history.pushState(null, '', hash);
   }
 }
 
 // ===================== HASH ROUTING =====================
-const HASH_TO_PAGE = {'#leiloes':'leiloes','#fipe':'analise','#historico':'historico','#agenda':'agenda'};
+const HASH_TO_PAGE = {'#leiloes':'leiloes','#fipe':'analise','#historico':'historico','#agenda':'agenda','#favoritos':'favoritos'};
 let _initialHashHandled = false;
 
 function navigateToHash(hash) {
@@ -1942,6 +1956,8 @@ function setGmFiltro(tipo, val, btn) {
 }
 
 function limparFiltrosGm() {
+  verSoFavoritos = false;
+  atualizarBotaoFavoritos();
   Object.keys(gmFiltros).forEach(k => gmFiltros[k] = '');
   document.querySelectorAll('#motos-sidebar .hf-chip').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('#motos-sidebar .hf-chip').forEach(b => { if(b.getAttribute('onclick') && b.getAttribute('onclick').includes("''")) b.classList.add('active'); });
@@ -2115,23 +2131,25 @@ function renderGridMotos() {
     return;
   }
 
+  grid.innerHTML = motos.map(cardMotoHTML).join('');
+}
+
+function cardMotoHTML(m) {
   const condCores = { financiada: { bg: 'rgba(26,158,92,.85)', label: '✅ Financiada' }, sinistro: { bg: 'rgba(220,53,69,.85)', label: '⚠️ Sinistro' }, sucata: { bg: 'rgba(108,117,125,.85)', label: '🔧 Sucata' }, lotamento: { bg: 'rgba(100,100,200,.85)', label: '📦 Lotamento' } };
+  const leilao = LEILOES.find(l => l.id === m.leilao_id);
+  const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
+  const pct = fipe && m.lance_inicial ? Math.round((m.lance_inicial / fipe) * 100) : null;
+  const pctLabel = pct ? `${pct}% FIPE` : '';
+  const pctBg = pct ? (pct < 30 ? 'rgba(26,158,92,.9)' : pct < 50 ? 'rgba(255,165,0,.9)' : pct < 70 ? 'rgba(255,165,0,.7)' : 'rgba(220,53,69,.85)') : '';
+  const cond = (m.condicao||'').toLowerCase();
+  const condInfo = condCores[cond] || { bg: 'rgba(100,100,100,.7)', label: m.condicao || '—' };
+  const ccEfetiva = m.cilindrada || extractCilindrada(m.marca, m.modelo);
+  const porte = getPorteLabel(ccEfetiva);
+  const montaEfetiva = m.monta || inferMonta(ccEfetiva);
+  const dia = leilao?.dia || (leilao?.data ? new Date(leilao.data + 'T12:00:00').getDate() : '?');
+  const mes = leilao?.mes || (leilao?.data ? new Date(leilao.data + 'T12:00:00').toLocaleString('pt-BR',{month:'short'}).toUpperCase().replace('.','') : '?');
 
-  grid.innerHTML = motos.map(m => {
-    const leilao = LEILOES.find(l => l.id === m.leilao_id);
-    const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
-    const pct = fipe && m.lance_inicial ? Math.round((m.lance_inicial / fipe) * 100) : null;
-    const pctLabel = pct ? `${pct}% FIPE` : '';
-    const pctBg = pct ? (pct < 30 ? 'rgba(26,158,92,.9)' : pct < 50 ? 'rgba(255,165,0,.9)' : pct < 70 ? 'rgba(255,165,0,.7)' : 'rgba(220,53,69,.85)') : '';
-    const cond = (m.condicao||'').toLowerCase();
-    const condInfo = condCores[cond] || { bg: 'rgba(100,100,100,.7)', label: m.condicao || '—' };
-    const ccEfetiva = m.cilindrada || extractCilindrada(m.marca, m.modelo);
-    const porte = getPorteLabel(ccEfetiva);
-    const montaEfetiva = m.monta || inferMonta(ccEfetiva);
-    const dia = leilao?.dia || (leilao?.data ? new Date(leilao.data + 'T12:00:00').getDate() : '?');
-    const mes = leilao?.mes || (leilao?.data ? new Date(leilao.data + 'T12:00:00').toLocaleString('pt-BR',{month:'short'}).toUpperCase().replace('.','') : '?');
-
-    return `<a href="#moto-${m.id}" style="display:block;text-decoration:none;color:inherit;background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'" onclick="event.preventDefault();abrirFichaMoto(${m.id})">
+  return `<a href="#moto-${m.id}" style="display:block;text-decoration:none;color:inherit;background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'" onclick="event.preventDefault();abrirFichaMoto(${m.id})">
       <div style="position:relative;height:120px;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;">
         ${m.foto
           ? `<img src="${m.foto}" alt="${m.marca} ${m.modelo}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" onclick="event.stopPropagation();${m.url ? `window.open('${m.url}','_blank')` : ''}">`
@@ -2157,7 +2175,23 @@ function renderGridMotos() {
         </div>
       </div>
     </a>`;
-  }).join('');
+}
+
+function renderFavoritos() {
+  const grid = document.getElementById('favoritos-grid');
+  if (!grid) return;
+  const favs = MOTOS.filter(m => {
+    const leilao = LEILOES.find(l => l.id === m.leilao_id);
+    if (!leilao || leilao.encerrado) return false;
+    return FAVORITOS.has(String(m.id));
+  });
+  const label = document.getElementById('fav-result-label');
+  if (label) label.textContent = `${favs.length} moto${favs.length !== 1 ? 's' : ''} favoritada${favs.length !== 1 ? 's' : ''}`;
+  if (!favs.length) {
+    grid.innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted);">Você ainda não favoritou nenhuma moto. Toque no 🤍 nos cards para salvar aqui.</div>';
+    return;
+  }
+  grid.innerHTML = favs.map(cardMotoHTML).join('');
 }
 
 function limparFiltrosAgenda() {
