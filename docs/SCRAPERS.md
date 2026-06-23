@@ -155,16 +155,23 @@ Confirmado via `grep`. Campos e como extrair:
 
 ## Copart
 
-**Arquitetura:** SPA Angular protegida por **WAF Imperva/Incapsula** — bloqueia `fetch` direto do Node. **Exige Playwright.**
+**Arquitetura:** SPA **Angular** protegida por **WAF Imperva/Incapsula** (`/_Incapsula_Resource?...`). A home e a página de lote retornam HTML (200, ~220 KB) mas é só a **casca** — os dados (valor, status, specs) são carregados via API pelo Angular **dentro do browser**. Por `curl` NÃO se vê o conteúdo do lote (o número do lote nem aparece no HTML). **Exige Playwright.**
 
-**Como funciona** (`scrapers/copart.js`):
-1. Playwright navega pra URL filtrada (`categoria:Motos`, ano).
-2. Intercepta o request que o Angular faz pra `/public/vehicleFinder/search` (body `x-www-form-urlencoded`, formato DataTables).
-3. Usa o body como template e incrementa `start=N` pra paginar (20/página).
-4. Replica os requests via `page.evaluate(fetch(...))` — mesma sessão/cookies → bypassa o WAF.
+### Fontes
+| Uso | Como |
+|---|---|
+| Lista (motos) | Playwright navega `vehicleFinderSearch?searchStr=...`; intercepta o POST que o Angular faz a `/public/vehicleFinder/search` (body `x-www-form-urlencoded`, DataTables); pagina com `page.evaluate(fetch())` na mesma sessão (bypassa WAF). |
+| Detalhe do lote | `www.copart.com.br/lot/{lotId}` — Angular, dados via API interna (não visível por curl). |
 
-**Campos:** `ln` (lote), `mkn` (marca), `lm` (modelo), `lcy` (ano), `ad` (data), `stt` (status/condição), `hb` (bid), `tims` (foto, `?imageType=big`).
-**Fragilidade:** se o Angular mudar o formato do body DataTables ou o endpoint, precisa recapturar o template.
+Scraper: `scrapers/copart.js` (só ativos). **`copart-encerrados.js` NÃO existe.**
+
+**Campos da listagem:** `ln` (lote), `mkn` (marca), `lm` (modelo), `lcy` (ano), `ad` (data), `stt` (status/condição), `hb` (highest bid), `ob` (opening bid), `tims` (foto `?imageType=big`). Filtra "vendas futuras" (`stt: Aguardando Classificação` ou `ad` vazio).
+
+### Encerrados — PENDENTE (precisa de POC com Playwright)
+- Confirmado (Jun/2026): a página `/lot/{id}` carrega (200), WAF não bloqueia a casca, MAS o valor/status do lote **não está no HTML** (Angular monta via API no browser). O lote tem `hb` (highest bid) na **listagem**, mas não confirmamos se vira "valor de arremate final" após encerrar.
+- **POC necessária:** rodar Playwright na página de um lote encerrado, deixar o Angular carregar, e (a) capturar a chamada de API de detalhe (igual o scraper ativo faz com a busca) OU (b) ler o valor/status do DOM renderizado. Verificar se o valor final de venda é público (Copart às vezes só mostra pra logados/cadastrados).
+- Pendência antiga confirmada: "Copart encerrados — precisa de POC com Playwright para confirmar se o valor final é público."
+- Fragilidade geral: se o Angular mudar o formato do body DataTables ou o endpoint, recapturar o template.
 
 ---
 
@@ -200,18 +207,58 @@ Scraper: `scrapers/freitas.js` — fetch HTTP com `Referer`, regex. `isMoto()` w
 
 ## Superbid
 
-**Arquitetura:** **API REST JSON** paginada (host em `exchange.superbid.net`).
-- Ativos (`scrapers/superbid.js`): query paginada, `parseShortDesc` com 3 estratégias (barra MARCA/MODELO, keyword "modelo", fallback). Remove lote cujo "cilindrada" é ano (1900–2100). `isMoto()` whitelist.
-- Encerrados (`scrapers/superbid-encerrados.js`): por oferta `www.superbid.net/oferta/{offerId}`.
+**Arquitetura:** SPA **Next.js** — dados em `__NEXT_DATA__` (JSON no HTML, extraído via `extractNextData()`). NÃO bloqueado pelo Codespaces. É o leiloeiro com infra mais madura (encerrados já implementado), mas com o **pior problema de dados** (duplicatas — ver abaixo).
+
+### Fontes
+| Uso | Fonte |
+|---|---|
+| Lista (motos abertas) | API `offer-query.superbid.net/seo/offers/?...&searchType=opened` (JSON, paginável com `pageSize`) |
+| Detalhe / encerrado | `www.superbid.net/oferta/{offerId}` (Next.js, `offerDetails.offers[0]`) |
+| Link do leilão | `exchange.superbid.net/leilao/{aucId}` |
+
+Scrapers: `scrapers/superbid.js` (ativos) e `scrapers/superbid-encerrados.js` (**já existe e é maduro**).
+
+### Encerrados — JÁ IMPLEMENTADO (bem resolvido)
+`superbid-encerrados.js` lê `www.superbid.net/oferta/{offerId}` (offerId vem de `motos.url`). Mapa de status:
+- `statusId 1` → aberto → pula
+- `statusId 3` + `hasBids:true` → encerrado com lances → **vendido**
+- `statusId 11` + `hasBids:true` → lance único no mínimo → **condicional**
+- `statusId 6` + `hasBids:false` → deserto → pula
+
+**Sinal de arremate = `hasBids`** (NÃO `winnerBid.currentWinner`, que é enganoso — eles já caíram nessa e documentaram). **Valor = `offerDetail.currentMaxBid` ?? `price`** (o maior lance). Idempotente, à prova de corrida com o scraper ativo, janela de 7 dias. → este scraper já incorpora as lições que descobrimos na unha nos outros (pegar o maior lance, desconfiar do campo "oficial").
+
+### 🐛 BUG GRAVE — duplicatas (confirmado Jun/2026)
+**1189 motos Superbid no banco, mas só 532 offerIds únicos → ~657 duplicatas (55% da base!).** Alguns offerIds repetidos 5-6× (ex.: `4625597` ×6).
+**Causa:** o dedupe no `superbid.js` compara motos **dentro do mesmo `leilao_id`** (busca `motos?leilao_id=eq.{lid}` e deleta/reinsere). Mas a unicidade real de uma moto é a **URL `/oferta/{offerId}`**. Se a mesma oferta cai em `leilao_id` diferente entre execuções (ou o leilao_id muda), ela é reinserida sem ser detectada → acumula cópias a cada run.
+**Correção (2 partes):**
+1. **Prevenir:** dedupe por **URL/offerId** (não por leilao_id). Idealmente uma constraint UNIQUE em `motos.url` + upsert `on_conflict=url`. Ou, antes de inserir, checar se a URL já existe no banco.
+2. **Limpar o passado:** SQL idempotente que remove duplicatas por offerId/url, **preservando** a linha que tem `arrematado` (ou a mais recente). Rodar com cuidado (destrutivo) — tem backup diário.
 
 ---
 
 ## VIP Leilões
 
-**Arquitetura:** server-rendered com proteção por cookie.
-- Lista: `www.vipleiloes.com.br/pesquisa?classificacao=Motos` (POST paginado).
-- Detalhe: `www.vipleiloes.com.br/evento/anuncio/{slug}`.
-- **Cookie `__CBCanal`** obtido via redirect 302 (GET /canal). `isMoto()` whitelist.
+**Arquitetura:** server-rendered com proteção por **cookie `__CBCanal`** (obtido via GET `/canal`, aceita HTTP 200 ou 302). NÃO bloqueado pelo Codespaces (responde 302). Stack com `data-bind-*` attributes (knockout-like).
+
+### Fontes
+| Uso | URL |
+|---|---|
+| Lista (motos) | `www.vipleiloes.com.br/pesquisa?classificacao=Motos` (POST paginado, precisa do cookie) |
+| Detalhe / encerrado | `www.vipleiloes.com.br/evento/anuncio/{slug}` |
+| Cookie | GET `www.vipleiloes.com.br/canal` → `Set-Cookie: __CBCanal=...` |
+
+Scraper: `scrapers/vip.js` — pega cookie, POST paginado na pesquisa, regex. `isMoto()` + `isCarro()`. Já captura `local`. **`vip-encerrados.js` NÃO existe** (ficou pela metade; agora há fonte confirmada — dá pra criar).
+
+### Encerrados — FONTE CONFIRMADA (melhor caso entre os leiloeiros)
+A página `/evento/anuncio/{slug}` de um lote **encerrado CONTINUA no ar** com o resultado (testado: lote do dia 22 acessível no dia 23, HTTP 200, 188 KB). Mostra status + escada de lances. **Melhor que Sodré/Freitas** (que somem rápido). Falta confirmar por quantos dias persiste.
+
+**Status:** `class="offer-status anuncio-Vendido"` / `data-bind-situacaoClass="Vendido"`. Variantes: `Vendido`, `Vendido por Compre Já`, `Encerrado` (não vendido).
+**Datas:** JSON inline `"data_inicio"` e `"data_encerramento"` (ex.: `"23/06/2026 00:21:26 +00:00"`).
+**Campos extras:** KM, Final da placa, endereço completo do pátio (ex.: "RODOVIA BR 470 KM 17...").
+
+### ⚠️ ARMADILHA do valor de arremate (importante)
+O valor "oficial" no atributo `<h2 ... data-bind-valorAtual>` mostrava **R$ 11.500**, MAS a escada de lances (vários `<span>R$ ...`) ia até **R$ 11.800**. O **valor real de arremate é o MAIOR lance da escada**, não o `data-bind-valorAtual` (que estava defasado / era penúltimo). 
+**Regra pro scraper:** pegar o **maior** valor entre os lances (`<span>R$ ...` dentro do bloco de lances), NÃO confiar só no `valorAtual`. Pegar o valorAtual gravaria valor menor que o arremate real. (Armadilha análoga à do "condicional" do Sodré — confirmar sempre contra a escada.)
 
 ---
 
@@ -229,6 +276,9 @@ Scraper: `scrapers/freitas.js` — fetch HTTP com `Referer`, regex. `isMoto()` w
 
 ### Condicional não é reprocessado
 Hoje o status "condicional" é capturado uma vez e nunca atualizado. Falta lógica pra revisitar e ver o desfecho (vendido/não-vendido).
+
+### Superbid — duplicatas massivas (PRIORITÁRIO)
+1189 motos no banco, só 532 únicas → ~657 duplicatas (55%). Causa: dedupe por `leilao_id` em vez de URL/offerId. Ver seção Superbid. Correção: UNIQUE em `motos.url` + upsert por url no scraper, e SQL de limpeza preservando linhas com arrematado.
 
 ### FIPE — matching impreciso (histórico)
 Marcas chinesas sem cobertura FIPE (JTZ, Haojian) sempre retornam "não encontrado". Idas e vindas no matching; ver README seção FIPE.
