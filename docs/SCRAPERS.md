@@ -103,20 +103,22 @@ grep -oE "https?://[^\"' ]+|/api/[a-z0-9/_-]+" /tmp/x.js | sort -u
 ```
 > Confirmado: a API reflete o site corretamente. Se o banco diverge, o erro está no **mapeamento lote→moto** do scraper (ver Problemas conhecidos).
 
-### ⏰ Janela de disponibilidade dos encerrados (CRÍTICO)
-Testado em Jun/2026 com leilões de idades diferentes:
-- Página individual `/leilao/{id}/lote/{id}/`: **removida poucos dias após encerrar** (um leilão de 3 dias atrás já não abria). **NÃO serve pra valor de arremate.**
-- API `lots-finished`: **também expira rápido** — leilão recente retornou 15 lotes; um pouco mais antigo, 1 lote; vários IDs mais antigos retornaram **0 lotes**.
+### ⏰ Janela de disponibilidade dos encerrados (CONFIRMADO Jun/2026)
+**Página individual** `/leilao/{id}/lote/{id}/` de um lote encerrado:
+- **1-2 dias após encerrar: AINDA fica no ar** e mostra o resultado completo no HTML — status (`vendido`), valor do lance (ex.: R$ 23.300), e a **escada de lances** (histórico: 23.300 → 22.800 → ... com comissão e total). Isso a API NÃO dá.
+- **~3 dias após: removida** (confirmado: um lote de 3 dias atrás já não abria).
 
-**Consequência operacional:** o valor de arremate **precisa ser capturado na janela curta logo após o encerramento**. Se o `sodre-encerrados.js` não rodar a tempo (ou falhar no dia), o dado **some pra sempre** — não dá pra buscar retroativamente. É a causa de leilões encerrados ficarem sem valor no banco.
-**Recomendações:**
-- Garantir que o scraper de encerrados rode com folga após o horário do leilão (e ter retry).
-- Considerar rodar mais de uma vez no dia seguinte ao leilão.
-- Logar/alertar quando um leilão for marcado encerrado **sem** ter capturado lotes (pra saber que perdeu a janela).
+**API `lots-finished`:**
+- Dura um pouco mais que a página, mas **também expira** — leilões antigos retornam 0 lotes (testado: vários IDs antigos vazios).
+- **É a fonte de verdade pro valor:** o lote 0254 deu R$ 23.300/vendido na API, idêntico à página. Sem divergência.
 
-**Obs.:** a API mistura segmentos (imóveis, veículos) e o `auction_id` NÃO é sequencial por tipo — não dá pra inferir idade/segmento pelo número do ID. A janela é por **tempo**, não por ID.
+**Resumo de fontes de encerrado:** API = principal (valor confiável, dura mais, dá pra paginar todos os lotes). Página individual = bônus opcional só nos primeiros 1-2 dias (traz escada de lances/comissão), mas some rápido.
 
-### 🔄 "Condicional" é status TEMPORÁRIO (dinâmica confirmada)
+### ⚠️ PAGINAÇÃO — robustez (atenção)
+A API retorna **15 lotes por página**, ordenados por `lot_number`. Leilão grande tem muitas páginas (ex.: 28656 = ~390 lotes em **26 páginas**; o lote 0254 só apareceu na página 17).
+O `sodre-encerrados.js` **percorre todas as páginas corretamente** (vai até `meta.lastPage`). PORÉM **não tem retry**: se uma página do meio falhar (timeout/500), ele faz `break` e para — perdendo todas as páginas seguintes (numa falha na pág. 10 de 26, perde da 10 à 26). **Melhoria recomendada:** retry por página + não abortar tudo numa falha isolada. Isso, combinado com a janela de tempo curta, é a provável causa de motos de leilão encerrado sem valor.
+
+### 🔄 "Condicional" é status TEMPORÁRIO (CONFIRMADO ao vivo)
 Status possíveis na API: `vendido`, `não vendido`, `cancelado` e (no dia do leilão) `condicional`.
 
 Descoberta (Jun/2026): no dia do leilão, lotes cujo lance não atinge o mínimo ficam **`condicional`** (vendedor precisa aprovar) com um `bid_actual` **provisório**. Dias depois a Sodré resolve cada um e o status vira **definitivo** (`vendido`/`não vendido`/`cancelado`), muitas vezes com **valor diferente**. O `condicional` então **desaparece** da API.
