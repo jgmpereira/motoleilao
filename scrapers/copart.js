@@ -532,8 +532,15 @@ async function main() {
 
       const novas = motosPorLeilao[lid];
       const BATCH = 50;
-      for (let i = 0; i < novas.length; i += BATCH) {
-        await supaFetch('motos', { method: 'POST', body: JSON.stringify(novas.slice(i, i + BATCH)), prefer: 'return=minimal' });
+      // Motos com URL de lote específico → upsert por url (compatível com constraint motos_url_unique)
+      // Motos sem lotNum (url genérica compartilhada) → insert normal
+      const novasComUrl  = novas.filter(m => m.url && m.url.includes('/lot/'));
+      const novasSemUrl  = novas.filter(m => !m.url || !m.url.includes('/lot/'));
+      for (let i = 0; i < novasComUrl.length; i += BATCH) {
+        await supaFetch('motos?on_conflict=url', { method: 'POST', body: JSON.stringify(novasComUrl.slice(i, i + BATCH)), prefer: 'resolution=merge-duplicates,return=minimal' });
+      }
+      for (let i = 0; i < novasSemUrl.length; i += BATCH) {
+        await supaFetch('motos', { method: 'POST', body: JSON.stringify(novasSemUrl.slice(i, i + BATCH)), prefer: 'return=minimal' });
       }
       console.log(`  → Inseriu ${novas.length} moto(s)`);
     }
