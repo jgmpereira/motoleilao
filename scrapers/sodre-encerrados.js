@@ -87,6 +87,13 @@ async function main() {
   for (const leilao of leiloes) {
     console.log(`\n  Leilão: ${leilao.id} (${leilao.data})`);
 
+    // Data já passou (a query filtra data<=hoje) → o leilão ESTÁ encerrado,
+    // independente de conseguirmos capturar os valores. Marca já, pra não vazar na home.
+    await supaFetch(`leiloes?id=eq.${leilao.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ encerrado: true }),
+    });
+
     // 2. Extrai auction_id do link do leilão ou das motos
     let auctionId = null;
     const matchLink = (leilao.link || '').match(/\/leilao\/(\d+)/);
@@ -180,13 +187,6 @@ async function main() {
     }
 
     console.log(`  ✅ ${inseridos} arrematados inseridos, ${ignorados} ignorados`);
-
-    // 6. Marca leilão como encerrado
-    await supaFetch(`leiloes?id=eq.${leilao.id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ encerrado: true }),
-    });
-    console.log(`  🔒 Leilão ${leilao.id} marcado como encerrado`);
   }
 
   console.log('\n✅ Scraper de encerrados concluído!');
