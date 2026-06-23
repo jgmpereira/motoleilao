@@ -170,11 +170,31 @@ Confirmado via `grep`. Campos e como extrair:
 
 ## Freitas
 
-**Arquitetura:** server-rendered. **Fetch direto de HTML** (sem Playwright), parse via regex.
-- Lista: `www.freitasleiloeiro.com.br/`
-- Detalhe: `www.freitasleiloeiro.com.br/Leiloes/LoteDetalhes?leilaoId={id}&loteNumero={n}`
-- Fotos: `cdn3.freitasleiloeiro.com.br`
-- Filtro `isMoto()` (whitelist de marcas) rejeita carros.
+**Arquitetura:** server-rendered. **Fetch direto de HTML** (sem Playwright), parse via regex. (No Codespaces o domínio do Freitas é **bloqueado pela allowlist de egress** → 000; investigar via navegador. Em produção/GitHub Actions funciona normal.)
+
+### Fontes
+| Uso | URL |
+|---|---|
+| Lista de lotes (motos) | `www.freitasleiloeiro.com.br/Leiloes/PesquisarLotes?Categoria=1&TipoLoteId=3` |
+| Detalhe do lote | `www.freitasleiloeiro.com.br/Leiloes/LoteDetalhes?leilaoId={id}&loteNumero={n}` |
+| Fotos (CDN, padrão fixo) | `cdn3.freitasleiloeiro.com.br/LEILOES/{leilaoId}/FOTOS/{lote3}/LT{lote3}_01.JPG` |
+
+Scraper: `scrapers/freitas.js` — fetch HTTP com `Referer`, regex. `isMoto()` whitelist de marcas (rejeita carros — o número do lote é geral, carros+motos juntos; motos costumam ter números mais altos). Marca leilão `encerrado=true` só pela data (`data < hoje`) — **não captura valor**.
+
+### Campos na página da moto ATIVA (confirmado via Console, Jun/2026)
+- Linha resumo: `MARCA/MODELO, ANO, PLACA: ..., COMBUSTÍVEL, COR` (ex.: `HONDA/CBR 650R, 20/20, PLACA: E__-___2, GASOLINA, VERMELHA`)
+- **Lance Inicial**, **Maior lance** (ao vivo, ex.: R$ 36.500), histórico "Últimos lances do lote", Lance/Data
+- **Local do leilão**, Data do leilão, Condições de venda, Catálogo
+- **Mapa Google** (`initMap`) → tem localização geográfica do pátio
+- Um valor de referência solto (ex.: R$ 26.000 — provável avaliação/FIPE, confirmar)
+
+### Encerrados — REVISÃO (era "inviável", na verdade é viável NA JANELA ATIVA)
+- Página de lote **encerrado dá erro / é removida** logo após o leilão (janela mais curta que o Sodré — testado: lote de leilão encerrado retornou "Ocorreu um erro").
+- **MAS** a página **ativa** mostra o **"Maior lance" em tempo real**. → Pra ter valor de arremate do Freitas, capturar o **maior lance no fim/durante** o leilão (não depois). Não há API JSON nem página pós-encerramento.
+- Conclusão antiga ("Freitas encerrados sem fonte pública, inviável") estava parcialmente errada: é inviável **depois**, viável **durante**. Exigiria um scraper rodando perto do horário de encerramento.
+
+**🔲 A CONFIRMAR (hipótese do dono):** a página do lote pode ficar acessível **durante todo o dia do leilão** com o valor já fechado (não só no segundo do encerramento). Se confirmado, a janela é de horas, não de minutos → dá pra rodar o scraper de encerrados algumas horas após o leilão, no mesmo dia.
+**Teste:** no dia de um leilão Freitas, anotar a hora de encerramento e tentar abrir a página do lote (`LoteDetalhes?leilaoId=&loteNumero=`) algumas horas depois, ainda no mesmo dia, e ver se mostra o maior lance final. Depois testar no dia seguinte (provavelmente já dá erro).
 
 ---
 
