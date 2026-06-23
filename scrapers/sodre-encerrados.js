@@ -44,25 +44,39 @@ async function supaFetch(path, opts = {}) {
 async function fetchLotesEncerrados(auctionId) {
   const lotes = [];
   let page = 1;
-  while (true) {
-    const url = `https://prd-api.sodresantoro.com.br/api/v1/lots-finished?auctionId=${auctionId}&page=${page}`;
-    const res = await fetch(url, {
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0',
+  let lastPage = 1;
+
+  while (page <= lastPage) {
+    let json = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const url = `https://prd-api.sodresantoro.com.br/api/v1/lots-finished?auctionId=${auctionId}&page=${page}`;
+      const res = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0',
+        }
+      });
+      if (res.ok) {
+        json = await res.json();
+        break;
       }
-    });
-    if (!res.ok) {
-      console.log(`  ⚠️ API lots-finished status ${res.status} para auction ${auctionId} — dados indisponíveis`);
-      break;
+      console.warn(`  ⚠️ página ${page} tentativa ${attempt}/3 falhou (status ${res.status})`);
+      if (attempt < 3) await new Promise(r => setTimeout(r, 1000));
     }
-    const json = await res.json();
+
+    if (!json) {
+      console.warn(`  ⚠️ página ${page} falhou após 3 tentativas, pulando`);
+      page++;
+      continue;
+    }
+
     const data = json.data || [];
     lotes.push(...data);
-    console.log(`  Página ${page}/${json.meta?.lastPage}: ${data.length} lotes`);
-    if (page >= (json.meta?.lastPage || 1)) break;
+    lastPage = json.meta?.lastPage || lastPage;
+    console.log(`  Página ${page}/${lastPage}: ${data.length} lotes`);
     page++;
   }
+
   return lotes;
 }
 
@@ -70,15 +84,17 @@ async function fetchLotesEncerrados(auctionId) {
 async function main() {
   console.log('🏁 Sodré Santoro — scraper de encerrados iniciando');
 
-  // 1. Busca leilões do Sodré não encerrados com data passada
+  // 1. Busca leilões do Sodré na janela dos últimos 3 dias (encerrado ou não)
+  // Reprocessa a janela para atualizar condicionais que resolvem dias após o leilão
   const hoje = new Date().toISOString().slice(0, 10);
+  const hojeMenos3 = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const leiloes = await supaFetch(
-    `leiloes?plataforma=eq.Sodré Santoro&encerrado=eq.false&data=lte.${hoje}&select=id,link,data`,
+    `leiloes?plataforma=eq.Sodré Santoro&data=gte.${hojeMenos3}&data=lte.${hoje}&select=id,link,data`,
     { prefer: 'return=representation' }
   );
 
   if (!leiloes || leiloes.length === 0) {
-    console.log('ℹ️ Nenhum leilão do Sodré pendente de encerramento.');
+    console.log('ℹ️ Nenhum leilão do Sodré na janela de 3 dias.');
     return;
   }
 
