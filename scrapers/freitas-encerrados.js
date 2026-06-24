@@ -111,10 +111,17 @@ function stripHtml(html) {
     .replace(/&[a-z]+;/gi, ' ');
 }
 
-// ── Limpa lixo de comentário HTML e prefixos soltos ──────────────────────────
+// Bloco jurídico fixo de pagamento/transferência — aparece no meio do resumo útil
+const BLOCO_PAGAMENTO_RE = /A CONCRETIZA[ÇC][ÃA]O DA ARREMATA[ÇC][ÃA]O[\s\S]*?FIGURAR COMO COMPRADOR OU PAGADOR\.?/gi;
+
+// ── Limpa lixo de comentário HTML, bloco de pagamento e separadores órfãos ──
 function limparResumo(texto) {
   return texto
-    .replace(/<!--|-->/g, '')          // BUG 1: remove marcadores de comentário HTML
+    .replace(/<!--|-->/g, '')          // remove marcadores de comentário HTML
+    .replace(BLOCO_PAGAMENTO_RE, '')   // remove bloco jurídico fixo de pagamento
+    .replace(/(\s*\/\s*){2,}/g, ' / ') // colapsa separadores duplicados resultantes
+    .replace(/^\s*\/\s*/, '')          // remove / solto no início
+    .replace(/\s*\/\s*$/, '')          // remove / solto no fim
     .replace(/\s+/g, ' ')
     .trim()
     .replace(/^[\s\/\->]+/, '')        // remove qualquer combinação de /, -, > no início
