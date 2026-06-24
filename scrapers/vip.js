@@ -16,6 +16,7 @@
  */
 
 const https = require('https');
+const { extrairUF } = require('./_utils');
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const SUPA_URL   = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
@@ -436,6 +437,7 @@ async function main() {
       url,
       fipe_csv:     null,
       patio:        local || null,
+      estado:       extrairUF(local),
     });
   }
 

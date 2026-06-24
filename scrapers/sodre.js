@@ -16,6 +16,7 @@
  */
 
 const { chromium } = require('playwright');
+const { extrairUF } = require('./_utils');
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
@@ -546,6 +547,7 @@ async function main() {
         lance_inicial: lance,
         financeira,
         patio:        patio || null,
+        estado:       extrairUF(patio),
         cilindrada,
         monta,
         fipe_csv:     null,
