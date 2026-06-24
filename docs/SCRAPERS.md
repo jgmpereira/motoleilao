@@ -18,6 +18,26 @@
 
 ---
 
+## Changelog 24/06/2026
+
+Sessão grande. Resumo do que mudou:
+- **Sodré encerrados:** retry na paginação + reprocessa janela de 3 dias (condicional vira vendido ao reprocessar). VALIDADO em produção.
+- **Superbid:** constraint `motos_url_unique` recriada como **UNIQUE simples** (não índice parcial — índice parcial com WHERE quebra o `on_conflict=url` do PostgREST, erro 42P10). Migration alinhada. LIÇÃO: upsert on_conflict exige constraint UNIQUE simples.
+- **VIP encerrados:** scraper criado (status via `data-bind-situacaoClass`: Vendido / EmAnalise=condicional / Encerrado; valor via `data-bind-valorAtual`). Falta validar em produção.
+- **Coluna `estado` (UF):** criada em motos, ~8261 preenchidas via patio. Scrapers (sodre/vip/copart/superbid/freitas) preenchem daqui pra frente. Filtro por estado + badge no card no front.
+- **Colunas `descricao_resumo` e `alertas`:** criadas em motos. Freitas preenche (resumo por allowlist + alertas). Front exibe badges + observações.
+- **Freitas — completo:** paginação (PageNumber/TopRows, pegava só ~30 de ~60+), estado, descrição resumida, alertas, status/valor de arremate, front. Ver seção Freitas.
+
+### Pendências mapeadas (próximas sessões)
+- VIP encerrados: validar workflow em produção.
+- Descrição/alertas dos outros leiloeiros (Sodré/VIP/Superbid) reusando `detectarAlertas` do _utils.
+- Aba fixa "Como funciona cada leiloeiro" (comissão, pagamento, retirada — conteúdo editorial, não scraped).
+- Copart encerrados: POC com Playwright.
+- 794 condicionais históricos (pré-20/06, API expirada) — decidir como exibir.
+- Otimização: `TopRows` do Freitas pode subir (menos requests).
+
+---
+
 ## Metodologia
 ### Como descobrir de onde um site tira os dados
 
@@ -182,26 +202,31 @@ Scraper: `scrapers/copart.js` (só ativos). **`copart-encerrados.js` NÃO existe
 ### Fontes
 | Uso | URL |
 |---|---|
-| Lista de lotes (motos) | `www.freitasleiloeiro.com.br/Leiloes/PesquisarLotes?Categoria=1&TipoLoteId=3` |
+| Lista de lotes (motos) — PAGINADA | `www.freitasleiloeiro.com.br/Leiloes/PesquisarLotes?Categoria=1&TipoLoteId=3&...&PageNumber={n}&TopRows=12` |
 | Detalhe do lote | `www.freitasleiloeiro.com.br/Leiloes/LoteDetalhes?leilaoId={id}&loteNumero={n}` |
 | Fotos (CDN, padrão fixo) | `cdn3.freitasleiloeiro.com.br/LEILOES/{leilaoId}/FOTOS/{lote3}/LT{lote3}_01.JPG` |
 
-Scraper: `scrapers/freitas.js` — fetch HTTP com `Referer`, regex. `isMoto()` whitelist de marcas (rejeita carros — o número do lote é geral, carros+motos juntos; motos costumam ter números mais altos). Marca leilão `encerrado=true` só pela data (`data < hoje`) — **não captura valor**.
+### ⚠️ PAGINAÇÃO (CONFIRMADO Jun/2026)
+A listagem usa **rolagem infinita** → chama `PesquisarLotes` com **`PageNumber`** (NÃO "Pagina") e **`TopRows=12`** (12 lotes/página). O scraper DEVE iterar PageNumber=1,2,3... até uma página vir com <12 (ou 0) lotes. Antes pegava só ~30; corrigido para iterar tudo (~57-84 lotes). A URL completa inclui: `Nome=&Categoria=1&TipoLoteId=3&FaixaValor=0&Condicao=0&PatioId=0&AnoModeloMin=0&AnoModeloMax=0&ArCondicionado=false&DirecaoAssistida=false&Tag=&ClienteSclId=0&PageNumber={n}&TopRows=12`.
 
-### Campos na página da moto ATIVA (confirmado via Console, Jun/2026)
-- Linha resumo: `MARCA/MODELO, ANO, PLACA: ..., COMBUSTÍVEL, COR` (ex.: `HONDA/CBR 650R, 20/20, PLACA: E__-___2, GASOLINA, VERMELHA`)
-- **Lance Inicial**, **Maior lance** (ao vivo, ex.: R$ 36.500), histórico "Últimos lances do lote", Lance/Data
-- **Local do leilão**, Data do leilão, Condições de venda, Catálogo
-- **Mapa Google** (`initMap`) → tem localização geográfica do pátio
-- Um valor de referência solto (ex.: R$ 26.000 — provável avaliação/FIPE, confirmar)
+### Scrapers
+- `scrapers/freitas.js` (coleta) — fetch paginado + `isMoto()` (whitelist de marcas, rejeita carros). Agora também **visita a página de detalhe de cada moto** para capturar **estado (UF), descricao_resumo e alertas** já na coleta (toda moto nasce completa, inclusive de leilões futuros). Marca `encerrado=true` pela data.
+- `scrapers/freitas-encerrados.js` (resultado) — visita LoteDetalhes na janela de 3 dias e captura **status + valor + estado + descricao_resumo + alertas** numa visita só. Grava arrematados (DELETE+INSERT, condicional atualiza ao reprocessar).
+- Funções compartilhadas em `scrapers/_utils.js`: `extrairUF`, `extrairEstadoFreitas`, `extrairDescricao`, `filtrarSegmentos`, `stripHtml`, `detectarAlertas`.
 
-### Encerrados — REVISÃO (era "inviável", na verdade é viável NA JANELA ATIVA)
-- Página de lote **encerrado dá erro / é removida** logo após o leilão (janela mais curta que o Sodré — testado: lote de leilão encerrado retornou "Ocorreu um erro").
-- **MAS** a página **ativa** mostra o **"Maior lance" em tempo real**. → Pra ter valor de arremate do Freitas, capturar o **maior lance no fim/durante** o leilão (não depois). Não há API JSON nem página pós-encerramento.
-- Conclusão antiga ("Freitas encerrados sem fonte pública, inviável") estava parcialmente errada: é inviável **depois**, viável **durante**. Exigiria um scraper rodando perto do horário de encerramento.
+### Status / valor / estado (CONFIRMADO via DevTools, Jun/2026)
+- **Status:** num `<div class="text-success">` (ABERTO) ou `<div class="text-danger">` (VENDIDO **ou** CONDICIONAL — mesma classe!). Mapear pelo TEXTO, não pela classe. ⚠️ Nunca buscar a palavra no texto solto (há "VENDIDO/CONDICIONAL" nas condições gerais → falso positivo).
+- **Valor:** "Maior lance: R$ X".
+- **Estado/UF:** "Local do leilão: ... / SP" — UF no final, após último "/" ou "-". Regex `/[\/-]\s*([A-Z]{2})\s*$/` + valida com extrairUF. (O "local" do leilão no banco é "Online"; o estado real vem daqui.)
 
-**🔲 A CONFIRMAR (hipótese do dono):** a página do lote pode ficar acessível **durante todo o dia do leilão** com o valor já fechado (não só no segundo do encerramento). Se confirmado, a janela é de horas, não de minutos → dá pra rodar o scraper de encerrados algumas horas após o leilão, no mesmo dia.
-**Teste:** no dia de um leilão Freitas, anotar a hora de encerramento e tentar abrir a página do lote (`LoteDetalhes?leilaoId=&loteNumero=`) algumas horas depois, ainda no mesmo dia, e ver se mostra o maior lance final. Depois testar no dia seguinte (provavelmente já dá erro).
+### Descrição resumida + alertas (CONFIRMADO Jun/2026)
+A descrição do lote é `[parte útil variável] ... SEM GARANTIAS QUANTO A ESTRUTURA [ladainha jurídica fixa]`.
+- **Resumo:** abordagem por ALLOWLIST — quebra o texto por " / ", mantém só trechos úteis (alertas, peças danificadas, "vendido no estado", "mecânica sem teste"), descarta trechos com ruído jurídico (DECLARA, PORTARIA, DETRAN, CONTRAN, ATPV, DOCUMENTAÇÃO, PRAZO, PAGAMENTO, TRANSFERÊNCIA, etc.). **IPVA simplificado** → "IPVA pago" / "IPVA por conta do comprador".
+- **Alertas:** `detectarAlertas()` roda SÓ sobre o resumo (parte útil), NÃO sobre o HTML completo (senão "RECALL" da ladainha vira falso positivo em tudo). Flags: sinistrado, peq_monta, media_monta, grande_monta, circul_vedada, danos_estruturais, sem_chave, suspensao_danificada, hodometro_danificado, recuperado_roubo, recall.
+- Front: badges no card (graves, compactos) + seção "⚠️ Condições e alertas" na ficha + "Observações do lote" (resumo limpo).
+
+### Comissão / taxas (para a futura aba "Como funciona")
+5% comissão do leiloeiro + R$ 500 despesas operacionais. Venda condicional para lotes do Grupo Santander acima de R$ 100.000 (motos). Documentação em ~30 dias úteis. Retirada só com agendamento, multa diária por atraso.
 
 ---
 
