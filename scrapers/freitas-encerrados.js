@@ -202,17 +202,21 @@ async function main() {
         pulado++;
       }
 
-      // PATCH motos: estado só se vazio; descricao_resumo e alertas sempre
+      // PATCH motos — conservador: nunca sobrescreve com vazio/null.
+      // Trade-off aceito: se um anúncio remover um alerta real, o valor antigo persiste.
+      // Preferimos manter dado bom a apagar por página incompleta.
       const patch = {};
       if (!moto.estado && estado) { patch.estado = estado; estadoPreenchido++; }
-      if (descricaoResumo != null) patch.descricao_resumo = descricaoResumo;
-      patch.alertas = alertas; // null limpa alertas stale de execuções anteriores
+      if (descricaoResumo && descricaoResumo.trim()) patch.descricao_resumo = descricaoResumo;
+      if (alertas && alertas.trim()) patch.alertas = alertas;
 
-      await supaFetch(`motos?id=eq.${moto.id}`, {
-        method: 'PATCH',
-        body:   JSON.stringify(patch),
-        prefer: 'return=minimal',
-      });
+      if (Object.keys(patch).length > 0) {
+        await supaFetch(`motos?id=eq.${moto.id}`, {
+          method: 'PATCH',
+          body:   JSON.stringify(patch),
+          prefer: 'return=minimal',
+        });
+      }
 
       if (alertas) comAlertas++;
 
