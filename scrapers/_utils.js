@@ -16,4 +16,28 @@ function extrairUF(texto) {
   return UFS.has(candidato) ? candidato : null;
 }
 
-module.exports = { extrairUF };
+// ── detectarAlertas ──────────────────────────────────────────────────────────
+// Recebe texto (HTML já removido) e retorna array de flags de alerta.
+// Reutilizável por qualquer scraper de encerrados.
+const ALERTAS_MAP = [
+  [/SINISTRAD/i,                                                     'sinistrado'],
+  [/PEQ(?:UENA)?\s+MONTA/i,                                          'peq_monta'],
+  [/M[EÉ]DIA\s+MONTA/i,                                             'media_monta'],
+  [/GRANDE\s+MONTA/i,                                               'grande_monta'],
+  [/CIRCUL\.?\s*(?:A[ÇC][ÃA]O\s+)?VEDADA/i,                       'circul_vedada'],
+  [/DANOS\s+ESTRUTURAIS/i,                                      'danos_estruturais'],
+  [/SEM\s+CHAVE/i,                                                    'sem_chave'],
+  [/SUSPENS[ÃA]O\s+DANIFICADA/i,                            'suspensao_danificada'],
+  [/HOD[OÔ]METRO\s+DANIFICADO/i,                            'hodometro_danificado'],
+  [/RECUPERAD[OA]\s+DE\s+ROUBO|ROUBO\/FURTO/i,              'recuperado_roubo'],
+  [/RECALL/i,                                                           'recall'],
+];
+
+function detectarAlertas(texto) {
+  if (!texto) return [];
+  return ALERTAS_MAP
+    .filter(([re]) => re.test(texto))
+    .map(([, flag]) => flag);
+}
+
+module.exports = { extrairUF, detectarAlertas };
