@@ -24,9 +24,38 @@ const SUPA_KEY  = process.env.SUPABASE_KEY;
 // Diagnóstico — imprime antes de qualquer coisa para ver o valor real
 console.log(`🔧 SUPABASE_URL env raw : "${process.env.SUPABASE_URL ?? '(não definido)'}"`);
 console.log(`🔧 SUPA_URL final       : "${SUPA_URL}"`);
-const SODRE_URL = 'https://www.sodresantoro.com.br/veiculos/lotes?lot_category=motos&sort=auction_date_init_asc';
-// Quantos lotes esperar no máximo; aumentar se o site tiver paginação com load-more
-const MAX_SCROLL_ROUNDS = 50;
+const SODRE_URL      = 'https://www.sodresantoro.com.br/veiculos/lotes?lot_category=motos&sort=auction_date_init_asc';
+const SEARCH_LOTS_API = 'https://www.sodresantoro.com.br/api/search-lots';
+const PAGE_SIZE       = 48;   // tamanho de página que o site usa
+const MAX_PAGES       = 30;   // teto de segurança contra loop infinito
+
+// Corpo base da chamada à API (Elasticsearch-style).
+// Reproduz exatamente o que o site envia; só `from` muda a cada iteração.
+const SEARCH_BODY_BASE = {
+  indices: ['veiculos', 'judiciais-veiculos'],
+  query: {
+    bool: {
+      filter: [
+        { bool: { should: [
+          { bool: { must: [{ term: { auction_status: 'online' } }] } },
+          { bool: { must: [{ term: { auction_status: 'aberto' } }], must_not: [{ terms: { lot_status_id: [5, 7] } }] } },
+          { bool: { must: [{ term: { auction_status: 'encerrado' } }, { terms: { lot_status_id: [6] } }] } },
+        ], minimum_should_match: 1 } },
+        { bool: { should: [
+          { bool: { must_not: { term: { lot_status_id: 6 } } } },
+          { bool: { must: [{ term: { lot_status_id: 6 } }, { term: { segment_id: 1 } }] } },
+        ], minimum_should_match: 1 } },
+        { bool: { should: [{ bool: { must_not: [{ term: { lot_test: true } }] } }], minimum_should_match: 1 } },
+      ],
+    },
+  },
+  post_filter: { bool: { filter: [{ terms: { lot_category: ['motos'] } }] } },
+  size: PAGE_SIZE,
+  sort: [
+    { lot_status_id_order: { order: 'asc' } },
+    { auction_date_init:   { order: 'asc' } },
+  ],
+};
 
 if (!SUPA_KEY) {
   console.error('❌  SUPABASE_KEY não definido');
@@ -359,7 +388,7 @@ function isMoto(lot) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
   console.log('🏍  Sodré Santoro — scraper iniciando');
-  console.log(`    URL: ${SODRE_URL}`);
+  console.log(`    API: ${SEARCH_LOTS_API}`);
   console.log(`    Supabase: ${SUPA_URL}`);
 
   const browser = await chromium.launch({
@@ -380,113 +409,71 @@ async function main() {
     extraHTTPHeaders: { 'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8' },
   });
 
-  // Remove flag webdriver
   await context.addInitScript(() => {
     Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
     window.chrome = { runtime: {} };
   });
 
-  // Intercepta todas as respostas JSON
-  const capturedLots = [];
-  context.on('response', async (response) => {
-    const url = response.url();
-    const ct  = response.headers()['content-type'] ?? '';
-    if (!ct.includes('application/json')) return;
-    // Loga TODAS as chamadas JSON do domínio para descobrir a URL correta dos lotes
-    if (!url.includes('sodresantoro')) return;
-    if (/\.(js|css|woff|png|jpg)/.test(url)) return;
-
-    try {
-      const json = await response.json();
-      const lots = extrairLotesDeResposta(json);
-      if (lots && lots.length > 0) {
-        console.log(`  📡 LOTES [${response.status()}] ${url} → ${lots.length} itens`);
-        capturedLots.push(...lots);
-      } else {
-        // Log de todas as outras chamadas para descobrir onde ficam os lotes
-        console.log(`  📡 JSON  [${response.status()}] ${url} — não são lotes: ${JSON.stringify(json).slice(0, 200)}`);
-      }
-    } catch {
-      // body não é JSON puro — ignora
-    }
-  });
-
   const page = await context.newPage();
 
   try {
-    // ── 1. Navega até a listagem ──────────────────────────────────────────────
-    console.log('\n🌐 Navegando para a listagem...');
+    // ── 1. Navega uma vez para estabelecer cookies/sessão ─────────────────────
+    console.log('\n🌐 Estabelecendo sessão...');
     const navResp = await page.goto(SODRE_URL, {
       waitUntil: 'domcontentloaded',
-      timeout:   90_000,
+      timeout:   60_000,
     });
     console.log(`   Status HTTP: ${navResp?.status()}`);
-
     if (navResp?.status() === 403) {
-      console.error('❌  Bloqueado pelo CDN (403). O site pode estar com proteção extra.');
+      console.error('❌  Bloqueado pelo CDN (403). Abortando.');
+      return;
     }
-
-    // Aguarda a SPA renderizar (networkidle às vezes trava em SPAs com polling)
-    await page.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => {});
-    await page.waitForTimeout(3_000);
-
-    // — 2. Navega pelas páginas para carregar todos os lotes
-  let pageNum = 1;
-  while (true) {
-    if (pageNum > 1) {
-      const pageUrl = SODRE_URL + '&page=' + pageNum;
-      console.log(`  Navegando para página ${pageNum}: ${pageUrl}`);
-      await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 90_000 });
-      await page.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => {});
-      await page.waitForTimeout(3_000);
-    }
-    const beforeCount = capturedLots.length;
     await page.waitForTimeout(2_000);
-    console.log(`  Página ${pageNum}: ${capturedLots.length} lotes acumulados`);
-    if (capturedLots.length === beforeCount && pageNum > 1) {
-      console.log(`  Página ${pageNum}: sem novos lotes, encerrando.`);
-      break;
-    }
-    const nextBtn = page.locator('a[aria-label="Next"], [class*="next"]:not([disabled])').first();
-    const hasNext = await nextBtn.isVisible({ timeout: 2_000 }).catch(() => false);
-    if (!hasNext) { console.log('  Sem próxima página, encerrando.'); break; }
-    pageNum++;
-  }
 
-    console.log(`\n📊 Total lotes via API: ${capturedLots.length}`);
-    if (capturedLots.length > 0) {
-      console.log('\n🔍 JSON do primeiro lote (para debug de campos):');
-      console.log(JSON.stringify(capturedLots[0], null, 2));
-      console.log('─────────────────────────────────────────────\n');
-    }
+    // ── 2. Pagina a API search-lots diretamente (from/size — Elasticsearch) ───
+    // A paginação por botão "Next" na UI parou de funcionar (SPA não recarrega
+    // ao trocar &page=N na URL). Solução: chamar a API via page.evaluate(fetch(...))
+    // — usa os cookies da sessão do browser — incrementando `from` a cada página.
+    console.log('\n📡 Paginando API search-lots...');
+    const capturedLots = [];
+    let total = null;
 
-    // ── 3. Fallback: DOM scraping ─────────────────────────────────────────────
-    if (capturedLots.length === 0) {
-      console.log('⚠️  Nenhum dado via API. Tentando extrair texto da página...');
+    for (let p = 0; p < MAX_PAGES; p++) {
+      const from = p * PAGE_SIZE;
+      const bodyObj = { ...SEARCH_BODY_BASE, from };
 
-      // Salva screenshot para diagnóstico
-      await page.screenshot({ path: 'sodre-debug.png', fullPage: false });
-      console.log('   📸 Screenshot: sodre-debug.png');
+      const { status, json } = await page.evaluate(async ({ url, body }) => {
+        const r = await fetch(url, {
+          method:  'POST',
+          headers: { 'content-type': 'application/json', 'accept': 'application/json' },
+          body:    JSON.stringify(body),
+        });
+        return { status: r.status, json: r.ok ? await r.json() : null };
+      }, { url: SEARCH_LOTS_API, body: bodyObj });
 
-      // Coleta todo texto visível da página
-      const pageText = await page.evaluate(() => {
-        // Remove scripts/styles do clone para limpar o texto
-        const clone = document.body.cloneNode(true);
-        clone.querySelectorAll('script,style,noscript').forEach(el => el.remove());
-        return clone.innerText;
-      });
+      if (status !== 200 || !json) {
+        console.error(`  ❌ Página ${p + 1}: HTTP ${status} — abortando paginação`);
+        break;
+      }
 
-      console.log('\n── Texto da página (primeiros 2000 chars) ──');
-      console.log(pageText.slice(0, 2_000));
-      console.log('────────────────────────────────────────────\n');
+      if (total === null) {
+        total = json.total ?? null;
+        console.log(`  Total anunciado pela API: ${total}`);
+      }
 
-      // Tenta extrair lotes da estrutura DOM
-      const domLots = await extractLotsFromDOM(page);
-      if (domLots.length > 0) {
-        console.log(`   DOM scraping encontrou ${domLots.length} lotes`);
-        capturedLots.push(...domLots);
+      const results = json.results ?? [];
+      console.log(`  Página ${p + 1} (from=${from}): ${results.length} lotes`);
+      if (results.length === 0) break;
+
+      capturedLots.push(...results);
+
+      if (total !== null && capturedLots.length >= total) {
+        console.log('  Todos os lotes coletados.');
+        break;
       }
     }
+
+    console.log(`\n📊 Total lotes coletados: ${capturedLots.length} (API total: ${total})`);
 
     if (capturedLots.length === 0) {
       console.log('ℹ️  Nenhum lote encontrado. Encerrando sem salvar.');
