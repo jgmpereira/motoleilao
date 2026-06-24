@@ -111,6 +111,16 @@ function stripHtml(html) {
     .replace(/&[a-z]+;/gi, ' ');
 }
 
+// ── Limpa lixo de comentário HTML e prefixos soltos ──────────────────────────
+function limparResumo(texto) {
+  return texto
+    .replace(/<!--|-->/g, '')          // BUG 1: remove marcadores de comentário HTML
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^[\s\/\->]+/, '')        // remove qualquer combinação de /, -, > no início
+    .trim();
+}
+
 // ── Extrai descricao_resumo do HTML ──────────────────────────────────────────
 // Localiza o bloco (parágrafo) que contém "SEM GARANTIAS QUANTO A ESTRUTURA"
 // e retorna tudo antes desse marcador (a parte útil variável do lote).
@@ -124,8 +134,7 @@ function extrairDescricao(html) {
   for (const bloco of blocos) {
     if (!corteRe.test(bloco)) continue;
     const idx   = bloco.search(corteRe);
-    let antes   = bloco.slice(0, idx).replace(/\s+/g, ' ').trim();
-    antes       = antes.replace(/^\/+|\/+$/g, '').trim();
+    const antes = limparResumo(bloco.slice(0, idx));
     if (antes.length >= 5) return antes;
   }
 
@@ -133,12 +142,29 @@ function extrairDescricao(html) {
   const kwRe = /VEICULO\s+VENDIDO\s+NO\s+ESTADO|MECA(?:N|Â)ICA\s+SEM\s+TESTE|SINISTRADO|PEQ.{0,5}MONTA/i;
   for (const bloco of blocos) {
     if (!kwRe.test(bloco)) continue;
-    let texto2 = bloco.replace(/\s+/g, ' ').trim().slice(0, 300);
-    texto2     = texto2.replace(/^\/+|\/+$/g, '').trim();
+    const texto2 = limparResumo(bloco.slice(0, 300));
     if (texto2.length >= 5) return texto2;
   }
 
   return null;
+}
+
+// ── Extrai UF do endereço local do Freitas ────────────────────────────────────
+// Endereços têm vários "-" no meio; a UF são sempre as 2 letras maiúsculas
+// no FINAL da string, após o último "/" ou "-".
+// Ex.: "AV. DOS ESTADOS, 584 - PORTÃO 2 - UTINGA - SANTO ANDRÉ/SP" → "SP"
+function extrairEstadoFreitas(html) {
+  // Permite tags HTML entre o rótulo e o texto do endereço
+  const m = html.match(
+    /Local\s+do\s+leil(?:[ãa]|&atilde;)o:?\s*(?:<[^>]+>\s*)*([^\n<]{3,150})/i
+  );
+  if (!m) return null;
+  const local = m[1].replace(/&[a-z]+;/gi, ' ').replace(/<[^>]+>/g, '').trim();
+  console.log(`   📍 Local: "${local}"`);
+  // Pega as 2 letras maiúsculas no final após "/" ou "-"
+  const ufMatch = local.match(/[\/\-]\s*([A-Z]{2})\s*$/);
+  if (!ufMatch) return null;
+  return extrairUF(ufMatch[1]); // valida contra lista de UFs conhecidas
 }
 
 // ── Parseia campos do HTML de LoteDetalhes ────────────────────────────────────
@@ -158,16 +184,15 @@ function parseLoteDetalhes(html) {
   const valorMatch = html.match(/Maior\s+lance:?\s*R?\$?\s*([\d.,]+)/i);
   const valor      = valorMatch ? parseLance(valorMatch[1]) : null;
 
-  // ESTADO/UF — "Local do leilão: CIDADE / UF"
-  const localMatch = html.match(/Local\s+do\s+leil[ãa]o:?\s*([^\n<]{3,120})/i);
-  const estado     = localMatch ? extrairUF(localMatch[1]) : null;
+  // ESTADO/UF — BUG 3: regex tolerante a tags + UF no final da string
+  const estado = extrairEstadoFreitas(html);
 
   // DESCRIÇÃO RESUMIDA
   const descricaoResumo = extrairDescricao(html);
 
-  // ALERTAS — sobre texto sem HTML (evita falsos positivos em atributos)
-  const textoLimpo = stripHtml(html);
-  const alertasArr = detectarAlertas(textoLimpo);
+  // ALERTAS — BUG 2: só sobre descricao_resumo (parte útil já cortada),
+  // não sobre o HTML completo que contém "RECALL" na ladainha jurídica fixa
+  const alertasArr = detectarAlertas(descricaoResumo || '');
   const alertas    = alertasArr.length > 0 ? alertasArr.join(',') : null;
 
   return { statusArrematado, valor, estado, descricaoResumo, alertas };
