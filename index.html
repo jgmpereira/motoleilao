@@ -569,6 +569,12 @@ tbody tr:hover{background:var(--s2);}
 
       <div style="border-top:1px solid var(--border);margin:4px 0 12px;"></div>
 
+      <!-- Estado -->
+      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px;">Estado</div>
+      <div id="gm-estados" style="display:flex;flex-direction:column;gap:2px;margin-bottom:12px;"></div>
+
+      <div style="border-top:1px solid var(--border);margin:4px 0 12px;"></div>
+
       <!-- Plataforma -->
       <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px;">Plataforma</div>
       <div id="gm-plataformas" style="display:flex;flex-direction:column;gap:2px;margin-bottom:12px;"></div>
@@ -1900,7 +1906,7 @@ function renderLeiloes() {
 const agendaFiltros = { per: '', status: '', plat: '' };
 
 // ===================== GRID DE MOTOS =====================
-const gmFiltros = { per: '', cond: '', porte: '', fipe: '', seg: '', marca: '', plat: '' };
+const gmFiltros = { per: '', cond: '', porte: '', fipe: '', seg: '', marca: '', plat: '', estado: '' };
 
 function syncGmFiltrosHash() {
   const params = new URLSearchParams();
@@ -1915,6 +1921,11 @@ function syncGmFiltrosHash() {
     const marcas = [...marcasEl.querySelectorAll('input[data-marca]:checked')].map(i => i.dataset.marca);
     if(marcas.length) params.set('marca', marcas.join(','));
   }
+  const estadosElH = document.getElementById('gm-estados');
+  if(estadosElH) {
+    const estados = [...estadosElH.querySelectorAll('input[data-estado]:checked')].map(i => i.dataset.estado);
+    if(estados.length) params.set('estado', estados.join(','));
+  }
   const qs = params.toString();
   const hash = qs ? '#leiloes?' + qs : '#leiloes';
   if(location.hash !== hash) history.pushState(null, '', hash);
@@ -1925,6 +1936,7 @@ function applyGmFiltrosFromHash(qs) {
   ['per','cond','porte','fipe','seg'].forEach(k => { gmFiltros[k] = params.get(k) || ''; });
   gmFiltros.plat = params.get('plat') || '';
   gmFiltros.marca = params.get('marca') || '';
+  gmFiltros.estado = params.get('estado') || '';
   document.querySelectorAll('#motos-sidebar .hf-chip').forEach(chip => {
     const oc = chip.getAttribute('onclick') || '';
     const mt = oc.match(/setGmFiltro\('(\w+)','([^']*)'/);
@@ -1941,6 +1953,11 @@ function applyGmFiltrosFromHash(qs) {
   if(marcasEl && marcasEl.dataset.populated) {
     const marcas = new Set(gmFiltros.marca ? gmFiltros.marca.split(',') : []);
     marcasEl.querySelectorAll('input[data-marca]').forEach(i => { i.checked = marcas.has(i.dataset.marca); });
+  }
+  const estadosElA = document.getElementById('gm-estados');
+  if(estadosElA && estadosElA.dataset.populated) {
+    const estados = new Set(gmFiltros.estado ? gmFiltros.estado.split(',') : []);
+    estadosElA.querySelectorAll('input[data-estado]').forEach(i => { i.checked = estados.has(i.dataset.estado); });
   }
 }
 
@@ -1964,8 +1981,10 @@ function limparFiltrosGm() {
   document.getElementById('gm-busca').value = '';
   const marcasEl = document.getElementById('gm-marcas');
   const platEl = document.getElementById('gm-plataformas');
+  const estadosElL = document.getElementById('gm-estados');
   if (marcasEl) marcasEl.querySelectorAll('input').forEach(i => i.checked = false);
   if (platEl) platEl.querySelectorAll('input').forEach(i => i.checked = false);
+  if (estadosElL) estadosElL.querySelectorAll('input').forEach(i => i.checked = false);
   renderGridMotos();
   syncGmFiltrosHash();
 }
@@ -2036,11 +2055,33 @@ function renderGridMotos() {
     }
   }
 
+  const estadosEl = document.getElementById('gm-estados');
+  if (estadosEl && !estadosEl.dataset.populated) {
+    estadosEl.dataset.populated = '1';
+    const ufsSet = new Set();
+    MOTOS.forEach(mo => {
+      const lx = LEILOES.find(x => x.id === mo.leilao_id);
+      if (!lx || lx.encerrado) return;
+      if (mo.estado) ufsSet.add(mo.estado);
+    });
+    const ufs = [...ufsSet].sort();
+    const ls = 'display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;';
+    const is = 'accent-color:var(--accent);';
+    estadosEl.innerHTML = ufs.map(uf =>
+      `<label style="${ls}"><input type="checkbox" data-estado="${uf}" style="${is}" onchange="renderGridMotos();syncGmFiltrosHash()"> ${uf}</label>`
+    ).join('');
+    if (gmFiltros.estado) {
+      const estadosSel = new Set(gmFiltros.estado.split(','));
+      estadosEl.querySelectorAll('input[data-estado]').forEach(i => { i.checked = estadosSel.has(i.dataset.estado); });
+    }
+  }
+
   const marcasSel = marcasEl ? [...marcasEl.querySelectorAll('input[data-marca]:checked')].map(i => i.dataset.marca) : [];
   const outrasChecked = !!(marcasEl && marcasEl.querySelector('input[data-outras]:checked'));
   const marcasOutrasSet = new Set(JSON.parse(marcasEl?.dataset.outras || '[]'));
   const anyMarcaFiltro = marcasSel.length > 0 || outrasChecked;
   const platsSel = platEl ? [...platEl.querySelectorAll('input:checked')].map(i => i.parentElement.textContent.trim()) : [];
+  const estadosSel = estadosEl ? [...estadosEl.querySelectorAll('input[data-estado]:checked')].map(i => i.dataset.estado) : [];
 
   const busca = (document.getElementById('gm-busca')?.value || '').toLowerCase().trim();
   const hoje = new Date().toISOString().slice(0,10);
@@ -2085,6 +2126,9 @@ function renderGridMotos() {
     if (gmFiltros.seg) {
       if (getSegmento(m) !== gmFiltros.seg) return false;
     }
+
+    // Filtro estado
+    if (estadosSel.length && !estadosSel.includes(m.estado)) return false;
 
     // Filtro marca
     if (anyMarcaFiltro) {
@@ -2165,7 +2209,7 @@ function cardMotoHTML(m) {
           ${porte ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${porte.texto} · ${ccEfetiva}cc</span>` : ''}
           ${montaEfetiva ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${montaEfetiva} monta</span>` : ''}
         </div>
-        <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:5px;">📅 ${leilao?.nome || m.leilao_id}</div>
+        <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:5px;">📅 ${leilao?.nome || m.leilao_id}${m.estado ? ` <span style="color:var(--muted);font-weight:500;">📍${m.estado}</span>` : ''}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid var(--border);">
           <div style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace;">${m.lance_inicial ? 'R$'+Number(m.lance_inicial).toLocaleString('pt-BR') : '—'}</div>
           <div style="display:flex;align-items:center;gap:6px;">
