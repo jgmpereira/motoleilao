@@ -111,46 +111,86 @@ function stripHtml(html) {
     .replace(/&[a-z]+;/gi, ' ');
 }
 
-// Bloco jurídico fixo de pagamento/transferência — aparece no meio do resumo útil
-const BLOCO_PAGAMENTO_RE = /A CONCRETIZA[ÇC][ÃA]O DA ARREMATA[ÇC][ÃA]O[\s\S]*?FIGURAR COMO COMPRADOR OU PAGADOR\.?/gi;
+// ── Filtro por allowlist de conteúdo útil ────────────────────────────────────
+// Ruído: qualquer trecho que contenha estas palavras é descartado
+const NOISE_RE = /DECLARA|PORTARIA|\bDETRAN\b|\bCONTRAN\b|RESOLU[ÇC][ÃA]O|\bATPV\b|DOCUMENTA[ÇC][ÃA]O|\bDOCUMENTOS\b|PRAZO|RESPONSABILIDADE|TERMO\s+DE\s+RESP|REC\.?\s*DE\s+FIRMA|CAT[ÁA]LOGO|CONCRETIZA[ÇC][ÃA]O|PAGAMENTO|TRANSFER[ÊE]NCIA|ARREMATANTE|COMITENTE|D[ÉE]BITOS|MULTAS|AVERBA[ÇC][ÃA]O|PONTUA[ÇC][ÃA]O|RESTRI[ÇC][ÃA]O|EMPLACAMENTO|REGULARIZA[ÇC]|LACRA[ÇC]|MERCOSUL|ESTAMPAGEM|PER[ÍI]CIA|\bLAUDO\b|\bECV\b|\bCSV\b|BANC[ÁA]RIA|PROPRIEDADE|PESSOA\s+JUR[ÍI]DICA|S[ÓO]CIO/i;
+// Útil: indica condição ou defeito relevante para o comprador
+const USEFUL_RE = /SINISTRAD|MONTA|CIRCUL|VEDADA|DANOS\s+ESTRUTURAIS|SEM\s+CHAVE|SUSPENS[ÃA]O|HOD[OÔ]METRO|ROUBO|FURTO|DANIFICAD|AUSENTE|FALTA|EMBREAGEM|CORRENTE|C[ÂA]MBIO|VENDIDO\s+NO\s+ESTADO|MEC[ÂA]NICA\s+SEM\s+TESTE|CABO\s+CARREGAMENTO|RECUPERAD|\bMOTOR\b/i;
+// Útil forte: justifica aparar rabo de ruído no mesmo trecho
+const STRONG_RE = /SINISTRAD|MONTA|CIRCUL|VEDADA|DANOS\s+ESTRUTURAIS|SEM\s+CHAVE|SUSPENS[ÃA]O|ROUBO|FURTO|RECUPERAD|DANIFICAD/i;
+// IPVA
+const IPVA_PAGO_RE = /IPVA.{0,80}(?:PAGO|POR\s+CONTA\s+DA\s+(?:COMPANHIA|SEGURADORA|COMITENTE))/i;
+const IPVA_COMP_RE = /IPVA.{0,80}(?:P\/C\s+DO\s+COMPRADOR|POR\s+CONTA\s+DO\s+COMPRADOR)/i;
 
-// ── Limpa lixo de comentário HTML, bloco de pagamento e separadores órfãos ──
-function limparResumo(texto) {
-  return texto
-    .replace(/<!--|-->/g, '')          // remove marcadores de comentário HTML
-    .replace(BLOCO_PAGAMENTO_RE, '')   // remove bloco jurídico fixo de pagamento
-    .replace(/(\s*\/\s*){2,}/g, ' / ') // colapsa separadores duplicados resultantes
-    .replace(/^\s*\/\s*/, '')          // remove / solto no início
-    .replace(/\s*\/\s*$/, '')          // remove / solto no fim
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/^[\s\/\->]+/, '')        // remove qualquer combinação de /, -, > no início
-    .trim();
+// Filtra trechos do resumo mantendo só o conteúdo reconhecidamente útil
+function filtrarSegmentos(texto) {
+  if (!texto) return null;
+
+  // Detecta IPVA no texto completo antes de quebrar em segmentos
+  let ipvaTag = null;
+  if (/\bIPVA\b/i.test(texto)) {
+    if (IPVA_PAGO_RE.test(texto))      ipvaTag = 'IPVA pago';
+    else if (IPVA_COMP_RE.test(texto)) ipvaTag = 'IPVA por conta do comprador';
+  }
+
+  const segs = texto
+    .split(/\s+\/\s+|\n+/)
+    .map(s => s.replace(/<!--|-->/g, '').replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+
+  const mantidos = [];
+  let ipvaInserido = false;
+
+  for (const seg of segs) {
+    // Segmentos de IPVA/DPVAT/licenciamento → substituir por tag simplificada (uma vez)
+    if (/\bIPVA\b|\bDPVAT\b|\bLICENIAMENTO\b/i.test(seg)) {
+      if (ipvaTag && !ipvaInserido) { mantidos.push(ipvaTag); ipvaInserido = true; }
+      continue;
+    }
+
+    const temNoise  = NOISE_RE.test(seg);
+    const temUtil   = USEFUL_RE.test(seg);
+    const temFort   = STRONG_RE.test(seg);
+    const nPalavras = seg.split(/\s+/).filter(Boolean).length;
+
+    if (!temNoise) {
+      // Sem ruído: manter se útil OU trecho curto (sigla, observação pontual)
+      if (temUtil || nPalavras <= 5) mantidos.push(seg);
+    } else if (temFort) {
+      // Tem ruído mas também alerta grave: apara no início do primeiro ruído
+      const m  = NOISE_RE.exec(seg);
+      const ap = m && m.index > 0
+        ? seg.slice(0, m.index).replace(/\s*[\/,;\-]+\s*$/, '').trim()
+        : seg;
+      mantidos.push(ap.length >= 3 ? ap : seg);
+    }
+    // Tem ruído sem alerta forte → descarta
+  }
+
+  const seen = new Set();
+  const dedup = mantidos.filter(s => { if (seen.has(s)) return false; seen.add(s); return true; });
+  if (!dedup.length) return null;
+  return dedup.join(' / ').replace(/\s+/g, ' ').trim();
 }
 
-// ── Extrai descricao_resumo do HTML ──────────────────────────────────────────
-// Localiza o bloco (parágrafo) que contém "SEM GARANTIAS QUANTO A ESTRUTURA"
-// e retorna tudo antes desse marcador (a parte útil variável do lote).
+// ── Extrai e filtra descricao_resumo do HTML ─────────────────────────────────
 function extrairDescricao(html) {
   const corteRe = /SEM\s+GARANTIAS\s+QUANTO\s+[AÀ]\s+ESTRUTURA/i;
   const texto   = stripHtml(html);
-
-  // Divide em parágrafos lógicos (separados por linha em branco)
-  const blocos = texto.split(/\n{2,}/);
+  const blocos  = texto.split(/\n{2,}/);
 
   for (const bloco of blocos) {
     if (!corteRe.test(bloco)) continue;
-    const idx   = bloco.search(corteRe);
-    const antes = limparResumo(bloco.slice(0, idx));
-    if (antes.length >= 5) return antes;
+    const result = filtrarSegmentos(bloco.slice(0, bloco.search(corteRe)));
+    if (result && result.length >= 5) return result;
   }
 
-  // Fallback: bloco com palavras-chave típicas de condição, sem "SEM GARANTIAS"
-  const kwRe = /VEICULO\s+VENDIDO\s+NO\s+ESTADO|MECA(?:N|Â)ICA\s+SEM\s+TESTE|SINISTRADO|PEQ.{0,5}MONTA/i;
+  // Fallback: bloco com palavras-chave típicas sem marcador "SEM GARANTIAS"
+  const kwRe = /VEICULO\s+VENDIDO\s+NO\s+ESTADO|MEC[ÂA]NICA\s+SEM\s+TESTE|SINISTRADO|PEQ.{0,5}MONTA/i;
   for (const bloco of blocos) {
     if (!kwRe.test(bloco)) continue;
-    const texto2 = limparResumo(bloco.slice(0, 300));
-    if (texto2.length >= 5) return texto2;
+    const result = filtrarSegmentos(bloco.slice(0, 500));
+    if (result && result.length >= 5) return result;
   }
 
   return null;
