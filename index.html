@@ -570,8 +570,11 @@ tbody tr:hover{background:var(--s2);}
       <div style="border-top:1px solid var(--border);margin:4px 0 12px;"></div>
 
       <!-- Estado -->
-      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px;">Estado</div>
-      <div id="gm-estados" style="display:flex;flex-direction:column;gap:2px;margin-bottom:12px;"></div>
+      <div id="gm-estados-header" onclick="toggleFiltroEstado()" style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;padding:2px 0;">
+        <span id="gm-estados-label">Estado</span>
+        <span id="gm-estados-arrow" style="font-size:10px;">▸</span>
+      </div>
+      <div id="gm-estados" style="display:none;flex-direction:column;gap:2px;margin-bottom:12px;"></div>
 
       <div style="border-top:1px solid var(--border);margin:4px 0 12px;"></div>
 
@@ -1954,10 +1957,11 @@ function applyGmFiltrosFromHash(qs) {
     const marcas = new Set(gmFiltros.marca ? gmFiltros.marca.split(',') : []);
     marcasEl.querySelectorAll('input[data-marca]').forEach(i => { i.checked = marcas.has(i.dataset.marca); });
   }
-  const estadosElA = document.getElementById('gm-estados');
-  if(estadosElA && estadosElA.dataset.populated) {
-    const estados = new Set(gmFiltros.estado ? gmFiltros.estado.split(',') : []);
-    estadosElA.querySelectorAll('input[data-estado]').forEach(i => { i.checked = estados.has(i.dataset.estado); });
+  if (gmFiltros.estado) {
+    const estadosElA = document.getElementById('gm-estados');
+    if (estadosElA) estadosElA.style.display = 'flex';
+    const arrowA = document.getElementById('gm-estados-arrow');
+    if (arrowA) arrowA.textContent = '▾';
   }
 }
 
@@ -1972,6 +1976,15 @@ function setGmFiltro(tipo, val, btn) {
   syncGmFiltrosHash();
 }
 
+function toggleFiltroEstado() {
+  const el = document.getElementById('gm-estados');
+  const arrow = document.getElementById('gm-estados-arrow');
+  if (!el) return;
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'flex';
+  if (arrow) arrow.textContent = open ? '▸' : '▾';
+}
+
 function limparFiltrosGm() {
   verSoFavoritos = false;
   atualizarBotaoFavoritos();
@@ -1984,7 +1997,14 @@ function limparFiltrosGm() {
   const estadosElL = document.getElementById('gm-estados');
   if (marcasEl) marcasEl.querySelectorAll('input').forEach(i => i.checked = false);
   if (platEl) platEl.querySelectorAll('input').forEach(i => i.checked = false);
-  if (estadosElL) estadosElL.querySelectorAll('input').forEach(i => i.checked = false);
+  if (estadosElL) {
+    estadosElL.querySelectorAll('input').forEach(i => i.checked = false);
+    estadosElL.style.display = 'none';
+  }
+  const arrowLimpar = document.getElementById('gm-estados-arrow');
+  if (arrowLimpar) arrowLimpar.textContent = '▸';
+  const lblLimpar = document.getElementById('gm-estados-label');
+  if (lblLimpar) lblLimpar.textContent = 'Estado';
   renderGridMotos();
   syncGmFiltrosHash();
 }
@@ -2055,33 +2075,12 @@ function renderGridMotos() {
     }
   }
 
-  const estadosEl = document.getElementById('gm-estados');
-  if (estadosEl && !estadosEl.dataset.populated) {
-    estadosEl.dataset.populated = '1';
-    const ufsSet = new Set();
-    MOTOS.forEach(mo => {
-      const lx = LEILOES.find(x => x.id === mo.leilao_id);
-      if (!lx || lx.encerrado) return;
-      if (mo.estado) ufsSet.add(mo.estado);
-    });
-    const ufs = [...ufsSet].sort();
-    const ls = 'display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;';
-    const is = 'accent-color:var(--accent);';
-    estadosEl.innerHTML = ufs.map(uf =>
-      `<label style="${ls}"><input type="checkbox" data-estado="${uf}" style="${is}" onchange="renderGridMotos();syncGmFiltrosHash()"> ${uf}</label>`
-    ).join('');
-    if (gmFiltros.estado) {
-      const estadosSel = new Set(gmFiltros.estado.split(','));
-      estadosEl.querySelectorAll('input[data-estado]').forEach(i => { i.checked = estadosSel.has(i.dataset.estado); });
-    }
-  }
-
+  // Variáveis de filtro declaradas antes do bloco dinâmico de estados (que precisa delas)
   const marcasSel = marcasEl ? [...marcasEl.querySelectorAll('input[data-marca]:checked')].map(i => i.dataset.marca) : [];
   const outrasChecked = !!(marcasEl && marcasEl.querySelector('input[data-outras]:checked'));
   const marcasOutrasSet = new Set(JSON.parse(marcasEl?.dataset.outras || '[]'));
   const anyMarcaFiltro = marcasSel.length > 0 || outrasChecked;
   const platsSel = platEl ? [...platEl.querySelectorAll('input:checked')].map(i => i.parentElement.textContent.trim()) : [];
-  const estadosSel = estadosEl ? [...estadosEl.querySelectorAll('input[data-estado]:checked')].map(i => i.dataset.estado) : [];
 
   const busca = (document.getElementById('gm-busca')?.value || '').toLowerCase().trim();
   const hoje = new Date().toISOString().slice(0,10);
@@ -2089,6 +2088,63 @@ function renderGridMotos() {
   const fimSemanaISO = fimSemana.toISOString().slice(0,10);
   const fimProximaISO = fimProxima.toISOString().slice(0,10);
   const inicioProximaISO = inicioProxima.toISOString().slice(0,10);
+
+  // Bloco de estados — repopulado a cada render com as UFs que passam pelos outros filtros
+  const estadosEl = document.getElementById('gm-estados');
+  if (estadosEl) {
+    // Lê seleção atual: DOM tem prioridade (evita re-marcar UFs desmarcadas); fallback para hash na primeira renderização
+    const domInputs = estadosEl.querySelectorAll('input[data-estado]');
+    const selEstados = domInputs.length > 0
+      ? new Set([...domInputs].filter(i => i.checked).map(i => i.dataset.estado))
+      : new Set(gmFiltros.estado ? gmFiltros.estado.split(',') : []);
+
+    // Coleta UFs que passam em TODOS os outros filtros (ignorando o próprio filtro de estado)
+    const ufsDisp = new Set();
+    MOTOS.forEach(mo => {
+      const lx = LEILOES.find(x => x.id === mo.leilao_id);
+      if (!lx || lx.encerrado) return;
+      if (verSoFavoritos && !FAVORITOS.has(String(mo.id))) return;
+      if (platsSel.length && !platsSel.includes(lx.plataforma)) return;
+      if (gmFiltros.per === 'semana' && lx.data > fimSemanaISO) return;
+      if (gmFiltros.per === 'proxima' && (lx.data < inicioProximaISO || lx.data > fimProximaISO)) return;
+      if (gmFiltros.cond && !(mo.condicao||'').toLowerCase().includes(gmFiltros.cond)) return;
+      if (gmFiltros.porte) {
+        const p = getPorte(mo.cilindrada) || (mo.monta === 'grande' ? 'alta' : mo.monta) || null;
+        if (p !== gmFiltros.porte) return;
+      }
+      if (gmFiltros.fipe) {
+        const fv = mo.fipe_csv || fipeCache[fipeKey(mo)];
+        if (!fv) return;
+        if (Math.round((mo.lance_inicial / fv) * 100) >= parseInt(gmFiltros.fipe)) return;
+      }
+      if (gmFiltros.seg && getSegmento(mo) !== gmFiltros.seg) return;
+      if (anyMarcaFiltro) {
+        const nm = normalizarMarca(mo.marca);
+        if (marcasOutrasSet.has(nm)) { if (!outrasChecked) return; }
+        else if (!marcasSel.includes(nm)) return;
+      }
+      if (busca && !`${mo.marca} ${mo.modelo} ${mo.ano} ${mo.lote}`.toLowerCase().includes(busca)) return;
+      if (mo.estado) ufsDisp.add(mo.estado);
+    });
+    // União: disponíveis ∪ já selecionadas (nunca perde seleção ao mudar outros filtros)
+    selEstados.forEach(uf => ufsDisp.add(uf));
+    const ufs = [...ufsDisp].sort();
+
+    const ls = 'display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;';
+    const is = 'accent-color:var(--accent);';
+    estadosEl.innerHTML = ufs.map(uf =>
+      `<label style="${ls}"><input type="checkbox" data-estado="${uf}" style="${is}" onchange="renderGridMotos();syncGmFiltrosHash()"> ${uf}</label>`
+    ).join('');
+    // Restaura seleção (setar .checked não dispara onchange)
+    estadosEl.querySelectorAll('input[data-estado]').forEach(i => { i.checked = selEstados.has(i.dataset.estado); });
+
+    // Atualiza rótulo do cabeçalho com contador
+    const lblEl = document.getElementById('gm-estados-label');
+    if (lblEl) lblEl.textContent = selEstados.size > 0 ? `Estado (${selEstados.size})` : 'Estado';
+  }
+
+  // estadosSel lido após repopulação do DOM
+  const estadosSel = estadosEl ? [...estadosEl.querySelectorAll('input[data-estado]:checked')].map(i => i.dataset.estado) : [];
 
   let motos = MOTOS.filter(m => {
     const leilao = LEILOES.find(l => l.id === m.leilao_id);
