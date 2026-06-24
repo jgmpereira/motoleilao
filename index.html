@@ -5591,7 +5591,7 @@ function abrirFichaMoto(motoId) {
       📅 ${dataFmt}${l.hora?' às '+l.hora:''}
       <span style="margin:0 8px;color:var(--border);">|</span>
       🏢 ${l.plataforma||'—'}
-      ${l.local?`<span style="margin:0 8px;color:var(--border);">|</span>📍 ${l.local}`:''}`;
+      ${(m.estado || l.local)?`<span style="margin:0 8px;color:var(--border);">|</span>📍 ${m.estado || l.local}`:''}`;
   } else {
     document.getElementById('ficha-leilao-info').innerHTML = '—';
   }
