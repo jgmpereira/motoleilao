@@ -2192,6 +2192,7 @@ function cardMotoHTML(m) {
   const montaEfetiva = m.monta || inferMonta(ccEfetiva);
   const dia = leilao?.dia || (leilao?.data ? new Date(leilao.data + 'T12:00:00').getDate() : '?');
   const mes = leilao?.mes || (leilao?.data ? new Date(leilao.data + 'T12:00:00').toLocaleString('pt-BR',{month:'short'}).toUpperCase().replace('.','') : '?');
+  const alertaBadgesCard = renderAlertaBadges(m.alertas, { compact: true });
 
   return `<a href="#moto-${m.id}" style="display:block;text-decoration:none;color:inherit;background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'" onclick="event.preventDefault();abrirFichaMoto(${m.id})">
       <div style="position:relative;height:120px;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;">
@@ -2210,6 +2211,7 @@ function cardMotoHTML(m) {
           ${montaEfetiva ? `<span style="padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--muted);">${montaEfetiva} monta</span>` : ''}
         </div>
         <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:5px;">📅 ${leilao?.nome || m.leilao_id}${m.estado ? ` <span style="color:var(--muted);font-weight:500;">📍${m.estado}</span>` : ''}</div>
+        ${alertaBadgesCard ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">${alertaBadgesCard}</div>` : ''}
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid var(--border);">
           <div style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace;">${m.lance_inicial ? 'R$'+Number(m.lance_inicial).toLocaleString('pt-BR') : '—'}</div>
           <div style="display:flex;align-items:center;gap:6px;">
@@ -3456,6 +3458,47 @@ function getSegmento(m) {
 
 function toTitle(str) {
   return str.toLowerCase().replace(/(?:^|\s)\w/g, c => c.toUpperCase()).trim();
+}
+
+const ALERTA_MAP = {
+  sinistrado:           { emoji: '🔴', label: 'Sinistrado',             sev: 'grave'   },
+  peq_monta:            { emoji: '⚠️', label: 'Pequena monta',          sev: 'grave'   },
+  media_monta:          { emoji: '⚠️', label: 'Média monta',            sev: 'grave'   },
+  grande_monta:         { emoji: '🔴', label: 'Grande monta',           sev: 'grave'   },
+  circul_vedada:        { emoji: '🚫', label: 'Circulação vedada',      sev: 'grave'   },
+  danos_estruturais:    { emoji: '🔴', label: 'Danos estruturais',      sev: 'grave'   },
+  sem_chave:            { emoji: '🔑', label: 'Sem chave',              sev: 'atencao' },
+  suspensao_danificada: { emoji: '🔧', label: 'Suspensão danificada',   sev: 'atencao' },
+  hodometro_danificado: { emoji: '🔧', label: 'Hodômetro danificado',   sev: 'atencao' },
+  recuperado_roubo:     { emoji: '⚠️', label: 'Recuperado roubo/furto', sev: 'atencao' },
+  recall:               { emoji: '⚠️', label: 'Recall',                 sev: 'atencao' },
+};
+
+function cleanResumo(txt) {
+  return (txt || '').replace(/^[\s\/>-]+|[\s\/]+$/g, '').trim();
+}
+
+function renderAlertaBadges(alertasCsv, { compact = false } = {}) {
+  if (!alertasCsv) return '';
+  const flags = alertasCsv.split(',').map(s => s.trim()).filter(Boolean);
+  if (!flags.length) return '';
+  const infos = flags.map(f => ALERTA_MAP[f] || { emoji: '⚠️', label: f, sev: 'atencao' });
+  infos.sort((a, b) => (a.sev === 'grave' ? 0 : 1) - (b.sev === 'grave' ? 0 : 1));
+  const mkBadge = info => {
+    const g = info.sev === 'grave';
+    const bg  = g ? 'rgba(211,47,47,.12)' : 'rgba(255,153,0,.12)';
+    const clr = g ? 'var(--red)' : '#f90';
+    const bdr = g ? 'rgba(211,47,47,.35)' : 'rgba(255,153,0,.35)';
+    return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;background:${bg};color:${clr};border:1px solid ${bdr};">${info.emoji} ${info.label}</span>`;
+  };
+  if (compact) {
+    const graves = infos.filter(i => i.sev === 'grave');
+    if (!graves.length) return '';
+    const shown = graves.slice(0, 2);
+    const extra = infos.length - shown.length;
+    return shown.map(mkBadge).join('') + (extra > 0 ? `<span style="padding:2px 5px;border-radius:8px;font-size:10px;font-weight:700;background:rgba(211,47,47,.08);color:var(--red);border:1px solid rgba(211,47,47,.2);">+${extra}</span>` : '');
+  }
+  return infos.map(mkBadge).join('');
 }
 
 // ===================== FREITAS LEILOEIRO =====================
@@ -5480,6 +5523,10 @@ function abrirFichaMoto(motoId) {
     return {txt:'❌ CARO',s:'background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.3);color:var(--red);'};
   })() : null;
 
+  // Alertas e resumo para a ficha
+  const fichaBadgesHtml = renderAlertaBadges(m.alertas);
+  const fichaResumo = cleanResumo(m.descricao_resumo);
+
   // Linha de valores: Lance | FIPE
   document.getElementById('ficha-grid').innerHTML = `
     <div style="display:flex;gap:8px;margin-bottom:10px;">
@@ -5526,6 +5573,12 @@ function abrirFichaMoto(motoId) {
           </div>
         </div>`;
       }).join('')}
+    </div>` : ''}
+    ${(fichaBadgesHtml || fichaResumo) ? `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:2px;">
+      <div style="font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:5px;">⚠️ Condições e alertas</div>
+      ${fichaBadgesHtml ? `<div style="display:flex;flex-wrap:wrap;gap:4px;${fichaResumo ? 'margin-bottom:8px;' : ''}">${fichaBadgesHtml}</div>` : ''}
+      ${fichaResumo ? `<div style="font-size:12px;color:var(--muted);background:var(--s1);border-radius:6px;padding:8px 10px;border:1px solid var(--border);line-height:1.5;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Observações do lote</div>${fichaResumo}</div>` : ''}
     </div>` : ''}
   `;
 
