@@ -15,6 +15,7 @@
  */
 
 const https = require('https');
+const { extrairEstadoFreitas, extrairDescricao, detectarAlertas } = require('./_utils');
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const SUPA_URL    = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
@@ -347,6 +348,42 @@ async function main() {
   console.log('\n🔍 Primeiro lote (para verificação):');
   console.log(JSON.stringify(lots[0], null, 2));
 
+  // ── 2.5. Enriquece lotes com estado / descricao_resumo / alertas ─────────
+  console.log('\n🔍 Buscando estado e condições via páginas de detalhe...');
+  let semEstado = 0;
+  for (let i = 0; i < lots.length; i++) {
+    const lot = lots[i];
+    if (!lot.url || !lot.url.includes('LoteDetalhes')) continue;
+
+    let html = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const res = await httpGet(lot.url);
+        if (res.status === 200) { html = res.body; break; }
+        console.warn(`    ⚠️ HTTP ${res.status} (tentativa ${attempt}/3): lote ${lot.loteNum}`);
+      } catch (err) {
+        console.warn(`    ⚠️ Erro tentativa ${attempt}/3: ${err.message}`);
+      }
+      if (attempt < 3) await new Promise(r => setTimeout(r, 300 + Math.random() * 200));
+    }
+
+    if (!html) {
+      console.warn(`    ⚠️ Sem HTML para lote ${lot.loteNum} — estado=null`);
+      semEstado++;
+    } else {
+      lot.estado          = extrairEstadoFreitas(html) || null;
+      const descricao     = extrairDescricao(html);
+      lot.descricaoResumo = descricao || null;
+      lot.alertas         = descricao ? (detectarAlertas(descricao).join(',') || null) : null;
+    }
+
+    if ((i + 1) % 10 === 0 || i === lots.length - 1) {
+      console.log(`   ${i + 1}/${lots.length} lotes processados`);
+    }
+    await new Promise(r => setTimeout(r, 200 + Math.random() * 200));
+  }
+  if (semEstado > 0) console.log(`   ⚠️ ${semEstado} lote(s) sem estado por falha de fetch`);
+
   // ── 3. Agrupa por leilão ──────────────────────────────────────────────────
   const leiloesPorId   = {};
   const motosPorLeilao = {};
@@ -374,21 +411,24 @@ async function main() {
       : 'grande');
 
     motosPorLeilao[lid].push({
-      leilao_id:    lid,
-      lote:         loteNum,
+      leilao_id:        lid,
+      lote:             loteNum,
       marca,
       modelo,
       ano,
       cor,
       condicao,
-      lance_inicial: lance,
+      lance_inicial:    lance,
       financeira,
       cilindrada,
-      monta:        montaFinal,
+      monta:            montaFinal,
       foto,
       url,
-      fipe_csv:     null,
-      patio:        null,
+      estado:           lot.estado           || null,
+      descricao_resumo: lot.descricaoResumo  || null,
+      alertas:          lot.alertas          || null,
+      fipe_csv:         null,
+      patio:            null,
     });
   }
 

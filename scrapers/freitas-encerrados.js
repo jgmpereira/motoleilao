@@ -14,7 +14,7 @@
  */
 
 const https = require('https');
-const { extrairUF, detectarAlertas } = require('./_utils');
+const { extrairUF, detectarAlertas, stripHtml, filtrarSegmentos, extrairDescricao, extrairEstadoFreitas } = require('./_utils');
 
 const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
 const SUPA_KEY = process.env.SUPABASE_KEY;
@@ -97,122 +97,7 @@ async function fetchDetalhes(url) {
   return null;
 }
 
-// ── stripHtml: converte HTML em texto limpo (blocos → \n\n) ───────────────────
-function stripHtml(html) {
-  return html
-    .replace(/<\/(p|div|li|td|tr|section|article|h[1-6])\b[^>]*>/gi, '\n\n')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/&#\d+;/g, ' ')
-    .replace(/&[a-z]+;/gi, ' ');
-}
-
-// ── Filtro por allowlist de conteúdo útil ────────────────────────────────────
-// Ruído: qualquer trecho que contenha estas palavras é descartado
-const NOISE_RE = /DECLARA|PORTARIA|\bDETRAN\b|\bCONTRAN\b|RESOLU[ÇC][ÃA]O|\bATPV\b|DOCUMENTA[ÇC][ÃA]O|\bDOCUMENTOS\b|PRAZO|RESPONSABILIDADE|TERMO\s+DE\s+RESP|REC\.?\s*DE\s+FIRMA|CAT[ÁA]LOGO|CONCRETIZA[ÇC][ÃA]O|PAGAMENTO|TRANSFER[ÊE]NCIA|ARREMATANTE|COMITENTE|D[ÉE]BITOS|MULTAS|AVERBA[ÇC][ÃA]O|PONTUA[ÇC][ÃA]O|RESTRI[ÇC][ÃA]O|EMPLACAMENTO|REGULARIZA[ÇC]|LACRA[ÇC]|MERCOSUL|ESTAMPAGEM|PER[ÍI]CIA|\bLAUDO\b|\bECV\b|\bCSV\b|BANC[ÁA]RIA|PROPRIEDADE|PESSOA\s+JUR[ÍI]DICA|S[ÓO]CIO/i;
-// Útil: indica condição ou defeito relevante para o comprador
-const USEFUL_RE = /SINISTRAD|MONTA|CIRCUL|VEDADA|DANOS\s+ESTRUTURAIS|SEM\s+CHAVE|SUSPENS[ÃA]O|HOD[OÔ]METRO|ROUBO|FURTO|DANIFICAD|AUSENTE|FALTA|EMBREAGEM|CORRENTE|C[ÂA]MBIO|VENDIDO\s+NO\s+ESTADO|MEC[ÂA]NICA\s+SEM\s+TESTE|CABO\s+CARREGAMENTO|RECUPERAD|\bMOTOR\b/i;
-// Útil forte: justifica aparar rabo de ruído no mesmo trecho
-const STRONG_RE = /SINISTRAD|MONTA|CIRCUL|VEDADA|DANOS\s+ESTRUTURAIS|SEM\s+CHAVE|SUSPENS[ÃA]O|ROUBO|FURTO|RECUPERAD|DANIFICAD/i;
-// IPVA
-const IPVA_PAGO_RE = /IPVA.{0,80}(?:PAGO|POR\s+CONTA\s+DA\s+(?:COMPANHIA|SEGURADORA|COMITENTE))/i;
-const IPVA_COMP_RE = /IPVA.{0,80}(?:P\/C\s+DO\s+COMPRADOR|POR\s+CONTA\s+DO\s+COMPRADOR)/i;
-
-// Filtra trechos do resumo mantendo só o conteúdo reconhecidamente útil
-function filtrarSegmentos(texto) {
-  if (!texto) return null;
-
-  // Detecta IPVA no texto completo antes de quebrar em segmentos
-  let ipvaTag = null;
-  if (/\bIPVA\b/i.test(texto)) {
-    if (IPVA_PAGO_RE.test(texto))      ipvaTag = 'IPVA pago';
-    else if (IPVA_COMP_RE.test(texto)) ipvaTag = 'IPVA por conta do comprador';
-  }
-
-  const segs = texto
-    .split(/\s+\/\s+|\n+/)
-    .map(s => s.replace(/<!--|-->/g, '').replace(/\s+/g, ' ').trim())
-    .filter(Boolean);
-
-  const mantidos = [];
-  let ipvaInserido = false;
-
-  for (const seg of segs) {
-    // Segmentos de IPVA/DPVAT/licenciamento → substituir por tag simplificada (uma vez)
-    if (/\bIPVA\b|\bDPVAT\b|\bLICENIAMENTO\b/i.test(seg)) {
-      if (ipvaTag && !ipvaInserido) { mantidos.push(ipvaTag); ipvaInserido = true; }
-      continue;
-    }
-
-    const temNoise  = NOISE_RE.test(seg);
-    const temUtil   = USEFUL_RE.test(seg);
-    const temFort   = STRONG_RE.test(seg);
-    const nPalavras = seg.split(/\s+/).filter(Boolean).length;
-
-    if (!temNoise) {
-      // Sem ruído: manter se útil OU trecho curto (sigla, observação pontual)
-      if (temUtil || nPalavras <= 5) mantidos.push(seg);
-    } else if (temFort) {
-      // Tem ruído mas também alerta grave: apara no início do primeiro ruído
-      const m  = NOISE_RE.exec(seg);
-      const ap = m && m.index > 0
-        ? seg.slice(0, m.index).replace(/\s*[\/,;\-]+\s*$/, '').trim()
-        : seg;
-      mantidos.push(ap.length >= 3 ? ap : seg);
-    }
-    // Tem ruído sem alerta forte → descarta
-  }
-
-  const seen = new Set();
-  const dedup = mantidos.filter(s => { if (seen.has(s)) return false; seen.add(s); return true; });
-  if (!dedup.length) return null;
-  return dedup.join(' / ').replace(/\s+/g, ' ').trim();
-}
-
-// ── Extrai e filtra descricao_resumo do HTML ─────────────────────────────────
-function extrairDescricao(html) {
-  const corteRe = /SEM\s+GARANTIAS\s+QUANTO\s+[AÀ]\s+ESTRUTURA/i;
-  const texto   = stripHtml(html);
-  const blocos  = texto.split(/\n{2,}/);
-
-  for (const bloco of blocos) {
-    if (!corteRe.test(bloco)) continue;
-    const result = filtrarSegmentos(bloco.slice(0, bloco.search(corteRe)));
-    if (result && result.length >= 5) return result;
-  }
-
-  // Fallback: bloco com palavras-chave típicas sem marcador "SEM GARANTIAS"
-  const kwRe = /VEICULO\s+VENDIDO\s+NO\s+ESTADO|MEC[ÂA]NICA\s+SEM\s+TESTE|SINISTRADO|PEQ.{0,5}MONTA/i;
-  for (const bloco of blocos) {
-    if (!kwRe.test(bloco)) continue;
-    const result = filtrarSegmentos(bloco.slice(0, 500));
-    if (result && result.length >= 5) return result;
-  }
-
-  return null;
-}
-
-// ── Extrai UF do endereço local do Freitas ────────────────────────────────────
-// Endereços têm vários "-" no meio; a UF são sempre as 2 letras maiúsculas
-// no FINAL da string, após o último "/" ou "-".
-// Ex.: "AV. DOS ESTADOS, 584 - PORTÃO 2 - UTINGA - SANTO ANDRÉ/SP" → "SP"
-function extrairEstadoFreitas(html) {
-  // Permite tags HTML entre o rótulo e o texto do endereço
-  const m = html.match(
-    /Local\s+do\s+leil(?:[ãa]|&atilde;)o:?\s*(?:<[^>]+>\s*)*([^\n<]{3,150})/i
-  );
-  if (!m) return null;
-  const local = m[1].replace(/&[a-z]+;/gi, ' ').replace(/<[^>]+>/g, '').trim();
-  console.log(`   📍 Local: "${local}"`);
-  // Pega as 2 letras maiúsculas no final após "/" ou "-"
-  const ufMatch = local.match(/[\/\-]\s*([A-Z]{2})\s*$/);
-  if (!ufMatch) return null;
-  return extrairUF(ufMatch[1]); // valida contra lista de UFs conhecidas
-}
+// stripHtml, filtrarSegmentos, extrairDescricao, extrairEstadoFreitas → importados de ./_utils
 
 // ── Parseia campos do HTML de LoteDetalhes ────────────────────────────────────
 function parseLoteDetalhes(html) {
