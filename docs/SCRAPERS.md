@@ -27,6 +27,8 @@ Sessão grande. Resumo do que mudou:
 - **Coluna `estado` (UF):** criada em motos, ~8261 preenchidas via patio. Scrapers (sodre/vip/copart/superbid/freitas) preenchem daqui pra frente. Filtro por estado + badge no card no front.
 - **Colunas `descricao_resumo` e `alertas`:** criadas em motos. Freitas preenche (resumo por allowlist + alertas). Front exibe badges + observações.
 - **Freitas — completo:** paginação (PageNumber/TopRows, pegava só ~30 de ~60+), estado, descrição resumida, alertas, status/valor de arremate, front. Ver seção Freitas.
+- **Filtro de estado (UF) no front:** agora é colapsável (clique pra abrir/fechar, começa recolhido) e DINÂMICO — as UFs exibidas refletem os outros filtros aplicados (marca, segmento, etc.), sem filtrar a si mesmo (dá pra marcar várias UFs). Repopulado a cada render.
+- **Freitas — proteção de dados:** o freitas-encerrados.js NUNCA sobrescreve `alertas`/`descricao_resumo` com vazio/null (só grava se vier conteúdo). Protege contra página de detalhe que carrega incompleta. PATCH só é enviado se houver campo a atualizar. Trade-off: alerta removido no anúncio persiste (preferível a apagar dado bom por leitura capenga). A lógica de `arrematados` (DELETE+INSERT só com valor válido) já mantinha o registro antigo se não achasse valor novo — reprocessar a mesma moto na janela de 3 dias atualiza, não duplica (chave: moto_id).
 
 ### Pendências mapeadas (próximas sessões)
 - VIP encerrados: validar workflow em produção.
