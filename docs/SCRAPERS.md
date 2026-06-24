@@ -29,10 +29,12 @@ Sessão grande. Resumo do que mudou:
 - **Freitas — completo:** paginação (PageNumber/TopRows, pegava só ~30 de ~60+), estado, descrição resumida, alertas, status/valor de arremate, front. Ver seção Freitas.
 - **Filtro de estado (UF) no front:** agora é colapsável (clique pra abrir/fechar, começa recolhido) e DINÂMICO — as UFs exibidas refletem os outros filtros aplicados (marca, segmento, etc.), sem filtrar a si mesmo (dá pra marcar várias UFs). Repopulado a cada render.
 - **Freitas — proteção de dados:** o freitas-encerrados.js NUNCA sobrescreve `alertas`/`descricao_resumo` com vazio/null (só grava se vier conteúdo). Protege contra página de detalhe que carrega incompleta. PATCH só é enviado se houver campo a atualizar. Trade-off: alerta removido no anúncio persiste (preferível a apagar dado bom por leitura capenga). A lógica de `arrematados` (DELETE+INSERT só com valor válido) já mantinha o registro antigo se não achasse valor novo — reprocessar a mesma moto na janela de 3 dias atualiza, não duplica (chave: moto_id).
+- **Sodré — paginação corrigida (coleta):** o sodre.js coletava só ~48 motos de 1 leilão (a paginação por UI/botão "Next" quebrou). Corrigido para paginar a API `search-lots` diretamente: POST com `from` (offset estilo Elasticsearch: 0/48/96…) e `size:48`; total em `json.total`. ⚠️ A API dá **403 para requests fora do browser** (exige cookies de sessão) → solução: chamar via `page.evaluate(fetch(...))` dentro do contexto do Playwright (usa os cookies automaticamente). Resultado: 48 → ~110 motos, de ~17 leilões/16 datas. (NÃO foi regressão de algo que mexemos hoje — a paginação por UI vinha de antes; o site mudou.)
 
 ### Pendências mapeadas (próximas sessões)
 - VIP encerrados: validar workflow em produção.
 - Descrição/alertas dos outros leiloeiros (Sodré/VIP/Superbid) reusando `detectarAlertas` do _utils.
+- **Sodré descrição/alertas:** fácil — dados já vêm na API da listagem (`lot_description` + `lot_sinister`). Falta gerar `descricao_resumo` (com corte do juridiquês de "Débitos de ipva...") + alertas.
 - Aba fixa "Como funciona cada leiloeiro" (comissão, pagamento, retirada — conteúdo editorial, não scraped).
 - Copart encerrados: POC com Playwright.
 - 794 condicionais históricos (pré-20/06, API expirada) — decidir como exibir.
@@ -108,6 +110,11 @@ grep -oE "https?://[^\"' ]+|/api/[a-z0-9/_-]+" /tmp/x.js | sort -u
 ### Scrapers
 - `scrapers/sodre.js` — lotes ativos. **Já usa o link individual** `/leilao/{auction_id}/lote/{lot_id}/`.
 - `scrapers/sodre-encerrados.js` — valores de arremate via API `lots-finished`.
+
+### Coleta paginada via API (CONFIRMADO Jun/2026)
+A listagem usa `POST https://www.sodresantoro.com.br/api/search-lots` com corpo incluindo `from` (offset) e `size:48`; resposta `{results:[...], total:N, aggs:{...}}`. Paginar incrementando `from` até cobrir `total`. A API retorna **403 para chamadas sem cookies de sessão** — chamar de dentro do browser (Playwright `page.evaluate(fetch)`), não via `context.request` puro. NÃO depender do botão "Next" da UI (frágil, já quebrou).
+
+**Bônus — a API já entrega tudo na listagem** (sem precisar visitar página de detalhe, diferente do Freitas): `lot_description` (descrição completa), `lot_sinister` ("média monta" etc., já estruturado), `lot_note` (condições de venda), `lot_rate_information` (comissão 5%, depósito R$550), `lot_optionals` (["chave-ignicao"]), `lot_location` ("guarulhos i/sp"). → Quando for implementar descrição/alertas do Sodré, usar esses campos direto (reusar `detectarAlertas`/`extrairDescricao` do `_utils`); não precisa de fetch extra.
 
 ### API de encerrados — campos por lote (`lots-finished`)
 ```json
