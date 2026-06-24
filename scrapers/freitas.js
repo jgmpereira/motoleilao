@@ -5,11 +5,10 @@
  * Scraper automático — Freitas Leiloeiro
  *
  * Estratégia:
- *  1. GET direto ao endpoint /Leiloes/PesquisarLotes (retorna HTML, sem Playwright)
- *  2. Parseia os cards .cardlote via regex
+ *  1. GET paginado ao endpoint /Leiloes/PesquisarLotes via PageNumber/TopRows=12
+ *     (rolagem infinita do site — itera até página vazia ou < TopRows lotes)
+ *  2. Parseia os cards .cardlote via regex, deduplicando por URL de lote
  *  3. Agrupa por leilão (leilaoId do site) e upsert no Supabase
- *
- * O site retorna até ~30 lotes ativos de motos em uma única requisição (sem paginação real).
  *
  * Secrets necessários no GitHub:
  *   SUPABASE_KEY  — service_role key (ou anon key se RLS permitir)
@@ -18,11 +17,14 @@
 const https = require('https');
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const SUPA_URL   = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
-const SUPA_KEY   = process.env.SUPABASE_KEY;
-const FREITAS_URL = 'https://www.freitasleiloeiro.com.br/Leiloes/PesquisarLotes'
+const SUPA_URL    = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
+const SUPA_KEY    = process.env.SUPABASE_KEY;
+const FREITAS_BASE = 'https://www.freitasleiloeiro.com.br/Leiloes/PesquisarLotes'
   + '?Nome=&Categoria=1&TipoLoteId=3&FaixaValor=0&Condicao=0'
-  + '&PatioId=0&AnoModeloMin=0&AnoModeloMax=0&Tag=&Pagina=1';
+  + '&PatioId=0&AnoModeloMin=0&AnoModeloMax=0'
+  + '&ArCondicionado=false&DirecaoAssistida=false&Tag=&ClienteSclId=0';
+const TOP_ROWS  = 12;
+const MAX_PAGES = 50;
 const CDN = 'https://cdn3.freitasleiloeiro.com.br';
 
 if (!SUPA_KEY) {
@@ -288,22 +290,53 @@ function parseCards(html) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
   console.log('🏍  Freitas Leiloeiro — scraper iniciando');
-  console.log(`    Endpoint: ${FREITAS_URL}`);
+  console.log(`    Base: ${FREITAS_BASE}`);
   console.log(`    Supabase: ${SUPA_URL}`);
 
-  // ── 1. Busca o HTML dos lotes ─────────────────────────────────────────────
-  console.log('\n🌐 Buscando lotes...');
-  const { status, body } = await httpGet(FREITAS_URL);
-  console.log(`   HTTP ${status}, ${body.length} bytes`);
+  // ── 1. Busca todas as páginas de lotes (PageNumber/TopRows) ───────────────
+  console.log('\n🌐 Buscando lotes (paginação PageNumber/TopRows)...');
+  const todosLotes   = [];
+  const seenUrls     = new Set();
+  let paginasLidas   = 0;
+  let totalDuplicatas = 0;
 
-  if (status !== 200) {
-    console.error(`❌  Resposta inesperada: ${status}`);
-    process.exit(1);
+  for (let pagina = 1; pagina <= MAX_PAGES; pagina++) {
+    const pageUrl = `${FREITAS_BASE}&PageNumber=${pagina}&TopRows=${TOP_ROWS}`;
+    let res;
+    try {
+      res = await httpGet(pageUrl);
+    } catch (err) {
+      console.warn(`   ⚠️ Erro na página ${pagina}: ${err.message} — encerrando paginação`);
+      break;
+    }
+    if (res.status !== 200) {
+      console.warn(`   ⚠️ HTTP ${res.status} na página ${pagina} — encerrando paginação`);
+      break;
+    }
+
+    const lotesPagina = parseCards(res.body);
+    paginasLidas++;
+    console.log(`   📄 Página ${pagina}: ${res.body.length} bytes, ${lotesPagina.length} lotes`);
+
+    for (const lot of lotesPagina) {
+      if (!seenUrls.has(lot.url)) {
+        seenUrls.add(lot.url);
+        todosLotes.push(lot);
+      } else {
+        totalDuplicatas++;
+      }
+    }
+
+    if (lotesPagina.length === 0 || lotesPagina.length < TOP_ROWS) break;
+
+    // Delay entre páginas para não martelar o servidor
+    await new Promise(r => setTimeout(r, 200 + Math.random() * 200));
   }
 
-  // ── 2. Parseia os cards ───────────────────────────────────────────────────
-  const lots = parseCards(body);
-  console.log(`   ${lots.length} lotes parseados`);
+  console.log(`\n📄 ${paginasLidas} página(s), ${todosLotes.length} lotes coletados${totalDuplicatas > 0 ? `, ${totalDuplicatas} duplicata(s) removida(s)` : ''}`);
+
+  // ── 2. Valida e imprime amostra ───────────────────────────────────────────
+  const lots = todosLotes;
 
   if (lots.length === 0) {
     console.log('ℹ️  Nenhum lote encontrado. Encerrando sem salvar.');
