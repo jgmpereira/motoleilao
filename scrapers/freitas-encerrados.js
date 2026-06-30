@@ -48,7 +48,7 @@ function httpGet(url) {
       res.on('end', () => resolve({ status: res.statusCode, body: data }));
     });
     req.on('error', reject);
-    req.setTimeout(30_000, () => { req.destroy(); reject(new Error('Timeout')); });
+    req.setTimeout(12_000, () => { req.destroy(); reject(new Error('Timeout')); });
   });
 }
 
@@ -84,15 +84,15 @@ function parseLance(vlr) {
 
 // ── Fetch HTML com retry (falha de 1 lote não aborta o leilão) ────────────────
 async function fetchDetalhes(url) {
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       const res = await httpGet(url);
       if (res.status === 200) return res.body;
-      console.warn(`    ⚠️ HTTP ${res.status} tentativa ${attempt}/3: ${url}`);
+      console.warn(`    ⚠️ HTTP ${res.status} tentativa ${attempt}/2: ${url}`);
     } catch (err) {
-      console.warn(`    ⚠️ Erro tentativa ${attempt}/3: ${err.message}`);
+      console.warn(`    ⚠️ Erro tentativa ${attempt}/2: ${err.message}`);
     }
-    if (attempt < 3) await new Promise(r => setTimeout(r, 300 + Math.random() * 200));
+    if (attempt < 2) await new Promise(r => setTimeout(r, 300 + Math.random() * 200));
   }
   return null;
 }
@@ -154,7 +154,6 @@ async function main() {
   for (const l of leiloes) console.log(`   → ${l.id} (${l.data})`);
 
   let totVendido = 0, totCondicional = 0, totPulado = 0, totAlertas = 0, totEstado = 0;
-  let debugCount = 0; // limita logs de diagnóstico a 3 lotes — remover após diagnóstico
 
   for (const leilao of leiloes) {
     console.log(`\n📦 Leilão: ${leilao.id} (${leilao.data})`);
@@ -173,28 +172,24 @@ async function main() {
     console.log(`   ${motosFreitas.length}/${motos.length} motos com URL LoteDetalhes`);
 
     let vendido = 0, condicional = 0, pulado = 0, comAlertas = 0, estadoPreenchido = 0;
+    let falhasConsec = 0;
 
     for (const moto of motosFreitas) {
       const html = await fetchDetalhes(moto.url);
       if (!html) {
         console.warn(`    ⚠️ Sem HTML para moto ${moto.id} — pulando`);
         pulado++;
-        await new Promise(r => setTimeout(r, 300 + Math.random() * 200));
+        falhasConsec++;
+        if (falhasConsec >= 5) {
+          console.warn(`   ⚠️ 5 falhas consecutivas — site possivelmente bloqueando, abortando leilão ${leilao.id}`);
+          break;
+        }
+        await new Promise(r => setTimeout(r, 500 + Math.random() * 300));
         continue;
       }
+      falhasConsec = 0;
 
       const { statusArrematado, valor, estado, descricaoResumo, alertas } = parseLoteDetalhes(html);
-
-      if (debugCount < 3) {
-        const idx = html.indexOf('dvStatusLoteMenu');
-        const STATUS_RE_DEBUG = /<div[^>]*class="[^"]*text-(?:success|danger)[^"]*"[^>]*>\s*(VENDIDO|CONDICIONAL|ABERTO|N[ÃA]O\s*VENDIDO|ENCERRADO|DESERTO)\s*<\/div>/i;
-        console.log(`[DEBUG status] moto=${moto.id} len=${html.length} hasMenu=${idx >= 0} hasVendido=${html.includes('VENDIDO')} match=${JSON.stringify(STATUS_RE_DEBUG.exec(html)?.[1] ?? null)}`);
-        if (idx >= 0) console.log('[DEBUG trecho]', JSON.stringify(html.slice(idx - 60, idx + 140)));
-        const idxML = html.search(/Maior\s*lance/i);
-        console.log(`[DEBUG valor] valorExtraido=${JSON.stringify(valor)} temMaiorLance=${idxML >= 0}`);
-        if (idxML >= 0) console.log('[DEBUG valor trecho]', JSON.stringify(html.slice(idxML, idxML + 250)));
-        debugCount++;
-      }
 
       // Grava arrematado (DELETE + INSERT para permitir reprocessamento)
       if (statusArrematado && valor != null) {
@@ -232,7 +227,7 @@ async function main() {
 
       if (alertas) comAlertas++;
 
-      await new Promise(r => setTimeout(r, 300 + Math.random() * 200));
+      await new Promise(r => setTimeout(r, 500 + Math.random() * 300));
     }
 
     console.log(`   ✅ vendido=${vendido}  condicional=${condicional}  pulado=${pulado}  com_alertas=${comAlertas}  estado_preenchido=${estadoPreenchido}`);
