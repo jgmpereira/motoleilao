@@ -154,6 +154,7 @@ async function main() {
   for (const l of leiloes) console.log(`   → ${l.id} (${l.data})`);
 
   let totVendido = 0, totCondicional = 0, totPulado = 0, totAlertas = 0, totEstado = 0;
+  let debugCount = 0; // limita logs de diagnóstico a 3 lotes — remover após diagnóstico
 
   for (const leilao of leiloes) {
     console.log(`\n📦 Leilão: ${leilao.id} (${leilao.data})`);
@@ -180,6 +181,14 @@ async function main() {
         pulado++;
         await new Promise(r => setTimeout(r, 300 + Math.random() * 200));
         continue;
+      }
+
+      if (debugCount < 3) {
+        const idx = html.indexOf('dvStatusLoteMenu');
+        const STATUS_RE_DEBUG = /<div[^>]*class="[^"]*text-(?:success|danger)[^"]*"[^>]*>\s*(VENDIDO|CONDICIONAL|ABERTO|N[ÃA]O\s*VENDIDO|ENCERRADO|DESERTO)\s*<\/div>/i;
+        console.log(`[DEBUG status] moto=${moto.id} len=${html.length} hasMenu=${idx >= 0} hasVendido=${html.includes('VENDIDO')} match=${JSON.stringify(STATUS_RE_DEBUG.exec(html)?.[1] ?? null)}`);
+        if (idx >= 0) console.log('[DEBUG trecho]', JSON.stringify(html.slice(idx - 60, idx + 140)));
+        debugCount++;
       }
 
       const { statusArrematado, valor, estado, descricaoResumo, alertas } = parseLoteDetalhes(html);
