@@ -42,6 +42,17 @@ Sessão grande. Resumo do que mudou:
 
 ---
 
+## Changelog 30/06/2026
+
+- **Freitas — BUG GRAVE de perda de dados corrigido:** motos de leilões ENCERRADOS estavam sendo deletadas e o histórico de arremate ficava vazio (ex.: freitas_7882 perdeu 25 das 26 motos). Causa dupla:
+  (a) o `freitas.js` (coleta, roda 06h20 BRT) deletava motos que sumiram da listagem ativa e ainda não tinham arremate gravado; quando um leilão encerra, as motos vendidas saem da listagem e eram deletadas antes do `freitas-encerrados` (20h30) capturar o valor.
+  (b) o upsert do leilão no `freitas.js` mandava `encerrado:false`, e o `merge-duplicates` do PostgREST SOBRESCREVIA o `encerrado:true` — então o leilão era "reaberto" a cada coleta, e qualquer check de encerrado feito DEPOIS do upsert sempre dava false.
+  **Correção:** o `freitas.js` agora consulta `leiloes?id=eq.{lid}&select=encerrado` ANTES de qualquer escrita; se `encerrado=true`, pula o leilão inteiro (`continue`) — sem upsert, sem deleção, sem reinserção. Motos de leilão encerrado viram histórico imutável.
+  **Resiliência extra:** `freitas-encerrados` agora roda 2×/dia (15h e 20h30 BRT) para capturar o arremate antes da página de detalhe sair do ar.
+  **Dados já perdidos** (freitas_7882 etc.) NÃO são recuperáveis (páginas saíram do site). O fix só estanca a perda daqui pra frente.
+
+---
+
 ## Metodologia
 ### Como descobrir de onde um site tira os dados
 
@@ -222,6 +233,11 @@ A listagem usa **rolagem infinita** → chama `PesquisarLotes` com **`PageNumber
 - `scrapers/freitas.js` (coleta) — fetch paginado + `isMoto()` (whitelist de marcas, rejeita carros). Agora também **visita a página de detalhe de cada moto** para capturar **estado (UF), descricao_resumo e alertas** já na coleta (toda moto nasce completa, inclusive de leilões futuros). Marca `encerrado=true` pela data.
 - `scrapers/freitas-encerrados.js` (resultado) — visita LoteDetalhes na janela de 3 dias e captura **status + valor + estado + descricao_resumo + alertas** numa visita só. Grava arrematados (DELETE+INSERT, condicional atualiza ao reprocessar).
 - Funções compartilhadas em `scrapers/_utils.js`: `extrairUF`, `extrairEstadoFreitas`, `extrairDescricao`, `filtrarSegmentos`, `stripHtml`, `detectarAlertas`.
+
+### ⚠️ Armadilha — coleta NÃO pode deletar motos de leilão encerrado
+O `freitas.js` (coleta) deleta motos que sumiram da listagem ativa. Mas motos de leilão **ENCERRADO** também somem da listagem — e não podem ser deletadas (são histórico, e podem ainda não ter o arremate capturado). Regra: a deleção/recoleta só vale para leilões `encerrado=false`. Leilão encerrado é pulado inteiro (`continue`), **inclusive o upsert** — senão o `encerrado:false` do objeto local sobrescreve o `true` via `merge-duplicates` do PostgREST, "reabrindo" o leilão a cada coleta. A verificação precisa ser feita com um SELECT antes do upsert, não depois.
+
+**Timing da captura:** leilão Freitas é ~10h BRT. `freitas.js` (coleta/deleta) roda 06h20; `freitas-encerrados` (captura arremate) roda 15h e 20h30. A página de detalhe do lote sai do ar relativamente rápido após encerrar — por isso 2 janelas de captura no mesmo dia. Enquanto a moto existir no banco (não é mais deletada), o `freitas-encerrados` pode capturar o arremate em qualquer run futuro.
 
 ### Status / valor / estado (CONFIRMADO via DevTools, Jun/2026)
 - **Status:** num `<div class="text-success">` (ABERTO) ou `<div class="text-danger">` (VENDIDO **ou** CONDICIONAL — mesma classe!). Mapear pelo TEXTO, não pela classe. ⚠️ Nunca buscar a palavra no texto solto (há "VENDIDO/CONDICIONAL" nas condições gerais → falso positivo).
