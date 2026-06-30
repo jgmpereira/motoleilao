@@ -455,7 +455,22 @@ async function main() {
     const l = leiloesPorId[lid];
     console.log(`\n  Leilão: ${lid}  (${l.data} ${l.hora})`);
 
-    // Upsert leilão (merge — não sobrescreve encerrado=true)
+    // Verifica encerrado no banco ANTES do upsert — gerarLeilaoObj envia encerrado:false
+    // e merge-duplicates sobrescreveria o true se não fizermos esse check antes.
+    const leilaoDb = await supaFetch(`leiloes?id=eq.${lid}&select=encerrado`);
+    const encerradoNoBanco = leilaoDb && leilaoDb[0] ? leilaoDb[0].encerrado === true : false;
+
+    if (encerradoNoBanco) {
+      // Leilão encerrado: preservar histórico integralmente.
+      // Motos que ainda não têm arremate capturado seriam apagadas sem essa proteção —
+      // o freitas-encerrados.js pode capturá-las em qualquer run futuro enquanto existirem.
+      // MELHORIA FUTURA (CORREÇÃO 3): rodar freitas-encerrados.js também algumas horas
+      // após o horário do leilão (~10h), não só às 20h30, para reduzir janela de perda.
+      console.log(`  → Encerrado — motos preservadas (${motosPorLeilao[lid].length} lotes do site ignorados)`);
+      continue;
+    }
+
+    // Upsert leilão (merge — só chega aqui se encerrado=false)
     await supaFetch('leiloes?on_conflict=id', {
       method: 'POST',
       body:   JSON.stringify(l),
@@ -467,7 +482,7 @@ async function main() {
     const idsExist   = (motosExist ?? []).map(m => m.id);
 
     if (idsExist.length > 0) {
-      // Preserva motos que já têm arrematado
+      // Preserva motos que já têm arrematado; deleta as demais (saíram do site)
       const comArr    = await supaFetch(`arrematados?select=moto_id&moto_id=in.(${idsExist.join(',')})`);
       const idsComArr = new Set((comArr ?? []).map(a => a.moto_id));
       const deletar   = idsExist.filter(id => !idsComArr.has(id));
