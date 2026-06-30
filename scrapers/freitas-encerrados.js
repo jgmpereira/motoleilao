@@ -112,8 +112,8 @@ function parseLoteDetalhes(html) {
   else if (statusRaw === 'CONDICIONAL') statusArrematado = 'condicional';
   // ABERTO / NÃO VENDIDO / ENCERRADO / DESERTO → null (não grava arrematado)
 
-  // VALOR — maior lance
-  const valorMatch = html.match(/Maior\s+lance:?\s*R?\$?\s*([\d.,]+)/i);
+  // VALOR — maior lance (label e número podem estar separados por tags/quebras)
+  const valorMatch = html.match(/Maior\s*lance[\s\S]{0,200}?R\$\s*([\d.]+,\d{2})/i);
   const valor      = valorMatch ? parseLance(valorMatch[1]) : null;
 
   // ESTADO/UF — BUG 3: regex tolerante a tags + UF no final da string
@@ -183,15 +183,18 @@ async function main() {
         continue;
       }
 
+      const { statusArrematado, valor, estado, descricaoResumo, alertas } = parseLoteDetalhes(html);
+
       if (debugCount < 3) {
         const idx = html.indexOf('dvStatusLoteMenu');
         const STATUS_RE_DEBUG = /<div[^>]*class="[^"]*text-(?:success|danger)[^"]*"[^>]*>\s*(VENDIDO|CONDICIONAL|ABERTO|N[ÃA]O\s*VENDIDO|ENCERRADO|DESERTO)\s*<\/div>/i;
         console.log(`[DEBUG status] moto=${moto.id} len=${html.length} hasMenu=${idx >= 0} hasVendido=${html.includes('VENDIDO')} match=${JSON.stringify(STATUS_RE_DEBUG.exec(html)?.[1] ?? null)}`);
         if (idx >= 0) console.log('[DEBUG trecho]', JSON.stringify(html.slice(idx - 60, idx + 140)));
+        const idxML = html.search(/Maior\s*lance/i);
+        console.log(`[DEBUG valor] valorExtraido=${JSON.stringify(valor)} temMaiorLance=${idxML >= 0}`);
+        if (idxML >= 0) console.log('[DEBUG valor trecho]', JSON.stringify(html.slice(idxML, idxML + 250)));
         debugCount++;
       }
-
-      const { statusArrematado, valor, estado, descricaoResumo, alertas } = parseLoteDetalhes(html);
 
       // Grava arrematado (DELETE + INSERT para permitir reprocessamento)
       if (statusArrematado && valor != null) {
