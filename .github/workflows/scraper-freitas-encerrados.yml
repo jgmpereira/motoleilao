@@ -2,7 +2,8 @@ name: Scraper — Freitas Encerrados
 
 on:
   schedule:
-    - cron: '30 23 * * *'   # 20h30 BRT (23h30 UTC) todo dia
+    - cron: '0 18 * * *'    # 15h BRT (18h UTC) — captura intermediária (página ainda no ar)
+    - cron: '30 23 * * *'   # 20h30 BRT (23h30 UTC) — captura final (resultados resolvidos)
   workflow_dispatch:
 
 jobs:
