@@ -3,7 +3,7 @@
 > Como cada leiloeiro é coletado, como descobrir a fonte de dados de um site novo,
 > e os problemas conhecidos de cada um. Mantido junto do código (versionado no Git).
 
-Última atualização: Jun/2026.
+Última atualização: 01/07/2026.
 
 ---
 
@@ -50,6 +50,12 @@ Sessão grande. Resumo do que mudou:
   **Correção:** o `freitas.js` agora consulta `leiloes?id=eq.{lid}&select=encerrado` ANTES de qualquer escrita; se `encerrado=true`, pula o leilão inteiro (`continue`) — sem upsert, sem deleção, sem reinserção. Motos de leilão encerrado viram histórico imutável.
   **Resiliência extra:** `freitas-encerrados` agora roda 2×/dia (15h e 20h30 BRT) para capturar o arremate antes da página de detalhe sair do ar.
   **Dados já perdidos** (freitas_7882 etc.) NÃO são recuperáveis (páginas saíram do site). O fix só estanca a perda daqui pra frente.
+
+---
+
+## Changelog 01/07/2026
+
+- **Freitas encerrados — causa raiz definitiva do valor/status vindo `null` encontrada e corrigida.** Não era regex frágil no HTML (tentativa anterior) — `dvMaiorLance`/status são preenchidos por **AJAX**, o HTML cru nunca teve o dado. Corrigido para consultar `RetornarLoteStatus` + `RetornarMaiorLanceLote` (ver seção Freitas → "Status / valor / estado"). VALIDADO em produção: leilão `freitas_7894` foi de `pulado=46` (bug) para `vendido=17 condicional=24 pulado=5`; lote 20 (moto 57484) confirmado `VENDIDO`/R$8.800 batendo com o site.
 
 ---
 
@@ -239,10 +245,13 @@ O `freitas.js` (coleta) deleta motos que sumiram da listagem ativa. Mas motos de
 
 **Timing da captura:** leilão Freitas é ~10h BRT. `freitas.js` (coleta/deleta) roda 06h20; `freitas-encerrados` (captura arremate) roda 15h e 20h30. A página de detalhe do lote sai do ar relativamente rápido após encerrar — por isso 2 janelas de captura no mesmo dia. Enquanto a moto existir no banco (não é mais deletada), o `freitas-encerrados` pode capturar o arremate em qualquer run futuro.
 
-### Status / valor / estado (CONFIRMADO via DevTools, Jun/2026)
-- **Status:** num `<div class="text-success">` (ABERTO) ou `<div class="text-danger">` (VENDIDO **ou** CONDICIONAL — mesma classe!). Mapear pelo TEXTO, não pela classe. ⚠️ Nunca buscar a palavra no texto solto (há "VENDIDO/CONDICIONAL" nas condições gerais → falso positivo).
-- **Valor:** "Maior lance: R$ X".
-- **Estado/UF:** "Local do leilão: ... / SP" — UF no final, após último "/" ou "-". Regex `/[\/-]\s*([A-Z]{2})\s*$/` + valida com extrairUF. (O "local" do leilão no banco é "Online"; o estado real vem daqui.)
+### Status / valor / estado (CONFIRMADO via DevTools, 30/06-01/07/2026)
+- **⚠️ ARMADILHA DE ARQUITETURA — status e valor NÃO estão no HTML server-side.** `dvStatusLoteMenu`/`dvMaiorLance` (e o `<div class="text-success|text-danger">` de onde antes se lia o status) são preenchidos por **JavaScript via AJAX** depois do carregamento. Um `fetch` puro no HTML cru nunca vê esses valores — por isso o scraper ficava lendo `null`/status errado mesmo com o parsing "correto". Descoberto via DevTools (aba Network) inspecionando o que a página chama depois do load.
+- **Status → endpoint dedicado:** `GET /Leiloes/RetornarLoteStatus?leilaoId={id}&loteNumero={n}` → JSON `{"success":true,"message":{"nome":"VENDIDO", ...}}`. Usar `message.nome` (VENDIDO/CONDICIONAL/ABERTO/etc.).
+- **Valor → endpoint dedicado:** `GET /Leiloes/RetornarMaiorLanceLote?leilaoId={id}&loteNumero={n}&modeloRecebePropostas=False` → HTML com `<input type="hidden" id="hdMaiorLance" value="8800,0" />`. Extrair de `hdMaiorLance` (formato `"8800,0"` ou `"8.800,00"` — mesmo `parseLance` que já lida com ambos).
+- **`leilaoId`/`loteNumero`:** vêm de graça na própria `moto.url` (`LoteDetalhes?leilaoId=X&loteNumero=Y`), sem precisar consultar `motos.lote` nem reformatar zero-padding.
+- **Estado/UF:** continua vindo do HTML server-side (isso nunca foi o problema) — "Local do leilão: ... / SP", UF no final, após último "/" ou "-". Regex `/[\/-]\s*([A-Z]{2})\s*$/` + valida com extrairUF. (O "local" do leilão no banco é "Online"; o estado real vem daqui.)
+- **Custo:** até 3 requests por lote (HTML da página + status + lance, o último só se vendido/condicional) em vez de 1. Só chamar `RetornarMaiorLanceLote` quando o status já indicar venda evita gastar request em lote ABERTO.
 
 ### Descrição resumida + alertas (CONFIRMADO Jun/2026)
 A descrição do lote é `[parte útil variável] ... SEM GARANTIAS QUANTO A ESTRUTURA [ladainha jurídica fixa]`.
