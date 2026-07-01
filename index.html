@@ -214,8 +214,9 @@ tbody tr:hover{background:var(--s2);}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .form-select{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;cursor:pointer;}
 
+.admin-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 @media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr);}.analise-layout{grid-template-columns:1fr;}header{padding:12px 16px;}}
-@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr);}.leiloes-grid{grid-template-columns:1fr;padding:12px;}.tab{padding:11px 14px;font-size:11px;}}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr);}.leiloes-grid{grid-template-columns:1fr;padding:12px;}.tab{padding:11px 14px;font-size:11px;}.admin-stats-grid{grid-template-columns:repeat(2,1fr);}}
 #gm-filtros-btn{display:none;}
 .gm-sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99;}
 .gm-sidebar-overlay.open{display:block;}
@@ -877,6 +878,15 @@ tbody tr:hover{background:var(--s2);}
 <!-- PAGE ADMIN -->
 <div id="page-admin" class="page">
   <div style="max-width:620px;margin:28px auto;padding:0 16px;">
+
+    <!-- Resumo de assinantes -->
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;">📊 Resumo de assinantes</div>
+        <button onclick="renderAdminStats()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;">↻ Atualizar</button>
+      </div>
+      <div id="admin-stats" style="font-size:13px;color:var(--muted);">carregando...</div>
+    </div>
 
     <!-- Convidar VIP -->
     <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
@@ -1692,7 +1702,7 @@ function showPage(page, btn, skipHash) {
   if(page === 'historico') renderHistoricoGeral();
   if(page === 'agenda') renderAgenda();
   if(page === 'leiloes') renderGridMotos();
-  if(page === 'admin') renderAdminVips();
+  if(page === 'admin') { renderAdminStats(); renderAdminVips(); }
   if(page === 'favoritos') renderFavoritos();
   if(!skipHash) {
     const hash = {leiloes:'#leiloes', analise:'#fipe', historico:'#historico', motos:'#motos', agenda:'#agenda', admin:'#admin', favoritos:'#favoritos'}[page] || '#'+page;
@@ -5920,6 +5930,42 @@ function initAdmin() {
   document.getElementById('tab-admin').style.display = show;
   document.getElementById('btn-importar').style.display = show;
   document.getElementById('btn-novo-leilao').style.display = show;
+}
+
+function admStatCard(valor, label, cor) {
+  return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+    <div style="font-size:24px;font-weight:800;color:${cor};font-family:'DM Mono',monospace;">${valor}</div>
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px;">${label}</div>
+  </div>`;
+}
+
+async function renderAdminStats() {
+  const el = document.getElementById('admin-stats');
+  if (!el) return;
+  el.innerHTML = '<span style="color:var(--muted);">carregando...</span>';
+  try {
+    const assinantes = await supaFetch('assinantes?select=status,plano,data_inicio');
+    const lista = assinantes || [];
+    const ativos = lista.filter(a => a.status === 'ativo');
+    const mensais = ativos.filter(a => a.plano === 'mensal').length;
+    const anuais = ativos.filter(a => a.plano === 'anual').length;
+    const vips = ativos.filter(a => a.plano === 'vip').length;
+    const cancelados = lista.filter(a => a.status === 'cancelado').length;
+    const limite30d = new Date();
+    limite30d.setDate(limite30d.getDate() - 30);
+    const novos30d = lista.filter(a => a.data_inicio && new Date(a.data_inicio) >= limite30d).length;
+
+    el.innerHTML = `<div class="admin-stats-grid">
+      ${admStatCard(ativos.length, 'Ativos', 'var(--accent)')}
+      ${admStatCard(mensais, 'Mensais', 'var(--text)')}
+      ${admStatCard(anuais, 'Anuais', 'var(--text)')}
+      ${admStatCard(vips, 'VIPs', 'var(--a2)')}
+      ${admStatCard(cancelados, 'Cancelados', 'var(--red)')}
+      ${admStatCard(novos30d, 'Novos (30d)', 'var(--green)')}
+    </div>`;
+  } catch(e) {
+    el.innerHTML = `<span style="color:var(--red);">Erro ao carregar: ${e.message}</span>`;
+  }
 }
 
 async function renderAdminVips() {
