@@ -5,10 +5,13 @@
  * Scraper de leilões encerrados — Freitas Leiloeiro
  *
  * 1. Busca leilões Freitas na janela de 3 dias no Supabase (independente de encerrado)
- * 2. Para cada moto com URL LoteDetalhes: GET único na página de detalhe (retry 3x)
- * 3. Extrai: status, valor (maior lance), estado/UF, descricao_resumo, alertas
- * 4. Grava arrematados (DELETE + INSERT) para vendido/condicional com valor
- * 5. PATCH motos com estado (se vazio), descricao_resumo e alertas
+ * 2. Para cada moto com URL LoteDetalhes:
+ *    a. GET na página de detalhe → estado/UF, descricao_resumo, alertas
+ *    b. GET RetornarLoteStatus (AJAX) → status do lote (VENDIDO/CONDICIONAL/...)
+ *    c. Se vendido/condicional: GET RetornarMaiorLanceLote (AJAX) → valor do arremate
+ *    (status e valor NÃO estão no HTML server-side — são preenchidos via JS/AJAX no site)
+ * 3. Grava arrematados (DELETE + INSERT) para vendido/condicional com valor
+ * 4. PATCH motos com estado (se vazio), descricao_resumo e alertas
  *
  * ⚠️ Domínio freitasleiloeiro.com.br bloqueado no Codespaces — só roda via Actions.
  */
@@ -82,8 +85,8 @@ function parseLance(vlr) {
   return isNaN(num) || num <= 0 ? null : num;
 }
 
-// ── Fetch HTML com retry (falha de 1 lote não aborta o leilão) ────────────────
-async function fetchDetalhes(url) {
+// ── Fetch com retry (falha de 1 request não aborta o lote) ────────────────────
+async function fetchComRetry(url) {
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       const res = await httpGet(url);
@@ -97,25 +100,43 @@ async function fetchDetalhes(url) {
   return null;
 }
 
+// ── Extrai leilaoId e loteNumero da URL LoteDetalhes ──────────────────────────
+function extrairIds(url) {
+  const leilaoId   = (url.match(/leilaoId=(\d+)/) || [])[1];
+  const loteNumero = (url.match(/loteNumero=(\d+)/) || [])[1];
+  return leilaoId && loteNumero ? { leilaoId, loteNumero } : null;
+}
+
+// ── STATUS do lote — endpoint AJAX RetornarLoteStatus (JSON) ──────────────────
+async function buscarStatus(leilaoId, loteNumero) {
+  const url = `https://www.freitasleiloeiro.com.br/Leiloes/RetornarLoteStatus?leilaoId=${leilaoId}&loteNumero=${loteNumero}`;
+  const body = await fetchComRetry(url);
+  if (!body) return null;
+  try {
+    const json = JSON.parse(body);
+    return json?.message?.nome ? json.message.nome.trim().toUpperCase() : null;
+  } catch (err) {
+    console.warn(`    ⚠️ JSON inválido em RetornarLoteStatus: ${err.message}`);
+    return null;
+  }
+}
+
+// ── VALOR do lote — endpoint AJAX RetornarMaiorLanceLote (HTML c/ input hidden) ─
+async function buscarMaiorLance(leilaoId, loteNumero) {
+  const url = `https://www.freitasleiloeiro.com.br/Leiloes/RetornarMaiorLanceLote?leilaoId=${leilaoId}&loteNumero=${loteNumero}&modeloRecebePropostas=False`;
+  const body = await fetchComRetry(url);
+  if (!body) return null;
+  const inputTag = body.match(/<input[^>]*id="hdMaiorLance"[^>]*>/i);
+  if (!inputTag) return null;
+  const valorMatch = inputTag[0].match(/value="([^"]*)"/i);
+  return valorMatch ? parseLance(valorMatch[1]) : null;
+}
+
 // stripHtml, filtrarSegmentos, extrairDescricao, extrairEstadoFreitas → importados de ./_utils
 
-// ── Parseia campos do HTML de LoteDetalhes ────────────────────────────────────
+// ── Parseia campos do HTML de LoteDetalhes (estado/descrição/alertas — server-side) ─
+// Status e valor NÃO vêm aqui: são preenchidos por AJAX (buscarStatus/buscarMaiorLance).
 function parseLoteDetalhes(html) {
-  // STATUS — SOMENTE dentro de <div class="text-success|text-danger">
-  // ⚠️ Não buscar no texto solto (há "VENDIDO/CONDICIONAL" nas condições gerais)
-  const statusMatch = html.match(
-    /<div[^>]*class="[^"]*text-(?:success|danger)[^"]*"[^>]*>\s*(VENDIDO|CONDICIONAL|ABERTO|N[ÃA]O\s*VENDIDO|ENCERRADO|DESERTO)\s*<\/div>/i
-  );
-  const statusRaw = statusMatch ? statusMatch[1].replace(/\s+/g, ' ').trim().toUpperCase() : null;
-  let statusArrematado = null;
-  if (statusRaw === 'VENDIDO')    statusArrematado = 'vendido';
-  else if (statusRaw === 'CONDICIONAL') statusArrematado = 'condicional';
-  // ABERTO / NÃO VENDIDO / ENCERRADO / DESERTO → null (não grava arrematado)
-
-  // VALOR — maior lance (label e número podem estar separados por tags/quebras)
-  const valorMatch = html.match(/Maior\s*lance[\s\S]{0,200}?R\$\s*([\d.]+,\d{2})/i);
-  const valor      = valorMatch ? parseLance(valorMatch[1]) : null;
-
   // ESTADO/UF — BUG 3: regex tolerante a tags + UF no final da string
   const estado = extrairEstadoFreitas(html);
 
@@ -127,7 +148,7 @@ function parseLoteDetalhes(html) {
   const alertasArr = detectarAlertas(descricaoResumo || '');
   const alertas    = alertasArr.length > 0 ? alertasArr.join(',') : null;
 
-  return { statusArrematado, valor, estado, descricaoResumo, alertas };
+  return { estado, descricaoResumo, alertas };
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -174,8 +195,8 @@ async function main() {
     let vendido = 0, condicional = 0, pulado = 0, comAlertas = 0, estadoPreenchido = 0;
     let falhasConsec = 0;
 
-    for (const moto of motosFreitas) {
-      const html = await fetchDetalhes(moto.url);
+    for (const [idx, moto] of motosFreitas.entries()) {
+      const html = await fetchComRetry(moto.url);
       if (!html) {
         console.warn(`    ⚠️ Sem HTML para moto ${moto.id} — pulando`);
         pulado++;
@@ -189,7 +210,22 @@ async function main() {
       }
       falhasConsec = 0;
 
-      const { statusArrematado, valor, estado, descricaoResumo, alertas } = parseLoteDetalhes(html);
+      const { estado, descricaoResumo, alertas } = parseLoteDetalhes(html);
+
+      // STATUS/VALOR via AJAX — não estão no HTML server-side (preenchidos por JS)
+      let statusArrematado = null;
+      let valor = null;
+      const ids = extrairIds(moto.url);
+      if (ids) {
+        const statusNome = await buscarStatus(ids.leilaoId, ids.loteNumero);
+        if (statusNome === 'VENDIDO')         statusArrematado = 'vendido';
+        else if (statusNome === 'CONDICIONAL') statusArrematado = 'condicional';
+        // ABERTO / NÃO VENDIDO / ENCERRADO / DESERTO → null (não grava arrematado)
+
+        if (statusArrematado) valor = await buscarMaiorLance(ids.leilaoId, ids.loteNumero);
+
+        if (idx < 3) console.log(`    [DEBUG lote ${ids.loteNumero}] status=${statusNome} valor=${valor}`);
+      }
 
       // Grava arrematado (DELETE + INSERT para permitir reprocessamento)
       if (statusArrematado && valor != null) {
