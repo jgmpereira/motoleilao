@@ -253,6 +253,13 @@ O `freitas.js` (coleta) deleta motos que sumiram da listagem ativa. Mas motos de
 - **Estado/UF:** continua vindo do HTML server-side (isso nunca foi o problema) — "Local do leilão: ... / SP", UF no final, após último "/" ou "-". Regex `/[\/-]\s*([A-Z]{2})\s*$/` + valida com extrairUF. (O "local" do leilão no banco é "Online"; o estado real vem daqui.)
 - **Custo:** até 3 requests por lote (HTML da página + status + lance, o último só se vendido/condicional) em vez de 1. Só chamar `RetornarMaiorLanceLote` quando o status já indicar venda evita gastar request em lote ABERTO.
 
+> **Resiliência de rede (freitas-encerrados.js):** o scraper visita 2-3 endpoints por lote (HTML da página + RetornarLoteStatus + RetornarMaiorLanceLote), então precisa se proteger contra lentidão/bloqueio do Freitas. Config atual:
+> - `httpGet` com **timeout de 12s** (era 30s — reduzido porque 30s×retries travava o run por dezenas de minutos quando o site engasgava).
+> - **2 tentativas** por request (era 3) → pior caso ~24s por lote em vez de ~90s.
+> - **Circuit breaker:** se **5 lotes consecutivos** falharem no fetch, o scraper assume que o site está bloqueando/fora do ar e **aborta o leilão graciosamente** (em vez de insistir por 40+ min). O contador zera a cada sucesso.
+> - Delay de ~500-800ms entre lotes (ser gentil com o servidor, evitar o rate-limit que causa os bloqueios).
+> - **Contexto:** rodar o scraper muitas vezes seguidas no mesmo dia tende a fazer o Freitas responder devagar/bloquear o IP do Actions. Se um run vier com muitos lotes pulados por falha de fetch (não por status ABERTO), provavelmente é bloqueio temporário — esperar o próximo cron (15h/20h30) em vez de insistir.
+
 ### Descrição resumida + alertas (CONFIRMADO Jun/2026)
 A descrição do lote é `[parte útil variável] ... SEM GARANTIAS QUANTO A ESTRUTURA [ladainha jurídica fixa]`.
 - **Resumo:** abordagem por ALLOWLIST — quebra o texto por " / ", mantém só trechos úteis (alertas, peças danificadas, "vendido no estado", "mecânica sem teste"), descarta trechos com ruído jurídico (DECLARA, PORTARIA, DETRAN, CONTRAN, ATPV, DOCUMENTAÇÃO, PRAZO, PAGAMENTO, TRANSFERÊNCIA, etc.). **IPVA simplificado** → "IPVA pago" / "IPVA por conta do comprador".
