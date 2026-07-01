@@ -195,7 +195,7 @@ async function main() {
     let vendido = 0, condicional = 0, pulado = 0, comAlertas = 0, estadoPreenchido = 0;
     let falhasConsec = 0;
 
-    for (const [idx, moto] of motosFreitas.entries()) {
+    for (const moto of motosFreitas) {
       const html = await fetchComRetry(moto.url);
       if (!html) {
         console.warn(`    ⚠️ Sem HTML para moto ${moto.id} — pulando`);
@@ -223,8 +223,6 @@ async function main() {
         // ABERTO / NÃO VENDIDO / ENCERRADO / DESERTO → null (não grava arrematado)
 
         if (statusArrematado) valor = await buscarMaiorLance(ids.leilaoId, ids.loteNumero);
-
-        if (idx < 3) console.log(`    [DEBUG lote ${ids.loteNumero}] status=${statusNome} valor=${valor}`);
       }
 
       // Grava arrematado (DELETE + INSERT para permitir reprocessamento)
