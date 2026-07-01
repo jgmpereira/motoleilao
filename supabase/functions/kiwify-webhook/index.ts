@@ -107,6 +107,79 @@ async function enviarEmailBoasVindas(email: string, senha: string): Promise<void
   }
 }
 
+const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') ?? 'jgmpereira123@gmail.com';
+
+async function enviarAvisoAdmin(assunto: string, linhas: Record<string, string>): Promise<void> {
+  const resendKey = Deno.env.get('RESEND_API_KEY');
+  if (!resendKey) {
+    console.warn('[kiwify-webhook] RESEND_API_KEY não configurada, aviso ao admin não enviado');
+    return;
+  }
+
+  const linhasHtml = Object.entries(linhas)
+    .map(
+      ([label, valor]) => `
+                  <tr>
+                    <td style="padding:8px 0;border-bottom:1px solid #eef0f3;">
+                      <span style="font-size:12px;color:#8a92a0;">${label}</span><br>
+                      <strong style="font-size:15px;color:#1a1d23;">${valor}</strong>
+                    </td>
+                  </tr>`,
+    )
+    .join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f0f2f5;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f2f5;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08);max-width:100%;">
+        <tr>
+          <td style="background:#ff4d00;padding:28px 40px;text-align:center;">
+            <span style="font-family:Georgia,serif;font-size:28px;font-weight:900;letter-spacing:4px;color:#ffffff;text-transform:uppercase;">MOTO<span style="color:#ffe0d0;">LEILÃO</span></span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:36px 40px 28px;">
+            <h2 style="margin:0 0 20px;font-size:20px;color:#1a1d23;">${assunto}</h2>
+            <table width="100%" cellpadding="0" cellspacing="0">${linhasHtml}
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 40px;border-top:1px solid #eef0f3;text-align:center;">
+            <p style="margin:0;font-size:11px;color:#b0b8c4;">Aviso automático &mdash; Equipe MotoLeilão</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${resendKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'MotoLeilão <contato@motoleiloes.com.br>',
+      to: [ADMIN_EMAIL],
+      subject: assunto,
+      html,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    console.error('[kiwify-webhook] erro ao enviar aviso ao admin via Resend:', err);
+  } else {
+    console.log(`[kiwify-webhook] 📧 aviso ao admin enviado: ${assunto}`);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
@@ -166,11 +239,13 @@ Deno.serve(async (req) => {
       console.log(`[kiwify-webhook] usuário já existente, email não reenviado: ${email}`);
     }
 
+    const planoFinal = plano.toLowerCase().includes('anual') ? 'anual' : 'mensal';
+
     const { error: dbError } = await supabase.from('assinantes').upsert(
       {
         email,
         status: 'ativo',
-        plano: plano.toLowerCase().includes('anual') ? 'anual' : 'mensal',
+        plano: planoFinal,
         data_inicio: new Date().toISOString(),
         kiwify_order_id: orderId ?? null,
         data_cancelamento: null,
@@ -183,6 +258,18 @@ Deno.serve(async (req) => {
     }
 
     console.log(`[kiwify-webhook] ✅ assinante ativado: ${email}`);
+
+    try {
+      await enviarAvisoAdmin('🎉 Novo assinante no MotoLeilão', {
+        'Email': email,
+        'Plano': planoFinal,
+        'Order ID': orderId ?? '—',
+        'Novo usuário?': isNewUser ? 'Sim (primeiro acesso)' : 'Reativação',
+        'Data': new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+      });
+    } catch (e) {
+      console.error('[kiwify-webhook] erro ao enviar aviso ao admin (novo assinante):', e);
+    }
   }
 
   // ── Cancelamento / reembolso ──────────────────────────────────────────────
@@ -200,6 +287,16 @@ Deno.serve(async (req) => {
     }
 
     console.log(`[kiwify-webhook] ⛔ assinante cancelado: ${email}`);
+
+    try {
+      await enviarAvisoAdmin('⛔ Assinante cancelou — MotoLeilão', {
+        'Email': email,
+        'Evento': event,
+        'Data': new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+      });
+    } catch (e) {
+      console.error('[kiwify-webhook] erro ao enviar aviso ao admin (cancelamento):', e);
+    }
   } else {
     console.log(`[kiwify-webhook] evento ignorado: ${event}`);
   }
