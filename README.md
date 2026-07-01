@@ -351,6 +351,7 @@ localStorage → Supabase (fipe_valores) → API externa
 - Edge Function deployada e testada
 - Cria usuário no Auth e registra em `assinantes` ao receber `order_approved`
 - Cancela acesso ao receber `order_refunded` ou `subscription_canceled`
+- **Aviso ao admin (Jul/2026):** ao receber `order_approved`/`subscription_active`, além de criar o usuário e ativar o assinante, o webhook envia um email de aviso ao admin (`jgmpereira123@gmail.com`) via Resend — assunto "🎉 Novo assinante" com email, plano, order_id, se é novo/reativação e data BRT. Também avisa em cancelamento (`order_refunded`/`subscription_canceled`) com "⛔ Assinante cancelou". Função `enviarAvisoAdmin()` envolvida em try/catch — falha no aviso nunca afeta a criação/cancelamento do assinante. **⚠️ Deploy:** a `kiwify-webhook` é Edge Function — mudanças exigem `supabase functions deploy kiwify-webhook` (o commit no repo NÃO atualiza produção sozinho). Supabase CLI não vem instalado no Codespaces; instalar com `npm install -g supabase --prefix ~/.npm-global` + `export PATH="$HOME/.npm-global/bin:$PATH"`, depois `supabase login` / `supabase link --project-ref ntlwhwmtsyniinbkwjgg` / `supabase functions deploy kiwify-webhook`
 - JWT desabilitado na função (pública, autenticada pelo token na query string)
 - Email de boas-vindas via Resend — enviado ao criar usuário na Edge Function, com link de definição de senha
 - Tela de login no dashboard — protege o acesso com email/senha via Supabase Auth
@@ -359,6 +360,7 @@ localStorage → Supabase (fipe_valores) → API externa
 - Landing page de vendas — página pública integrada no `index.html`, aparece na URL raiz antes do login; hero, 4 cards de funcionalidades, card de preço R$19,90/mês, botão Kiwify
 - Tela de assinatura expirada — tela dark com cadeado exibida quando `assinantes.status != ativo`; botão "Reativar assinatura" (Kiwify) e botão "Sair"; token salvo no localStorage para o usuário recuperar acesso após reativar sem precisar logar de novo
 - **Painel Admin (Jun/2026):** aba `⚙️ Admin` visível só para `jgmpereira123@gmail.com`; convida VIPs (cria no Auth + insere em assinantes + email via Resend) e revoga (deleta do Auth via `DELETE /auth/v1/admin/users/{id}` + apaga linha da tabela)
+- **Resumo de assinantes (Jul/2026):** no topo da aba `⚙️ Admin`, um painel de estatísticas mostra ativos, quebra por plano (mensal/anual/vip), cancelados e novos nos últimos 30 dias. Lê a tabela `assinantes` via `supaFetch` com o token do admin (RLS `admin_select_assinantes` já permite). Função `renderAdminStats()` no `index.html`; chamada ao abrir a aba admin e no botão "↻ Atualizar". Frontend puro (GitHub Pages) — commit+push já publica, sem deploy separado
 - **RLS (Jun/2026):** `fipe_marcas` com RLS + policy de leitura pública; políticas `admin_select/update_assinantes` para o email admin
 
 ### 🔲 Próximos passos — divulgação
