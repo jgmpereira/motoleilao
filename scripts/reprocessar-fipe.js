@@ -629,13 +629,17 @@ async function limparFipeValoresRuins() {
   const rows = await supaFetchAll('fipe_valores?select=id,lookup_key,marca_nome,modelo_nome,valor');
   console.log(`   ${rows.length} registros em fipe_valores`);
 
+  // Só a assinatura do bug (marca_nome com o texto cru do banco em vez do nome
+  // real da FIPE) é usada para apagar histórico. O teto por cilindrada é uma
+  // heurística grosseira (existem scooters premium — ADV 160, SXR 160 — cujo
+  // valor real passa dos ~25k para 160cc); aplicar esse teto aqui apagaria
+  // registros corretos. Ele só entra como trava em cima de matches NOVOS na
+  // Etapa 2, onde uma rejeição errada apenas pula a atualização (sem perda).
   const ruins = [];
   for (const r of rows) {
     const marcaSuspeita = r.marca_nome && r.marca_nome !== r.marca_nome.toUpperCase();
-    const cc = extrairCilindrada(r.modelo_nome) || extrairCilindrada(r.lookup_key);
-    const valorSuspeito = r.valor && r.valor > tetoPorCilindrada(cc);
-    if (marcaSuspeita || valorSuspeito) {
-      ruins.push({ ...r, motivo: marcaSuspeita ? 'marca_nome não é nome FIPE real' : `valor R$ ${Number(r.valor).toLocaleString('pt-BR')} > teto para ~${cc}cc` });
+    if (marcaSuspeita) {
+      ruins.push({ ...r, motivo: 'marca_nome não é nome FIPE real' });
     }
   }
 
