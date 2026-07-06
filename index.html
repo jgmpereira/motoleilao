@@ -2811,40 +2811,29 @@ function normFipe(s) {
     .trim();
 }
 
-// Pontua similaridade entre string do modelo FIPE e termo buscado
+// Pontua similaridade entre string do modelo FIPE e termo buscado.
+// Cobertura de tokens da query no nome FIPE, penalizando tokens extras
+// (nomes FIPE "inchados") e divergência de número/cilindrada (erro grave).
 function scoreModelo(fipeNome, termo) {
   const fn = normFipe(fipeNome);
   const mn = normFipe(termo);
   if(fn === mn) return 1000;
-  // Tiebreak por tamanho: modelo FIPE mais curto (menos tokens extras) ganha
-  const tokensFipeLen = fn.split(/\s+/).filter(p => p.length > 0).length;
-  if(fn.includes(mn)) return 800 - tokensFipeLen;
-  if(mn.includes(fn)) return 700 - tokensFipeLen;
 
   const tokensQuery = mn.split(/\s+/).filter(p => p.length > 0);
   const tokensFipe  = fn.split(/\s+/).filter(p => p.length > 0);
 
-  let score = 0;
   let matched = 0;
   for(const t of tokensQuery) {
-    if(tokensFipe.includes(t)) {
-      // Números e siglas curtas valem mais
-      const isNum = /^\d+$/.test(t);
-      const isShort = t.length <= 2;
-      score += isNum ? t.length * 15 : isShort ? 5 : t.length * 4;
-      matched++;
-    } else if(tokensFipe.some(f => f.startsWith(t) || t.startsWith(f))) {
-      score += 2;
-      matched++;
-    }
+    if(tokensFipe.includes(t)) matched += 1;
+    else if(tokensFipe.some(f => f.startsWith(t) || t.startsWith(f))) matched += 0.5;
   }
-  // Penaliza se poucos tokens bateram
-  if(matched === 0) return 0;
   const coverage = matched / tokensQuery.length;
-  if(coverage < 0.5) score = Math.floor(score * 0.3);
+  const extra = Math.max(0, tokensFipe.length - tokensQuery.length);
+  let score = coverage * 100 - extra * 3;
 
-  // Bônus se começa igual
-  if(fn.startsWith(tokensQuery[0] || '')) score += 20;
+  // Números (cilindrada) precisam bater — "160" != "150" é erro grave
+  const nums = tokensQuery.filter(t => /^\d{2,4}$/.test(t));
+  for(const n of nums) { if(!tokensFipe.includes(n)) score -= 40; }
 
   return score;
 }
@@ -2959,9 +2948,8 @@ async function buscarFipe(m, forcedRefresh = false) {
         .filter(x => x.score > 0)
         .sort((a,b) => b.score - a.score
           || normFipe(a.x.nome).split(/\s+/).length - normFipe(b.x.nome).split(/\s+/).length);
-      // Score mínimo dinâmico: modelos curtos exigem menos pontos
-      const nTokens = normFipe(tentativa).split(/\s+/).filter(p => p.length > 0).length;
-      const minScore = nTokens <= 1 ? 15 : nTokens === 2 ? 22 : 30;
+      // Score mínimo: nova escala é ~0-100 por cobertura de tokens (1000 = match exato)
+      const minScore = 55;
       if(scored.length && scored[0].score >= minScore) {
         modeloObj = scored[0].x;
         // guarda alternativas com score próximo (até 30% abaixo do melhor) para desambiguação por ano
