@@ -136,10 +136,10 @@ Ficam em `.env` na raiz (recriar se Codespaces resetar) e nos Secrets do reposit
 | `scrapers/superbid.js` | Superbid | REST JSON paginado, 3 estratégias de parsing | 7h diário |
 | `scrapers/superbid-encerrados.js` | Superbid (encerrados) | Página SSR `/oferta/{id}` (`__NEXT_DATA__`); sinal `hasBids`, valor = `currentMaxBid` | 21h diário |
 | `scrapers/copart.js` | Copart | **Playwright obrigatório** — WAF Imperva bloqueia fetch direto | 6h50 diário |
-| `scripts/atualizar-fipe-mensal.js` | FIPE | API v2 parallelum + `X-Subscription-Token` — roda no workflow `fipe-mensal.yml` | Dia 1/mês 7h |
+| `scripts/fipe-diario.js` | FIPE | Orquestra `popular-fipe.js` (motos novas, prioridade) + `atualizar-fipe-mensal.js` (preços velhos), cota compartilhada — roda no workflow `fipe-diario.yml` | 9h diário |
 | `scripts/backup-supabase.js` | Backup | Exporta tabelas críticas → `backups/YYYY-MM-DD/` | 3h diário |
 
-> `scripts/popular-fipe.js` e `scripts/reprocessar-fipe.js` também usam a API v2 autenticada, mas são scripts manuais (backfill/correção pontual) — não rodam em nenhum workflow.
+> `scripts/popular-fipe.js` e `scripts/atualizar-fipe-mensal.js` também podem rodar isolados (`node scripts/popular-fipe.js`), cada um com sua própria cota de 900/dia — mas em produção rodam sempre via `fipe-diario.js`. `scripts/reprocessar-fipe.js` é manual (correção pontual), não roda em nenhum workflow.
 
 ### Atenções por scraper
 
@@ -149,7 +149,7 @@ Ficam em `.env` na raiz (recriar se Codespaces resetar) e nos Secrets do reposit
 
 **Superbid encerrados:** NÃO usa o feed `searchType=closed` (pool de SEO randômico, não-paginável e desatualizado). Busca cada oferta por `www.superbid.net/oferta/{offerId}` (offerId vem de `motos.url`) e lê `props.pageProps.offerDetails.offers[0]` do `__NEXT_DATA__`. É idempotente (pula motos já arrematadas) e não depende da flag `encerrado` — processa janela de 7 dias para evitar corrida com o `superbid.js` ativo (que fecha leilões passados às 7h). `winnerBid` só popula dias depois → usar `hasBids` como sinal. `statusId 11` = condicional; demais encerrados com lances = vendido. **Obs:** o `superbid.js` ativo gera linhas de moto duplicadas apontando para poucos offerIds — o encerrados grava o resultado correto por moto, mas a duplicação é upstream.
 
-**Scripts FIPE (resolvido Jul/2026):** `atualizar-fipe-mensal.js` (workflow mensal), `popular-fipe.js` e `reprocessar-fipe.js` (manuais) migrados pra API v2 autenticada (`FIPE_TOKEN`) — corrigido o parsing (modelos/anos como array direto, não objeto `{modelos:[...]}`) e os nomes de campo da resposta (`price`/`brand`/`model`/`codeFipe`/`referenceMonth`, não os nomes v1 `Valor`/`Marca`/`Modelo`/`CodigoFipe`/`MesReferencia`). `popular-fipe.js` e `reprocessar-fipe.js` também ganharam trava de ~900 requisições/dia e compartilham a lista de falhas conhecidas `scripts/fipe-nao-encontrados.json`.
+**Scripts FIPE (resolvido Jul/2026):** `atualizar-fipe-mensal.js`, `popular-fipe.js` e `reprocessar-fipe.js` migrados pra API v2 autenticada (`FIPE_TOKEN`) — corrigido o parsing (modelos/anos como array direto, não objeto `{modelos:[...]}`) e os nomes de campo da resposta (`price`/`brand`/`model`/`codeFipe`/`referenceMonth`, não os nomes v1 `Valor`/`Marca`/`Modelo`/`CodigoFipe`/`MesReferencia`). Automação diária (Jul/2026): `scripts/fipe-diario.js` orquestra `popular-fipe.js` (fase 1, prioridade — motos novas sem preço) e `atualizar-fipe-mensal.js` (fase 2 — preços desatualizados) no mesmo processo Node, compartilhando a cota via `scripts/fipe-budget.js` (objeto `{count,limit}` cacheado pelo `require()`, teto ~900 req/dia somadas). Cada script isolado ainda funciona sozinho com sua própria cota de 900/dia (uso manual). Os três compartilham `scripts/fipe-nao-encontrados.json` como lista de falhas conhecidas.
 
 ---
 

@@ -127,15 +127,20 @@ Dashboard de monitoramento de leilões de moto.
 - **Agendamento:** Todo dia às 06:50 BRT (`50 9 * * *` UTC)
 - **Workflow:** `.github/workflows/scraper-copart.yml`
 
-### `scripts/atualizar-fipe-mensal.js` — Atualização FIPE mensal
-- **O que faz:** Atualiza `fipe_valores` com o preço do mês atual (API v2 autenticada, `X-Subscription-Token: FIPE_TOKEN`)
-- **Agendamento:** Dia 1 de cada mês às 7h BRT
-- **Workflow:** `.github/workflows/fipe-mensal.yml`
+### `scripts/fipe-diario.js` — Orquestrador FIPE diário
+- **O que faz:** Roda, no mesmo processo, `popular-fipe.js` (motos novas sem preço — prioridade) e depois `atualizar-fipe-mensal.js` (preços desatualizados do mês anterior — com a cota que restar)
+- **Cota compartilhada:** `scripts/fipe-budget.js` — objeto único (`{count, limit}`) cacheado pelo `require()` do Node, visto pelos dois scripts no mesmo processo; teto ~900 requisições/dia somadas
+- **Agendamento:** Diário às 9h BRT (depois dos scrapers da manhã)
+- **Workflow:** `.github/workflows/fipe-diario.yml`
 
-### `scripts/popular-fipe.js` — Pré-popular FIPE (backfill manual)
-- **O que faz:** Busca FIPE (API v2 autenticada) de todas as motos sem valor FIPE no banco
-- **Não roda em workflow** — script manual, rodado sob demanda (`node scripts/popular-fipe.js`)
-- **Trava:** ~900 requisições/dia + lista de falhas conhecidas (`scripts/fipe-nao-encontrados.json`, compartilhada com `scripts/reprocessar-fipe.js`)
+### `scripts/popular-fipe.js` — Pré-popular FIPE
+- **O que faz:** Busca FIPE (API v2 autenticada) das motos sem valor FIPE no banco, agrupadas por modelo único
+- **Roda:** via `fipe-diario.js` (fase 1) ou isolado (`node scripts/popular-fipe.js`, cota própria de 900/dia)
+- **Trava:** lista de falhas conhecidas (`scripts/fipe-nao-encontrados.json`, compartilhada com `scripts/reprocessar-fipe.js`)
+
+### `scripts/atualizar-fipe-mensal.js` — Atualização FIPE mensal
+- **O que faz:** Atualiza `fipe_valores` com o preço do mês atual; retomada automática via `referencia_mes`/`referencia_ano` (só gravados no sucesso)
+- **Roda:** via `fipe-diario.js` (fase 2) ou isolado (`node scripts/atualizar-fipe-mensal.js`, cota própria de 900/dia)
 
 ### `scripts/backup-supabase.js` — Backup diário
 - **O que faz:** Exporta todas as tabelas críticas como JSON para `backups/YYYY-MM-DD/`
@@ -157,7 +162,7 @@ Dashboard de monitoramento de leilões de moto.
 | `scraper-vip.yml` | Scraper VIP Leilões | 6h40 diário |
 | `scraper-superbid.yml` | Scraper Superbid | 7h diário |
 | `scraper-copart.yml` | Scraper Copart Brasil (Playwright) | 6h50 diário |
-| `fipe-mensal.yml` | Atualização FIPE (`atualizar-fipe-mensal.js`) | 7h dia 1 do mês |
+| `fipe-diario.yml` | Atualização FIPE (`fipe-diario.js`: novas + mensal) | 9h diário |
 | `backup-supabase.yml` | Backup das tabelas do Supabase | 3h diário |
 
 ---
