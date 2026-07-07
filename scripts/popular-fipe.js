@@ -2,25 +2,39 @@
 'use strict';
 
 /**
- * Script de pré-população de FIPE
+ * Script de pré-população de FIPE (backfill manual — não é chamado por
+ * nenhum workflow do GitHub Actions)
  * Busca FIPE de todas as motos sem fipe_csv e salva no banco
+ *
+ * Uso:
+ *   node scripts/popular-fipe.js             # grava no banco
+ *   DRY_RUN=1 node scripts/popular-fipe.js   # só loga, não grava nada
  */
 
-const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
-const SUPA_KEY = process.env.SUPABASE_KEY;
-const FIPE_BASE = 'https://fipe.parallelum.com.br/api/v2/motorcycles';
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
 
-if (!SUPA_KEY) { console.error('❌ SUPABASE_KEY não definido'); process.exit(1); }
+const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
+const SUPA_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
+const FIPE_BASE = 'https://fipe.parallelum.com.br/api/v2/motorcycles';
+const DRY_RUN = process.env.DRY_RUN === '1';
+
+// Trava de cota diária da API FIPE — conta requisições HTTP reais (não
+// modelos), igual ao reprocessar-fipe.js.
+const REQ_LIMIT = parseInt(process.env.REQ_LIMIT || '900', 10);
+let reqCount = 0;
+
+if (!SUPA_KEY) { console.error('❌ SUPABASE_SERVICE_KEY (ou SUPABASE_KEY) não definido'); process.exit(1); }
 
 // Cache em memória
-const _marcasCache = null;
 let _marcas = null;
 const _modelosCache = {};
 const _anosCache = {};
 
 function normFipe(s) {
   return (s || '').toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/([a-z])(\d)/g, '$1 $2')
     .replace(/(\d)([a-z])/g, '$1 $2')
     .replace(/[^a-z0-9\s]/g, ' ')
@@ -41,8 +55,11 @@ const FIPE_HEADERS = process.env.FIPE_TOKEN
   ? { 'X-Subscription-Token': process.env.FIPE_TOKEN }
   : {};
 
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
 async function apiFetch(url) {
   for (let attempt = 0; attempt < 2; attempt++) {
+    reqCount++;
     try {
       const r = await fetch(url, { headers: FIPE_HEADERS });
       if (r.status === 429) {
@@ -87,8 +104,6 @@ async function supaFetch(path, opts = {}) {
   return JSON.parse(text);
 }
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
 function scoreModelo(nome, termo) {
   const n = normFipe(nome);
   const t = normFipe(termo);
@@ -105,38 +120,31 @@ function scoreModelo(nome, termo) {
   return cobertura * 100 - excesso * 2;
 }
 
-let _debugDone = false;
+function fipeKey(m) { return `${m.marca}|${m.modelo}|${(m.ano || '').split('/')[0]}`; }
 
-async function buscarFipe(marca, modelo, ano) {
-  // Carrega marcas
+async function buscarModeloFipe(m) {
+  const marca = m.marca, modelo = m.modelo, ano = m.ano;
+
+  // Carrega marcas (v2 retorna array direto de {code,name})
   if (!_marcas) {
     const rawMarcas = await apiFetch(`${FIPE_BASE}/brands`);
-    if (!_debugDone) {
-      console.log('\n[DEBUG] Raw response /brands:', JSON.stringify(rawMarcas).slice(0, 300));
-      console.log('[DEBUG] Type:', Array.isArray(rawMarcas) ? `array[${rawMarcas?.length}]` : typeof rawMarcas);
-      if (rawMarcas && rawMarcas[0]) console.log('[DEBUG] Primeiro item:', JSON.stringify(rawMarcas[0]));
-      _debugDone = true;
-    }
+    if (!Array.isArray(rawMarcas)) return { erro: 'não foi possível carregar marcas FIPE' };
     _marcas = rawMarcas;
-    if (!_marcas) return null;
   }
 
   const marcaLimpa = normFipe(marca.replace(/\/[a-z]+\d*/gi, '').trim());
   const marcaObj = _marcas.find(x => normFipe(x.name) === marcaLimpa)
     || _marcas.find(x => normFipe(x.name).includes(marcaLimpa))
     || _marcas.find(x => marcaLimpa.includes(normFipe(x.name)));
-  if (!marcaObj) return null;
+  if (!marcaObj) return { erro: 'marca não encontrada' };
 
-  // Carrega modelos
+  // Carrega modelos (v2 retorna array direto de {code,name})
   if (!_modelosCache[marcaObj.code]) {
     const r = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.code}/models`);
-    if (Object.keys(_modelosCache).length === 0) {
-      console.log(`\n[DEBUG] Raw response /models (${marcaObj.name}):`, JSON.stringify(r).slice(0, 400));
-      console.log('[DEBUG] Chaves do objeto:', r ? Object.keys(r) : 'null');
-    }
-    _modelosCache[marcaObj.code] = r ? (r.models ?? r.modelos ?? r) : [];
+    _modelosCache[marcaObj.code] = Array.isArray(r) ? r : [];
   }
   const modelos = _modelosCache[marcaObj.code];
+  if (!modelos.length) return { erro: 'sem modelos para a marca' };
 
   // Termos de busca
   const sinonKey1 = `${marcaLimpa}|${normFipe(modelo)}`;
@@ -144,18 +152,15 @@ async function buscarFipe(marca, modelo, ano) {
   const termoBusca = SINONIMOS[sinonKey1] || SINONIMOS[sinonKey2] || normFipe(modelo);
 
   const tentativas = [termoBusca];
-  
-  // Fallback sem sufixos
+
   const semSufixo = normFipe(termoBusca)
     .replace(/\b(abs|cbs|es|esd|esdi|adv|sed|seds|plus|sport|dlx|pro|limited|edition|ed|ex|ks|fan|titan|start|cargo)\b/g, '')
     .replace(/\s+/g, ' ').trim();
   if (semSufixo !== termoBusca && semSufixo.length > 2) tentativas.push(semSufixo);
 
-  // Fallback letra+número
   const numMatch = normFipe(modelo).match(/^([a-z]+[\s]?\d+)/);
   if (numMatch && !tentativas.includes(numMatch[1])) tentativas.push(numMatch[1]);
 
-  // Fallback sigla + número de qualquer posição
   const palavras = normFipe(modelo).split(/\s+/);
   const primeiraLetra = palavras.find(p => /^[a-z]+$/.test(p));
   const primeiroNum = normFipe(modelo).match(/\d{2,}/);
@@ -177,18 +182,17 @@ async function buscarFipe(marca, modelo, ano) {
       break;
     }
   }
-  if (!modeloObj) return null;
+  if (!modeloObj) return { erro: 'modelo não encontrado', tentativas };
 
-  // Carrega anos
+  // Carrega anos (v2 retorna array direto de {code,name})
   const anosKey = `${marcaObj.code}_${modeloObj.code}`;
   if (!_anosCache[anosKey]) {
     const r = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.code}/models/${modeloObj.code}/years`);
-    _anosCache[anosKey] = r || [];
+    _anosCache[anosKey] = Array.isArray(r) ? r : [];
   }
   const anos = _anosCache[anosKey];
-  if (!anos.length) return null;
+  if (!anos.length) return { erro: 'sem anos disponíveis' };
 
-  // Encontra ano
   const anoFab = (ano || '').split('/')[0].replace(/\D/g, '');
   let anoObj = anos.find(a => a.name.startsWith(anoFab))
     || anos.find(a => a.name.includes(anoFab));
@@ -203,91 +207,173 @@ async function buscarFipe(marca, modelo, ano) {
     if (comAno.length && Math.abs(comAno[0].y - target) <= 3) anoObj = comAno[0].a;
   }
   if (!anoObj) anoObj = anos[0];
-  if (!anoObj) return null;
+  if (!anoObj) return { erro: 'ano não resolvido' };
 
-  // Busca valor
+  // Busca valor — campos v2: price/brand/model/codeFipe/referenceMonth/fuel
   const dados = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.code}/models/${modeloObj.code}/years/${anoObj.code}`);
-  if (!dados || !dados.Valor) return null;
-  
-  const val = parseFloat(dados.Valor.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
-  
+  if (!dados || !dados.price) return { erro: 'valor não retornado pela API' };
+
+  const valor = parseFloat(dados.price.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
+
   return {
-    valor: val,
+    valor,
     marcaCodigo: marcaObj.code,
     modeloCodigo: modeloObj.code,
-    codigoFipe: dados.CodigoFipe,
-    modeloNome: modeloObj.name,
+    modeloNomeFipe: dados.model,
+    marcaNomeFipe: dados.brand,
+    codigoFipe: dados.codeFipe,
+    mesReferencia: dados.referenceMonth,
+    combustivel: dados.fuel,
   };
 }
 
-async function main() {
-  console.log('🏍️  Pré-população FIPE iniciando...\n');
+// ===================== LISTA DE FALHAS CONHECIDAS (compartilhada com reprocessar-fipe.js) =====================
 
-  // Busca motos sem fipe_csv
+const SKIP_LIST_PATH = path.join(__dirname, 'fipe-nao-encontrados.json');
+
+function loadSkipList() {
+  try {
+    const arr = JSON.parse(fs.readFileSync(SKIP_LIST_PATH, 'utf8'));
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveSkipList(set) {
+  if (DRY_RUN) return;
+  fs.writeFileSync(SKIP_LIST_PATH, JSON.stringify([...set].sort(), null, 2) + '\n');
+}
+
+function commitESendSkipList() {
+  if (DRY_RUN) return;
+  const cwd = path.join(__dirname, '..');
+  try {
+    const status = execSync('git status --porcelain -- scripts/fipe-nao-encontrados.json', { cwd }).toString().trim();
+    if (!status) { console.log('\n(lista de falhas sem mudanças — commit pulado)'); return; }
+    execSync('git add scripts/fipe-nao-encontrados.json', { cwd });
+    execSync(`git commit -m ${JSON.stringify('chore: atualiza lista de modelos FIPE não encontrados (pré-população manual)')}`, { cwd });
+    execSync('git push', { cwd });
+    console.log('\n✅ scripts/fipe-nao-encontrados.json commitado e enviado (git push).');
+  } catch (e) {
+    console.error('\n⚠️  falha ao commitar/enviar lista de falhas:', e.message.split('\n')[0]);
+  }
+}
+
+// ===================== PERSISTÊNCIA =====================
+
+const MESES_PT = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+async function salvarFipeValores(m, resultado) {
+  const key = fipeKey(m);
+  const mesRef = (resultado.mesReferencia || '').trim();
+  const partes = mesRef.toLowerCase().split(' de ');
+  const refMes = MESES_PT.indexOf(partes[0]) + 1 || null;
+  const refAno = partes[1] ? parseInt(partes[1]) : new Date().getFullYear();
+  const anoFab = parseInt((m.ano || '').split('/')[0]) || null;
+
+  const payload = {
+    marca_codigo: String(resultado.marcaCodigo),
+    modelo_codigo: String(resultado.modeloCodigo),
+    ano_modelo: anoFab,
+    combustivel: resultado.combustivel || null,
+    valor: resultado.valor,
+    mes_referencia: resultado.mesReferencia || null,
+    codigo_fipe: resultado.codigoFipe || null,
+    lookup_key: key,
+    marca_nome: resultado.marcaNomeFipe || null,
+    modelo_nome: resultado.modeloNomeFipe || null,
+    referencia_mes: refMes,
+    referencia_ano: refAno,
+  };
+
+  if (DRY_RUN) return;
+  await supaFetch('fipe_valores?on_conflict=lookup_key', {
+    method: 'POST',
+    prefer: 'resolution=merge-duplicates,return=minimal',
+    body: JSON.stringify(payload),
+  });
+}
+
+async function main() {
+  console.log(`🏍️  Pré-população FIPE${DRY_RUN ? ' — DRY RUN (nada será gravado)' : ''} iniciando...\n`);
+
   const motos = await supaFetch(
     'motos?fipe_csv=is.null&marca=not.is.null&modelo=not.is.null&select=id,marca,modelo,ano,leilao_id',
     { prefer: 'return=representation' }
   );
+  console.log(`📋 ${motos.length} motos sem FIPE`);
 
-  console.log(`📋 ${motos.length} motos sem FIPE\n`);
-
-  let ok = 0, falhou = 0, i = 0;
-
+  // Agrupa por modelo único (marca|modelo|ano) — evita reconsultar a API pra
+  // cada moto individual, igual ao reprocessar-fipe.js.
+  const grupos = new Map();
   for (const m of motos) {
+    const key = fipeKey(m);
+    if (!grupos.has(key)) grupos.set(key, { m, ids: [] });
+    grupos.get(key).ids.push(m.id);
+  }
+  console.log(`   ${grupos.size} modelos únicos (marca|modelo|ano) a processar`);
+
+  const skipSet = loadSkipList();
+  console.log(`   ${skipSet.size} já na lista de falhas conhecidas (serão pulados sem custo de cota)\n`);
+
+  let ok = 0, falhou = 0, pulados = 0, i = 0;
+  let cortadoPorCota = false;
+  const total = grupos.size;
+
+  for (const [key, g] of grupos) {
     i++;
-    process.stdout.write(`[${i}/${motos.length}] ${m.marca} ${m.modelo} ${m.ano} ... `);
 
+    if (skipSet.has(key)) { pulados++; continue; }
+
+    if (reqCount >= REQ_LIMIT) {
+      console.log(`\n🛑 Trava de cota acionada (${reqCount}/${REQ_LIMIT} requisições) — parando em [${i}/${total}].`);
+      cortadoPorCota = true;
+      break;
+    }
+
+    const { m, ids } = g;
+    process.stdout.write(`[${i}/${total}] ${key} (${ids.length} motos) ... `);
+
+    let resultado;
     try {
-      const result = await buscarFipe(m.marca, m.modelo, m.ano);
-      
-      if (result) {
-        // Salva fipe_csv na moto (prioritário)
-        await supaFetch(`motos?id=eq.${m.id}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ fipe_csv: result.valor }),
-        });
+      resultado = await buscarModeloFipe(m);
+    } catch (e) {
+      resultado = { erro: e.message };
+    }
 
-        // Salva em fipe_valores para cache futuro (erro 409 não impede o fipe_csv)
-        try {
-        const mesAtual = new Date().getMonth() + 1;
-        const anoAtual = new Date().getFullYear();
-        const lookupKey = `${m.marca}|${m.modelo}|${(m.ano||'').split('/')[0].replace(/\D/g,'')}`;
-        
-        await supaFetch('fipe_valores?on_conflict=lookup_key', {
-          method: 'POST',
-          body: JSON.stringify({
-            marca_codigo: String(result.marcaCodigo),
-            modelo_codigo: String(result.modeloCodigo),
-            ano_modelo: parseInt((m.ano||'').split('/')[0]) || 0,
-            combustivel: 'Gasolina',
-            valor: result.valor,
-            mes_referencia: `${String(mesAtual).padStart(2,'0')}/${anoAtual}`,
-            lookup_key: lookupKey,
-            codigo_fipe: result.codigoFipe || '',
-            marca_nome: m.marca,
-            modelo_nome: m.modelo,
-            referencia_mes: mesAtual,
-            referencia_ano: anoAtual,
-          }),
-          prefer: 'resolution=merge-duplicates,return=minimal',
-        });
-        } catch(cacheErr) { /* ignora erro de cache duplicado */ }
-
-        console.log(`✅ R$ ${result.valor.toLocaleString('pt-BR')}`);
-        ok++;
-      } else {
-        console.log(`❌ não encontrado`);
-        falhou++;
-      }
-    } catch(e) {
-      console.log(`❌ erro: ${e.message}`);
+    if (resultado.erro) {
+      console.log(`❌ não encontrado (${resultado.erro})`);
       falhou++;
+      skipSet.add(key);
+      await sleep(200);
+      continue;
+    }
+
+    console.log(`✅ "${resultado.modeloNomeFipe}" R$ ${resultado.valor.toLocaleString('pt-BR')}`);
+    ok++;
+
+    if (!DRY_RUN) {
+      await supaFetch(`motos?id=in.(${ids.join(',')})`, {
+        method: 'PATCH',
+        body: JSON.stringify({ fipe_csv: resultado.valor }),
+      });
+    }
+    try {
+      await salvarFipeValores(m, resultado);
+    } catch (e) {
+      console.log(`   ⚠️  fipe_valores não gravado (${e.message.split('\n')[0]})`);
     }
 
     await sleep(200);
   }
 
-  console.log(`\n✅ Concluído: ${ok} encontrados, ${falhou} não encontrados de ${motos.length} total`);
+  saveSkipList(skipSet);
+  commitESendSkipList();
+
+  console.log(`\n✅ Pré-população ${cortadoPorCota ? 'interrompida pela trava de cota' : 'concluída'}: ${ok} encontrados, ${falhou} não encontrados, ${pulados} pulados (falha conhecida) — de ${total} modelos únicos.`);
+  console.log(`   Requisições usadas: ${reqCount}/${REQ_LIMIT}`);
 }
 
 main().catch(e => { console.error('Fatal:', e.message); process.exit(1); });
