@@ -12,6 +12,12 @@ const SUPA_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
 const FIPE_BASE = 'https://fipe.parallelum.com.br/api/v2/motorcycles';
 const DRY_RUN = process.env.DRY_RUN === '1';
 
+// Trava de cota diária — compartilhada com popular-fipe.js quando os dois
+// rodam no mesmo processo via scripts/fipe-diario.js (ver fipe-budget.js).
+// A retomada continua via referencia_mes/referencia_ano (só gravados no
+// sucesso) — parar aqui no meio não quebra isso, o resto fica pra amanhã.
+const budget = require('./fipe-budget');
+
 if (!SUPA_KEY) { console.error('❌ SUPABASE_SERVICE_KEY (ou SUPABASE_KEY) não definido'); process.exit(1); }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -22,6 +28,7 @@ const FIPE_HEADERS = process.env.FIPE_TOKEN
 
 async function apiFetch(url) {
   for (let attempt = 0; attempt < 2; attempt++) {
+    budget.count++;
     try {
       const r = await fetch(url, { headers: FIPE_HEADERS });
       if (r.status === 429) {
@@ -113,10 +120,19 @@ async function main() {
     return;
   }
 
-  let ok = 0, erros = 0, nullConsec = 0;
+  let ok = 0, erros = 0, nullConsec = 0, pulados = 0;
+  let cortadoPorCota = false;
 
   for (let i = 0; i < paraAtualizar.length; i++) {
     const r = paraAtualizar[i];
+
+    if (budget.count >= budget.limit) {
+      console.log(`\n🛑 Trava de cota acionada (${budget.count}/${budget.limit} requisições) — parando em [${i+1}/${paraAtualizar.length}]. Resto fica pra amanhã (referencia_mes/ano não gravados).`);
+      cortadoPorCota = true;
+      pulados = paraAtualizar.length - i;
+      break;
+    }
+
     process.stdout.write(`[${i+1}/${paraAtualizar.length}] lookup: ${r.lookup_key} ... `);
 
     try {
@@ -165,7 +181,12 @@ async function main() {
     await sleep(delay);
   }
 
-  console.log(`\n✅ Concluído: ${ok} atualizados, ${erros} erros de ${paraAtualizar.length} total`);
+  console.log(`\n${cortadoPorCota ? '🛑 Interrompido pela trava de cota' : '✅ Concluído'}: ${ok} atualizados, ${erros} erros, ${pulados} deixados pra amanhã — de ${paraAtualizar.length} total.`);
+  console.log(`   Requisições usadas: ${budget.count}/${budget.limit}`);
 }
 
-main().catch(e => { console.error('Fatal:', e.message); process.exit(1); });
+module.exports = { run: main };
+
+if (require.main === module) {
+  main().catch(e => { console.error('Fatal:', e.message); process.exit(1); });
+}

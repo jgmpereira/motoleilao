@@ -21,9 +21,9 @@ const FIPE_BASE = 'https://fipe.parallelum.com.br/api/v2/motorcycles';
 const DRY_RUN = process.env.DRY_RUN === '1';
 
 // Trava de cota diária da API FIPE — conta requisições HTTP reais (não
-// modelos), igual ao reprocessar-fipe.js.
-const REQ_LIMIT = parseInt(process.env.REQ_LIMIT || '900', 10);
-let reqCount = 0;
+// modelos). Objeto compartilhado com atualizar-fipe-mensal.js quando os dois
+// rodam no mesmo processo via scripts/fipe-diario.js (ver fipe-budget.js).
+const budget = require('./fipe-budget');
 
 if (!SUPA_KEY) { console.error('❌ SUPABASE_SERVICE_KEY (ou SUPABASE_KEY) não definido'); process.exit(1); }
 
@@ -59,7 +59,7 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function apiFetch(url) {
   for (let attempt = 0; attempt < 2; attempt++) {
-    reqCount++;
+    budget.count++;
     try {
       const r = await fetch(url, { headers: FIPE_HEADERS });
       if (r.status === 429) {
@@ -327,8 +327,8 @@ async function main() {
 
     if (skipSet.has(key)) { pulados++; continue; }
 
-    if (reqCount >= REQ_LIMIT) {
-      console.log(`\n🛑 Trava de cota acionada (${reqCount}/${REQ_LIMIT} requisições) — parando em [${i}/${total}].`);
+    if (budget.count >= budget.limit) {
+      console.log(`\n🛑 Trava de cota acionada (${budget.count}/${budget.limit} requisições) — parando em [${i}/${total}].`);
       cortadoPorCota = true;
       break;
     }
@@ -373,7 +373,11 @@ async function main() {
   commitESendSkipList();
 
   console.log(`\n✅ Pré-população ${cortadoPorCota ? 'interrompida pela trava de cota' : 'concluída'}: ${ok} encontrados, ${falhou} não encontrados, ${pulados} pulados (falha conhecida) — de ${total} modelos únicos.`);
-  console.log(`   Requisições usadas: ${reqCount}/${REQ_LIMIT}`);
+  console.log(`   Requisições usadas: ${budget.count}/${budget.limit}`);
 }
 
-main().catch(e => { console.error('Fatal:', e.message); process.exit(1); });
+module.exports = { run: main };
+
+if (require.main === module) {
+  main().catch(e => { console.error('Fatal:', e.message); process.exit(1); });
+}

@@ -1,0 +1,36 @@
+name: FIPE Diário
+
+on:
+  schedule:
+    - cron: '0 12 * * *'  # 9h BRT (UTC-3) — depois dos scrapers da manhã (6h20-8h BRT)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    name: Atualizar FIPE (novas + mensal, cota compartilhada)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Configurar git (pra commitar a lista de falhas conhecidas)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Atualizar FIPE (popular-fipe + atualizar-fipe-mensal, cota compartilhada ~900 req/dia)
+        env:
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          FIPE_TOKEN: ${{ secrets.FIPE_TOKEN }}
+        run: node scripts/fipe-diario.js
