@@ -725,7 +725,16 @@ async function reprocessar() {
     } else {
       console.log(`✅ match "${resultado.modeloNomeFipe}" R$ ${resultado.valor.toLocaleString('pt-BR')}`);
       corrigidos++;
-      await salvarFipeValores(m, resultado);
+      try {
+        await salvarFipeValores(m, resultado);
+      } catch (e) {
+        // Duas motos com "modelo" textual diferente podem casar no mesmo
+        // (marca_codigo, modelo_codigo, ano_modelo, combustivel) da FIPE —
+        // constraint única colide mesmo com on_conflict=lookup_key. Não é
+        // fatal: fipe_csv da moto (o que importa pro usuário) é gravado
+        // independente disso.
+        console.log(`   ⚠️  fipe_valores não gravado (${e.message.split('\n')[0]})`);
+      }
       await atualizarFipeCsv(ids, resultado.valor);
     }
 
