@@ -8,10 +8,11 @@
  */
 
 const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
-const SUPA_KEY = process.env.SUPABASE_KEY;
+const SUPA_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
 const FIPE_BASE = 'https://fipe.parallelum.com.br/api/v2/motorcycles';
+const DRY_RUN = process.env.DRY_RUN === '1';
 
-if (!SUPA_KEY) { console.error('❌ SUPABASE_KEY não definido'); process.exit(1); }
+if (!SUPA_KEY) { console.error('❌ SUPABASE_SERVICE_KEY (ou SUPABASE_KEY) não definido'); process.exit(1); }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -65,6 +66,17 @@ async function supaFetch(path, opts = {}) {
   return JSON.parse(text);
 }
 
+// fipe_valores.ano_modelo foi gravado por scripts antigos com só 2 dígitos
+// (ex: 3, 12, 15 em vez de 2003, 2012, 2015) — o code de ano da API FIPE
+// exige o ano completo (ex: "2003-1"), então sem essa conversão a consulta
+// sempre dá 404.
+function anoParaCodigoFipe(ano) {
+  const n = parseInt(ano, 10);
+  if (!n) return null;
+  if (n >= 1900) return n;
+  return n <= 30 ? 2000 + n : 1900 + n;
+}
+
 async function main() {
   const now = new Date();
   const mesAtual = now.getMonth() + 1;
@@ -108,28 +120,32 @@ async function main() {
     process.stdout.write(`[${i+1}/${paraAtualizar.length}] lookup: ${r.lookup_key} ... `);
 
     try {
-      const url = `${FIPE_BASE}/brands/${r.marca_codigo}/models/${r.modelo_codigo}/years/${r.ano_modelo}-1`;
+      const anoCompleto = anoParaCodigoFipe(r.ano_modelo);
+      if (!anoCompleto) {
+        console.log(`❌ ano_modelo inválido (${r.ano_modelo})`);
+        erros++;
+        nullConsec++;
+        await sleep(200);
+        continue;
+      }
+
+      const url = `${FIPE_BASE}/brands/${r.marca_codigo}/models/${r.modelo_codigo}/years/${anoCompleto}-1`;
       const dados = await apiFetch(url);
 
-      if (dados && dados.Valor) {
-        const val = parseFloat(dados.Valor.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
-        
-        await supaFetch(`fipe_valores?id=eq.${r.id}`, {
-          method: 'PATCH',
-          body: JSON.stringify({
-            valor: val,
-            referencia_mes: mesAtual,
-            referencia_ano: anoAtual,
-            updated_at: new Date().toISOString(),
-          }),
-        });
+      if (dados && dados.price) {
+        const val = parseFloat(dados.price.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
 
-        // Atualiza também fipe_csv nas motos que usam esse lookup_key
-        await supaFetch(`motos?fipe_csv=not.is.null&leilao_id=in.(${
-          await getLeiloesFuturos()
-        })`, {
-          method: 'GET',
-        });
+        if (!DRY_RUN) {
+          await supaFetch(`fipe_valores?id=eq.${r.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              valor: val,
+              referencia_mes: mesAtual,
+              referencia_ano: anoAtual,
+              updated_at: new Date().toISOString(),
+            }),
+          });
+        }
 
         console.log(`✅ R$ ${val.toLocaleString('pt-BR')}`);
         ok++;
@@ -150,15 +166,6 @@ async function main() {
   }
 
   console.log(`\n✅ Concluído: ${ok} atualizados, ${erros} erros de ${paraAtualizar.length} total`);
-}
-
-async function getLeiloesFuturos() {
-  const hoje = new Date().toISOString().slice(0, 10);
-  const leiloes = await supaFetch(
-    `leiloes?encerrado=eq.false&select=id`,
-    { prefer: 'return=representation' }
-  );
-  return (leiloes || []).map(l => `"${l.id}"`).join(',') || '""';
 }
 
 main().catch(e => { console.error('Fatal:', e.message); process.exit(1); });
