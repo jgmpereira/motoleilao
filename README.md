@@ -127,10 +127,15 @@ Dashboard de monitoramento de leilões de moto.
 - **Agendamento:** Todo dia às 06:50 BRT (`50 9 * * *` UTC)
 - **Workflow:** `.github/workflows/scraper-copart.yml`
 
-### `scripts/popular-fipe.js` — Pré-popular FIPE
-- **O que faz:** Busca FIPE de todas as motos sem valor FIPE no banco
+### `scripts/atualizar-fipe-mensal.js` — Atualização FIPE mensal
+- **O que faz:** Atualiza `fipe_valores` com o preço do mês atual (API v2 autenticada, `X-Subscription-Token: FIPE_TOKEN`)
 - **Agendamento:** Dia 1 de cada mês às 7h BRT
 - **Workflow:** `.github/workflows/fipe-mensal.yml`
+
+### `scripts/popular-fipe.js` — Pré-popular FIPE (backfill manual)
+- **O que faz:** Busca FIPE (API v2 autenticada) de todas as motos sem valor FIPE no banco
+- **Não roda em workflow** — script manual, rodado sob demanda (`node scripts/popular-fipe.js`)
+- **Trava:** ~900 requisições/dia + lista de falhas conhecidas (`scripts/fipe-nao-encontrados.json`, compartilhada com `scripts/reprocessar-fipe.js`)
 
 ### `scripts/backup-supabase.js` — Backup diário
 - **O que faz:** Exporta todas as tabelas críticas como JSON para `backups/YYYY-MM-DD/`
@@ -152,7 +157,7 @@ Dashboard de monitoramento de leilões de moto.
 | `scraper-vip.yml` | Scraper VIP Leilões | 6h40 diário |
 | `scraper-superbid.yml` | Scraper Superbid | 7h diário |
 | `scraper-copart.yml` | Scraper Copart Brasil (Playwright) | 6h50 diário |
-| `fipe-mensal.yml` | Atualização FIPE | 7h dia 1 do mês |
+| `fipe-mensal.yml` | Atualização FIPE (`atualizar-fipe-mensal.js`) | 7h dia 1 do mês |
 | `backup-supabase.yml` | Backup das tabelas do Supabase | 3h diário |
 
 ---
