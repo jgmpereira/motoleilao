@@ -104,6 +104,27 @@ async function supaFetch(path, opts = {}) {
   return JSON.parse(text);
 }
 
+// O PostgREST corta em ~1000 linhas por requisição. Sem paginar, a busca de
+// motos sem fipe_csv sempre via só a mesma primeira fatia — se boa parte
+// dela for skip-list (falha conhecida) ou nunca sair da lista (porque nunca
+// resolve), o backlog além da linha 1000 nunca é sequer enxergado pelo
+// script. Pagina com order=id.asc pra garantir progresso estável entre
+// páginas e cobrir o backlog inteiro a cada rodada.
+async function supaFetchAll(pathComQuery) {
+  const rows = [];
+  const limit = 1000;
+  let offset = 0;
+  const sep = pathComQuery.includes('?') ? '&' : '?';
+  while (true) {
+    const page = await supaFetch(`${pathComQuery}${sep}order=id.asc&limit=${limit}&offset=${offset}`, { prefer: 'return=representation' });
+    if (!page || !page.length) break;
+    rows.push(...page);
+    if (page.length < limit) break;
+    offset += limit;
+  }
+  return rows;
+}
+
 function scoreModelo(nome, termo) {
   const n = normFipe(nome);
   const t = normFipe(termo);
@@ -299,11 +320,10 @@ async function salvarFipeValores(m, resultado) {
 async function main() {
   console.log(`🏍️  Pré-população FIPE${DRY_RUN ? ' — DRY RUN (nada será gravado)' : ''} iniciando...\n`);
 
-  const motos = await supaFetch(
-    'motos?fipe_csv=is.null&marca=not.is.null&modelo=not.is.null&select=id,marca,modelo,ano,leilao_id',
-    { prefer: 'return=representation' }
+  const motos = await supaFetchAll(
+    'motos?fipe_csv=is.null&marca=not.is.null&modelo=not.is.null&select=id,marca,modelo,ano,leilao_id'
   );
-  console.log(`📋 ${motos.length} motos sem FIPE`);
+  console.log(`📋 ${motos.length} motos sem FIPE (backlog completo, paginado)`);
 
   // Agrupa por modelo único (marca|modelo|ano) — evita reconsultar a API pra
   // cada moto individual, igual ao reprocessar-fipe.js.
