@@ -25,6 +25,16 @@ const DRY_RUN = process.env.DRY_RUN === '1';
 // rodam no mesmo processo via scripts/fipe-diario.js (ver fipe-budget.js).
 const budget = require('./fipe-budget');
 
+// A API FIPE v2 devolve x-ratelimit-remaining/x-ratelimit-reset por resposta
+// (teto real ~1000/dia, plano com token — ver docs do parallelum/fipe). Em
+// vez de só parar quando bater 429, guardamos o último estado conhecido pra
+// pausar de forma preventiva e retomar sozinho quando a janela resetar.
+let rateState = { remaining: null, resetSeconds: null };
+let resetWaits = 0;
+const MAX_RESET_WAITS = parseInt(process.env.MAX_RESET_WAITS || '1', 10);
+
+class CotaEsgotadaDeNovo extends Error {}
+
 if (!SUPA_KEY) { console.error('❌ SUPABASE_SERVICE_KEY (ou SUPABASE_KEY) não definido'); process.exit(1); }
 
 // Cache em memória
@@ -57,14 +67,38 @@ const FIPE_HEADERS = process.env.FIPE_TOKEN
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+function lerRateHeaders(r) {
+  const remaining = r.headers.get('x-ratelimit-remaining');
+  const reset = r.headers.get('x-ratelimit-reset');
+  if (remaining !== null) rateState.remaining = parseInt(remaining, 10);
+  if (reset !== null) rateState.resetSeconds = parseInt(reset, 10);
+}
+
+async function aguardaReset(motivo) {
+  if (resetWaits >= MAX_RESET_WAITS) {
+    console.log(`\n🛑 Cota esgotada de novo (${motivo}) e já usamos a(s) ${MAX_RESET_WAITS} pausa(s) de reset permitida(s) nesta sessão — parando em vez de esperar outro ciclo de ~24h.`);
+    throw new CotaEsgotadaDeNovo(motivo);
+  }
+  resetWaits++;
+  const espera = (rateState.resetSeconds || 60) + 15;
+  const quando = new Date(Date.now() + espera * 1000).toLocaleTimeString('pt-BR');
+  console.log(`\n⏸️  ${motivo} — pausando ~${Math.ceil(espera / 60)} min até a janela resetar (retoma às ${quando})...`);
+  await sleep(espera * 1000);
+  rateState.remaining = null;
+  console.log('▶️  retomando após reset da cota...');
+}
+
 async function apiFetch(url) {
-  for (let attempt = 0; attempt < 2; attempt++) {
+  if (rateState.remaining !== null && rateState.remaining <= 3) {
+    await aguardaReset('cota da janela quase esgotada (remaining <= 3)');
+  }
+  for (let attempt = 0; attempt < 4; attempt++) {
     budget.count++;
     try {
       const r = await fetch(url, { headers: FIPE_HEADERS });
+      lerRateHeaders(r);
       if (r.status === 429) {
-        process.stdout.write(' [rate limit, aguardando 2s]');
-        await sleep(2000);
+        await aguardaReset('rate limit (HTTP 429) da API FIPE');
         continue;
       }
       if (!r.ok) {
@@ -360,6 +394,10 @@ async function main() {
     try {
       resultado = await buscarModeloFipe(m);
     } catch (e) {
+      if (e instanceof CotaEsgotadaDeNovo) {
+        cortadoPorCota = true;
+        break;
+      }
       resultado = { erro: e.message };
     }
 
