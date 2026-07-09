@@ -177,6 +177,17 @@ function scoreModelo(nome, termo) {
 
 function fipeKey(m) { return `${m.marca}|${m.modelo}|${(m.ano || '').split('/')[0]}`; }
 
+// Converte ano curto (2 dígitos) pro ano completo antes de comparar com os
+// anos de 4 dígitos retornados pela FIPE — sem isso, parseInt("26") vira 26 e
+// a diferença contra qualquer ano real (ex: 2016) nunca fica <=3, então o
+// fallback de "ano mais próximo" nunca dispara e sempre cai em anos[0].
+function anoParaAnoCompleto(ano) {
+  const n = parseInt(ano, 10);
+  if (!n) return null;
+  if (n >= 1900) return n;
+  return n <= 30 ? 2000 + n : 1900 + n;
+}
+
 async function buscarModeloFipe(m) {
   const marca = m.marca, modelo = m.modelo, ano = m.ano;
 
@@ -225,6 +236,7 @@ async function buscarModeloFipe(m) {
   }
 
   let modeloObj = null;
+  let altCandidatos = [];
   for (const tentativa of tentativas) {
     const scored = modelos
       .map(x => ({ x, score: scoreModelo(x.name, tentativa) }))
@@ -234,10 +246,17 @@ async function buscarModeloFipe(m) {
     const minScore = nTokens <= 1 ? 15 : nTokens === 2 ? 22 : 30;
     if (scored.length && scored[0].score >= minScore) {
       modeloObj = scored[0].x;
+      // Candidatos com score próximo (ex: FIPE renomeia o trim pra geração mais
+      // nova, tipo "X" -> "X CONNECTED", e o texto raspado não carrega esse
+      // qualificador extra — sem isso o ano mais recente nunca é encontrado).
+      altCandidatos = scored.slice(1).filter(x => x.score >= scored[0].score * 0.7 && x.score >= minScore).map(x => x.x);
       break;
     }
   }
   if (!modeloObj) return { erro: 'modelo não encontrado', tentativas };
+
+  const anoFab = (ano || '').split('/')[0].replace(/\D/g, '');
+  const anoFabCompleto = anoParaAnoCompleto(anoFab);
 
   // Carrega anos (v2 retorna array direto de {code,name})
   const anosKey = `${marcaObj.code}_${modeloObj.code}`;
@@ -245,21 +264,40 @@ async function buscarModeloFipe(m) {
     const r = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.code}/models/${modeloObj.code}/years`);
     _anosCache[anosKey] = Array.isArray(r) ? r : [];
   }
-  const anos = _anosCache[anosKey];
+  let anos = _anosCache[anosKey];
   if (!anos.length) return { erro: 'sem anos disponíveis' };
 
-  const anoFab = (ano || '').split('/')[0].replace(/\D/g, '');
+  // Se o modelo top-score não tem o ano do veículo, tenta os candidatos
+  // alternativos (score próximo) antes de desistir — ver comentário acima.
+  if (anoFab && altCandidatos.length) {
+    const temAno = anos.some(a => a.name.startsWith(anoFab) || a.name.includes(anoFab));
+    if (!temAno) {
+      for (const alt of altCandidatos) {
+        const altKey = `${marcaObj.code}_${alt.code}`;
+        if (!_anosCache[altKey]) {
+          const r = await apiFetch(`${FIPE_BASE}/brands/${marcaObj.code}/models/${alt.code}/years`);
+          _anosCache[altKey] = Array.isArray(r) ? r : [];
+        }
+        const anosAlt = _anosCache[altKey];
+        if (anosAlt.length && anosAlt.some(a => a.name.startsWith(anoFab) || a.name.includes(anoFab))) {
+          modeloObj = alt;
+          anos = anosAlt;
+          break;
+        }
+      }
+    }
+  }
+
   let anoObj = anos.find(a => a.name.startsWith(anoFab))
     || anos.find(a => a.name.includes(anoFab));
 
-  if (!anoObj && anoFab) {
-    const target = parseInt(anoFab);
+  if (!anoObj && anoFabCompleto) {
     const comAno = anos.map(a => ({
       a,
       y: parseInt((a.name.match(/^(\d{4})/) || [])[1] || 0)
     })).filter(x => x.y);
-    comAno.sort((a, b) => Math.abs(a.y - target) - Math.abs(b.y - target));
-    if (comAno.length && Math.abs(comAno[0].y - target) <= 3) anoObj = comAno[0].a;
+    comAno.sort((a, b) => Math.abs(a.y - anoFabCompleto) - Math.abs(b.y - anoFabCompleto));
+    if (comAno.length && Math.abs(comAno[0].y - anoFabCompleto) <= 3) anoObj = comAno[0].a;
   }
   if (!anoObj) anoObj = anos[0];
   if (!anoObj) return { erro: 'ano não resolvido' };

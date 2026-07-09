@@ -415,6 +415,17 @@ function scoreModelo(fipeNome, termo) {
 
 function fipeKey(m) { return `${m.marca}|${m.modelo}|${(m.ano || '').split('/')[0]}`; }
 
+// Converte ano curto (2 dígitos) pro ano completo antes de comparar com os
+// anos de 4 dígitos retornados pela FIPE — sem isso, parseInt("26") vira 26 e
+// a diferença contra qualquer ano real (ex: 2016) nunca fica <=3, então o
+// fallback de "ano mais próximo" nunca dispara e sempre cai em anos[0].
+function anoParaAnoCompleto(ano) {
+  const n = parseInt(ano, 10);
+  if (!n) return null;
+  if (n >= 1900) return n;
+  return n <= 30 ? 2000 + n : 1900 + n;
+}
+
 // ===================== CILINDRADA / TRAVA DE SANIDADE =====================
 
 function extrairCilindrada(modelo) {
@@ -548,10 +559,10 @@ async function buscarModeloFipe(m) {
     || anos.find(a => a.nome.includes(anoFab))
     || (anoMod ? anos.find(a => a.nome.includes(anoMod)) : null);
   if (!anoObj && anoFab) {
-    const target = parseInt(anoFab);
+    const target = anoParaAnoCompleto(anoFab);
     const comAno = anos.map(a => ({ a, y: parseInt((a.nome.match(/^(\d{4})/) || [])[1] || 0) })).filter(x => x.y);
     comAno.sort((a, b) => Math.abs(a.y - target) - Math.abs(b.y - target));
-    if (comAno.length && Math.abs(comAno[0].y - target) <= 3) anoObj = comAno[0].a;
+    if (target && comAno.length && Math.abs(comAno[0].y - target) <= 3) anoObj = comAno[0].a;
   }
   if (!anoObj) anoObj = anos[0];
   if (!anoObj) return { erro: 'ano não resolvido' };
