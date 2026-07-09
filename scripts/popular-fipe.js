@@ -344,7 +344,12 @@ async function salvarFipeValores(m, resultado) {
   };
 
   if (DRY_RUN) return;
-  await supaFetch('fipe_valores?on_conflict=lookup_key', {
+  // on_conflict precisa apontar pra constraint única real da tabela
+  // (marca_codigo,modelo_codigo,ano_modelo,combustivel) — usar lookup_key
+  // aqui causava 409 sempre que o mesmo modelo/ano da FIPE era alcançado por
+  // um texto cru diferente (ex: "BMW|S 1000|24" vs "Bmw|S1000 R|24"), porque
+  // o conflito real batia na constraint dos 4 campos, não na de lookup_key.
+  await supaFetch('fipe_valores?on_conflict=marca_codigo,modelo_codigo,ano_modelo,combustivel', {
     method: 'POST',
     prefer: 'resolution=merge-duplicates,return=minimal',
     body: JSON.stringify(payload),

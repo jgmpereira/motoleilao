@@ -129,7 +129,7 @@ Dashboard de monitoramento de leilões de moto.
 
 ### `scripts/fipe-diario.js` — Orquestrador FIPE diário
 - **O que faz:** Roda, no mesmo processo, `popular-fipe.js` (motos novas sem preço — prioridade) e depois `atualizar-fipe-mensal.js` (preços desatualizados do mês anterior — com a cota que restar)
-- **Cota compartilhada:** `scripts/fipe-budget.js` — objeto único (`{count, limit}`) cacheado pelo `require()` do Node, visto pelos dois scripts no mesmo processo; teto ~900 requisições/dia somadas
+- **Cota compartilhada:** `scripts/fipe-budget.js` — objeto único (`{count, limit}`) cacheado pelo `require()` do Node, visto pelos dois scripts no mesmo processo; teto ~900 requisições/dia somadas (margem de segurança abaixo do limite real da API FIPE: **1.000 req/dia** com token gratuito, confirmado em `fipe.online/docs/comece-aqui` — é cota diária, não uma janela por hora)
 - **Agendamento:** Diário às 9h BRT (depois dos scrapers da manhã)
 - **Workflow:** `.github/workflows/fipe-diario.yml`
 

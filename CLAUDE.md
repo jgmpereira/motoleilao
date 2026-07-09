@@ -139,6 +139,8 @@ Ficam em `.env` na raiz (recriar se Codespaces resetar) e nos Secrets do reposit
 | `scripts/fipe-diario.js` | FIPE | Orquestra `popular-fipe.js` (motos novas, prioridade) + `atualizar-fipe-mensal.js` (preços velhos), cota compartilhada — roda no workflow `fipe-diario.yml` | 9h diário |
 | `scripts/backup-supabase.js` | Backup | Exporta tabelas críticas → `backups/YYYY-MM-DD/` | 3h diário |
 
+> A API FIPE (`fipe.parallelum.com.br` / `fipe.online`) limita **1.000 requisições por DIA** com token gratuito (500/dia sem token) — confirmado na doc oficial (`fipe.online/docs/comece-aqui`); o 429 da API é explicitamente "limite diário atingido", não é uma janela por hora. `scripts/fipe-budget.js` usa teto interno de 900/dia (margem de segurança abaixo do real).
+>
 > `scripts/popular-fipe.js` e `scripts/atualizar-fipe-mensal.js` também podem rodar isolados (`node scripts/popular-fipe.js`), cada um com sua própria cota de 900/dia — mas em produção rodam sempre via `fipe-diario.js`. `scripts/reprocessar-fipe.js` é manual (correção pontual), não roda em nenhum workflow.
 
 ### Atenções por scraper
