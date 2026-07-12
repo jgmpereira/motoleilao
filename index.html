@@ -1556,7 +1556,15 @@ async function carregarDados() {
     MOTOS = allMotos;
 
     setLoading('CARREGANDO ARREMATADOS...');
-    const arrList = await supaFetch('arrematados?select=*&order=data_registro.desc');
+    // Arrematados com paginação (max 1000 por req)
+    let arrList = [];
+    let arrOffset = 0;
+    while(true) {
+      const batch = await supaFetch(`arrematados?select=*&order=data_registro.desc&limit=1000&offset=${arrOffset}`);
+      arrList = arrList.concat(batch);
+      if(batch.length < 1000) break;
+      arrOffset += 1000;
+    }
     // Manter apenas o mais recente por moto
     ARREMATADOS = {};
     arrList.forEach(a => {
@@ -3074,8 +3082,15 @@ async function atualizarFipeMensal() {
   const btn = document.getElementById('btn-fipe-mensal');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Verificando...'; }
   try {
-    // Buscar todas as motos com marca/modelo/ano preenchidos
-    const motos = await supaFetch('motos?select=marca,modelo,ano&marca=not.is.null&modelo=not.is.null&ano=not.is.null');
+    // Buscar todas as motos com marca/modelo/ano preenchidos (paginado, max 1000 por req)
+    let motos = [];
+    let motosOffset = 0;
+    while(true) {
+      const batch = await supaFetch(`motos?select=marca,modelo,ano&marca=not.is.null&modelo=not.is.null&ano=not.is.null&limit=1000&offset=${motosOffset}`);
+      motos = motos.concat(batch);
+      if(batch.length < 1000) break;
+      motosOffset += 1000;
+    }
     const validas = (motos || []).filter(m => m.marca && m.modelo && m.ano);
 
     // Deduplica por fipeKey
