@@ -593,7 +593,7 @@ async function main() {
       const novas = motosPorLeilao[lid];
       const BATCH = 50;
       for (let i = 0; i < novas.length; i += BATCH) {
-        await supaFetch('motos', { method: 'POST', body: JSON.stringify(novas.slice(i, i + BATCH)), prefer: 'return=minimal' });
+        await supaFetch('motos?on_conflict=url', { method: 'POST', body: JSON.stringify(novas.slice(i, i + BATCH)), prefer: 'resolution=merge-duplicates,return=minimal' });
       }
       console.log(`  → Inseriu ${novas.length} moto(s)`);
     }
