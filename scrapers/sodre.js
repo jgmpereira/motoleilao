@@ -475,6 +475,10 @@ async function main() {
 
     console.log(`\n📊 Total lotes coletados: ${capturedLots.length} (API total: ${total})`);
 
+    // 🐛 DEBUG TEMPORÁRIO — dump completo dos 2 primeiros lotes para mapear campos de descrição/avarias
+    console.log('\n🐛 DEBUG lote[0] completo:\n' + JSON.stringify(capturedLots[0], null, 2));
+    if (capturedLots[1]) console.log('\n🐛 DEBUG lote[1] completo:\n' + JSON.stringify(capturedLots[1], null, 2));
+
     if (capturedLots.length === 0) {
       console.log('ℹ️  Nenhum lote encontrado. Encerrando sem salvar.');
       return;
