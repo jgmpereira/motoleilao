@@ -474,6 +474,7 @@ tbody tr:hover{background:var(--s2);}
   <button class="tab" id="tab-historico" onclick="showPage('historico',this)">📋 Histórico</button>
   <button class="tab" id="tab-favoritos" onclick="showPage('favoritos',this)">❤️ Favoritos</button>
   <button class="tab" id="tab-admin" style="display:none" onclick="showPage('admin',this)">⚙️ Admin</button>
+  <button class="tab" id="tab-instagram" style="display:none" onclick="showPage('instagram',this)">📸 Instagram</button>
 </div>
 
 <div id="stats-wrap">
@@ -907,6 +908,44 @@ tbody tr:hover{background:var(--s2);}
       <div id="admin-vips-list" style="font-size:13px;color:var(--muted);">carregando...</div>
     </div>
 
+  </div>
+</div>
+
+<!-- PAGE INSTAGRAM -->
+<div id="page-instagram" class="page">
+  <div style="max-width:1100px;margin:0 auto;padding:20px 16px;">
+    <div style="margin-bottom:16px;">
+      <h2 style="font-size:18px;font-weight:700;">📸 Instagram — Garimpo de Candidatas</h2>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;">Candidatas para postar — você escolhe.</div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button id="ig-preset-pista" class="btn btn-accent" onclick="setInstagramPreset('pista')" style="flex:1;">🏁 Pista</button>
+      <button id="ig-preset-garimpo" class="btn btn-ghost" onclick="setInstagramPreset('garimpo')" style="flex:1;">🔍 Garimpo (rua)</button>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);">
+        % FIPE máximo: <span id="ig-pct-label" style="color:var(--text);font-weight:700;">60%</span>
+        <input type="range" id="ig-pct-max" min="20" max="100" step="5" value="60" oninput="document.getElementById('ig-pct-label').textContent=this.value+'%';renderInstagram()" style="width:160px;">
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;">
+        <input type="checkbox" id="ig-so-vendido" onchange="renderInstagram()"> Só vendido (excluir condicional)
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;">
+        Cilindrada mínima:
+        <select id="ig-cc-min" onchange="renderInstagram()" class="finput" style="width:auto;">
+          <option value="0">Qualquer</option>
+          <option value="150">150cc+</option>
+          <option value="250">250cc+</option>
+          <option value="300">300cc+</option>
+          <option value="500">500cc+</option>
+        </select>
+      </label>
+      <span id="ig-count" style="margin-left:auto;font-size:12px;color:var(--muted);"></span>
+    </div>
+
+    <div id="ig-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;"></div>
   </div>
 </div>
 
@@ -1712,14 +1751,15 @@ function showPage(page, btn, skipHash) {
   if(page === 'leiloes') renderGridMotos();
   if(page === 'admin') { renderAdminStats(); renderAdminVips(); }
   if(page === 'favoritos') renderFavoritos();
+  if(page === 'instagram') renderInstagram();
   if(!skipHash) {
-    const hash = {leiloes:'#leiloes', analise:'#fipe', historico:'#historico', motos:'#motos', agenda:'#agenda', admin:'#admin', favoritos:'#favoritos'}[page] || '#'+page;
+    const hash = {leiloes:'#leiloes', analise:'#fipe', historico:'#historico', motos:'#motos', agenda:'#agenda', admin:'#admin', favoritos:'#favoritos', instagram:'#instagram'}[page] || '#'+page;
     if(location.hash !== hash) history.pushState(null, '', hash);
   }
 }
 
 // ===================== HASH ROUTING =====================
-const HASH_TO_PAGE = {'#leiloes':'leiloes','#fipe':'analise','#historico':'historico','#agenda':'agenda','#favoritos':'favoritos'};
+const HASH_TO_PAGE = {'#leiloes':'leiloes','#fipe':'analise','#historico':'historico','#agenda':'agenda','#favoritos':'favoritos','#instagram':'instagram'};
 let _initialHashHandled = false;
 
 function navigateToHash(hash) {
@@ -5931,8 +5971,120 @@ function initAdmin() {
   const isAdmin = authEmail === ADMIN_EMAIL;
   const show = isAdmin ? '' : 'none';
   document.getElementById('tab-admin').style.display = show;
+  document.getElementById('tab-instagram').style.display = show;
   document.getElementById('btn-importar').style.display = show;
   document.getElementById('btn-novo-leilao').style.display = show;
+}
+
+// ===================== INSTAGRAM (garimpo de candidatas) =====================
+let instagramPreset = 'pista';
+
+// Modelos de pista que podem escapar do getSegmento (esportiva/naked)
+const IG_REGEX_PISTA = /\bz\s?400\b|mt-?0?3\b|street\s*triple|\bninja\b|\bcbr\b|\br3\b|\br6\b|\br1\b|gsx-?r|\bhornet\b|mt-?0[79]\b|\bduke\b|rs\s?660|panigale|daytona/i;
+
+function setInstagramPreset(preset) {
+  instagramPreset = preset;
+  document.getElementById('ig-preset-pista').className = preset === 'pista' ? 'btn btn-accent' : 'btn btn-ghost';
+  document.getElementById('ig-preset-garimpo').className = preset === 'garimpo' ? 'btn btn-accent' : 'btn btn-ghost';
+  renderInstagram();
+}
+
+function cardMotoIG(m, pct) {
+  const arr = ARREMATADOS[m.id];
+  const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
+  const ind = getIndicador(m, pct);
+  const seg = getSegmento(m) || '—';
+  const cc = m.cilindrada || extractCilindrada(m.marca, m.modelo);
+  const condClass = { financiada: 'cond-fin', sinistro: 'cond-sin', sucata: 'cond-suc', lotamento: 'cond-lot' };
+  const fotosCount = Array.isArray(m.fotos) && m.fotos.length ? m.fotos.length : (m.foto ? 1 : 0);
+  const pctCor = pct < 30 ? 'var(--green)' : pct < 50 ? 'var(--a2)' : pct < 70 ? '#f90' : 'var(--red)';
+
+  let extraGarimpo = '';
+  if (instagramPreset === 'garimpo') {
+    const alertaHtml = renderAlertaBadges(m.alertas, { compact: true });
+    const resumo = cleanResumo(m.descricao_resumo);
+    if (alertaHtml || resumo) {
+      extraGarimpo = `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+        ${alertaHtml ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">${alertaHtml}</div>` : ''}
+        ${resumo ? `<div style="font-size:10px;color:var(--muted);line-height:1.4;max-height:48px;overflow:hidden;">${resumo}</div>` : ''}
+      </div>`;
+    }
+  }
+
+  return `<div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+    <div style="position:relative;height:170px;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;" onclick="abrirFichaMoto(${m.id})">
+      ${m.foto ? `<img src="${m.foto}" alt="${m.marca} ${m.modelo}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+      <div style="display:${m.foto ? 'none' : 'flex'};align-items:center;justify-content:center;font-size:40px;width:100%;height:100%;">🏍️</div>
+      ${fotosCount > 1 ? `<div style="position:absolute;bottom:6px;right:6px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;background:rgba(0,0,0,.6);color:#fff;">📷 ${fotosCount} fotos</div>` : ''}
+      <div style="position:absolute;top:6px;right:6px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:rgba(0,0,0,.55);color:#fff;">${ind.text}</div>
+    </div>
+    <div style="padding:10px;">
+      <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.marca} ${m.modelo}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">${m.ano || '—'} · ${cc ? cc + 'cc' : '—'} · ${seg}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+        <span class="cond-tag ${condClass[m.condicao] || ''}">${m.condicao || '—'}</span>
+        <span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:${arr.status_arrematado === 'condicional' ? 'rgba(255,165,0,.15)' : 'rgba(26,158,92,.12)'};color:${arr.status_arrematado === 'condicional' ? '#e67e00' : 'var(--green)'};">${arr.status_arrematado === 'condicional' ? '⏳ condicional' : '✔ vendido'}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-family:'DM Mono',monospace;">
+        <div><div style="font-size:10px;color:var(--muted);">Arrematado</div><strong style="color:var(--green);">R$${Number(arr.valor).toLocaleString('pt-BR')}</strong></div>
+        <div style="text-align:right;"><div style="font-size:10px;color:var(--muted);">FIPE</div><strong>R$${Number(fipe).toLocaleString('pt-BR')}</strong></div>
+      </div>
+      <div style="text-align:center;margin-top:6px;font-size:14px;font-weight:800;color:${pctCor};">${pct}% da FIPE</div>
+      ${m.url ? `<a href="${m.url}" target="_blank" onclick="event.stopPropagation()" style="display:block;text-align:center;margin-top:8px;font-size:11px;color:var(--accent);">Ver anúncio ↗</a>` : ''}
+      ${extraGarimpo}
+    </div>
+  </div>`;
+}
+
+function renderInstagram() {
+  const grid = document.getElementById('ig-grid');
+  if (!grid) return;
+
+  const pctMax    = parseInt(document.getElementById('ig-pct-max').value, 10) || 60;
+  const soVendido = document.getElementById('ig-so-vendido').checked;
+  const ccMin     = parseInt(document.getElementById('ig-cc-min').value, 10) || 0;
+
+  let candidatas = MOTOS.filter(m => {
+    const arr = ARREMATADOS[m.id];
+    if (!arr) return false;
+    const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
+    if (!fipe) return false;
+    if (soVendido && arr.status_arrematado === 'condicional') return false;
+    const cc = m.cilindrada || extractCilindrada(m.marca, m.modelo) || 0;
+    if (ccMin && cc < ccMin) return false;
+    const pct = Math.round((arr.valor / fipe) * 100);
+    return pct < pctMax;
+  }).map(m => {
+    const arr = ARREMATADOS[m.id];
+    const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
+    const pct = Math.round((arr.valor / fipe) * 100);
+    const cc = m.cilindrada || extractCilindrada(m.marca, m.modelo) || 0;
+    return { m, pct, cc };
+  });
+
+  if (instagramPreset === 'pista') {
+    candidatas = candidatas.filter(({ m }) => {
+      const seg = getSegmento(m);
+      if (seg === 'esportiva' || seg === 'naked') return true;
+      return IG_REGEX_PISTA.test(`${m.marca || ''} ${m.modelo || ''}`);
+    });
+    candidatas.sort((a, b) => a.pct - b.pct);
+  } else {
+    candidatas = candidatas.filter(({ m }) => m.condicao !== 'sucata');
+    candidatas.forEach(c => {
+      c.score = c.pct - (c.m.condicao === 'financiada' ? 10 : 0) - (c.cc >= 300 ? 8 : c.cc >= 250 ? 4 : 0);
+    });
+    candidatas.sort((a, b) => a.score - b.score);
+  }
+
+  candidatas = candidatas.slice(0, 40);
+
+  const countEl = document.getElementById('ig-count');
+  if (countEl) countEl.textContent = `${candidatas.length} candidata${candidatas.length !== 1 ? 's' : ''}`;
+
+  grid.innerHTML = candidatas.length
+    ? candidatas.map(({ m, pct }) => cardMotoIG(m, pct)).join('')
+    : '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--muted);">Nenhuma candidata encontrada com esses filtros.</div>';
 }
 
 function admStatCard(valor, label, cor) {
