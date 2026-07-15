@@ -166,6 +166,60 @@ function mapCondicao(stt) {
   return 'financiada';
 }
 
+// ── descricao_resumo / alertas — derivados de campos estruturados (enum-like)
+// da API do Copart. Confirmado por amostragem de 170 lotes que estes campos
+// VARIAM de fato entre lotes (não é boilerplate fixo, diferente de campos como
+// ft/drv/ess/al/dtc/lmc/bstl/lic que vieram constantes/vazios em todos os lotes).
+const MONTA_LABEL   = { pequena: 'Pequena monta', media: 'Média monta', grande: 'Grande monta' };
+const MONTA_FLAG    = { pequena: 'peq_monta', media: 'media_monta', grande: 'grande_monta' };
+
+// damageClassification → monta oficial do Copart (prioridade sobre o fallback
+// por cilindrada, que é só uma estimativa quando o campo não vem preenchido)
+const DAMAGE_MONTA = { 'PEQUENA MONTA': 'pequena', 'MÉDIA MONTA': 'media', 'GRANDE MONTA': 'grande' };
+function montaFromDamageClassification(texto) {
+  const t = (texto || '').toUpperCase().trim();
+  return DAMAGE_MONTA[t] || null;
+}
+
+// lossType → tipo de sinistro (mesmo conceito do extrairTipoSinistro do Sodré)
+const LOSS_TYPE_SINISTRO = { 'COLISÃO': 'colisão', 'ROUBO/FURTO': 'furto', 'QUEIMADO': 'incêndio' };
+function tipoSinistroFromLossType(lossType) {
+  const t = (lossType || '').toUpperCase().trim();
+  return LOSS_TYPE_SINISTRO[t] || null;
+}
+
+// vinType → alerta de chassi (Recortado/Remarcado/Descaracterizado/Avariado são
+// graves; "Normal" não gera alerta)
+const VIN_ALERTA = {
+  'RECORTADO':        'vin_recortado',
+  'REMARCADO':         'vin_remarcado',
+  'DESCARACTERIZADO':  'vin_descaracterizado',
+  'AVARIADO':          'vin_avariado',
+};
+function vinFlagFromVinType(vinType) {
+  const t = (vinType || '').toUpperCase().trim();
+  return VIN_ALERTA[t] || null;
+}
+
+// drivabilityRating → condição de funcionamento (texto já vem pronto e legível
+// da API; só descartamos "Desconhecido"/vazio, que é a maioria dos lotes)
+function mecanicaFromDrivabilityRating(texto) {
+  const t = (texto || '').trim();
+  if (!t || t === 'Desconhecido') return null;
+  return t;
+}
+
+function capitalizar(s) {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
+function montarDescricaoResumoCopart(tipoSinistro, montaLabel, mecanicaTxt) {
+  const principal = [tipoSinistro ? capitalizar(tipoSinistro) : null, montaLabel].filter(Boolean).join(' — ');
+  let resumo = principal;
+  if (mecanicaTxt) resumo = resumo ? `${resumo} — ${mecanicaTxt}` : mecanicaTxt;
+  return resumo || null;
+}
+
 // ── Utilitários de data ───────────────────────────────────────────────────────
 const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 
@@ -372,7 +426,6 @@ async function main() {
     const leiloesPorData  = {};
     const motosPorLeilao  = {};
     let skippedFutura = 0, skippedNaoMoto = 0, skippedSemData = 0;
-    let debugDumped = 0;
 
     for (const lot of allContent) {
       // "Aguardando Classificação" = venda futura sem data definida → ignora
@@ -409,13 +462,6 @@ async function main() {
         continue;
       }
 
-      // 🐛 DEBUG TEMPORÁRIO — dump completo dos 2 primeiros lotes de moto para
-      // mapear códigos de campo (condição de funcionamento, chave, combustível, etc.)
-      if (debugDumped < 2) {
-        console.log(`\n🐛 DEBUG lote-moto[${debugDumped}] completo:\n` + JSON.stringify(lot, null, 2));
-        debugDumped++;
-      }
-
       // Ano — lcy: 2022 → "22/22"
       let ano = null;
       if (anoNum) {
@@ -423,15 +469,34 @@ async function main() {
         ano = `${y}/${y}`;
       }
 
-      // Cilindrada e monta
+      // Cilindrada e monta — prioriza damageClassification (monta oficial do
+      // Copart); cai pra estimativa por cilindrada só quando "Não Aplicável"/ausente
       const cilindrada = extractCilindrada(marca, modelo);
-      const monta = cilindrada == null ? null
+      const montaAPI = montaFromDamageClassification(lot.damageClassification);
+      const monta = montaAPI ?? (cilindrada == null ? null
         : cilindrada <= 150 ? 'pequena'
         : cilindrada <= 500 ? 'media'
-        : 'grande';
+        : 'grande');
 
       // Condição
       const condicao = mapCondicao(status);
+
+      // descricao_resumo/alertas — lossType (tipo de sinistro), damageClassification
+      // (monta) e drivabilityRating (condição de funcionamento — sinal positivo
+      // quando indica que a moto dá partida) são campos estruturados que variam
+      // de fato entre lotes (confirmado por amostragem); vinType flagra chassi
+      // remarcado/recortado/descaracterizado/avariado como alerta
+      const tipoSinistro = tipoSinistroFromLossType(lot.lossType);
+      const mecanicaTxt  = mecanicaFromDrivabilityRating(lot.drivabilityRating);
+      const montaLabel   = monta ? MONTA_LABEL[monta] : null;
+      const descricaoResumo = montarDescricaoResumoCopart(tipoSinistro, montaLabel, mecanicaTxt);
+
+      const alertasSet = new Set();
+      if (monta && MONTA_FLAG[monta]) alertasSet.add(MONTA_FLAG[monta]);
+      const vinFlagCode = vinFlagFromVinType(lot.vinType);
+      if (vinFlagCode) alertasSet.add(vinFlagCode);
+      const alertasList = Array.from(alertasSet);
+      const alertas = alertasList.length ? alertasList.join(',') : null;
 
       // Lance/bid — hb (highest bid) ou ob (opening bid)
       const lanceRaw = parseFloat(lot.hb ?? lot.ob ?? lot.hbn ?? 0);
@@ -480,6 +545,8 @@ async function main() {
         financeira:   'Particular/Empresa',
         cilindrada,
         monta,
+        descricao_resumo: descricaoResumo,
+        alertas,
         foto,
         url,
         fipe_csv:     null,
