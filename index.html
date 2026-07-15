@@ -5569,6 +5569,20 @@ function toggleFiltrosMobile() {
   document.getElementById('gm-sidebar-overlay').classList.toggle('open');
 }
 
+// ===================== CARROSSEL FICHA MOTO =====================
+let _fichaFotos = [];
+let _fichaFotoIdx = 0;
+let _fichaTouchX = null;
+
+function fichaFotoNav(dir) {
+  if (!_fichaFotos.length) return;
+  _fichaFotoIdx = (_fichaFotoIdx + dir + _fichaFotos.length) % _fichaFotos.length;
+  const img = document.getElementById('ficha-foto-img');
+  const idxEl = document.getElementById('ficha-foto-idx');
+  if (img) img.src = _fichaFotos[_fichaFotoIdx];
+  if (idxEl) idxEl.textContent = `${_fichaFotoIdx + 1}/${_fichaFotos.length}`;
+}
+
 function abrirFichaMoto(motoId) {
   const m = MOTOS.find(x => x.id === motoId);
   if(!m) return;
@@ -5597,16 +5611,40 @@ function abrirFichaMoto(motoId) {
   const modal = document.getElementById('modal-ficha-moto');
   if(!modal) return;
 
-  // Foto
+  // Foto (carrossel se houver mais de uma)
   const fotoEl = modal.querySelector('#ficha-foto-area');
   if(fotoEl) {
     fotoEl.style.background = 'var(--bg)';
     fotoEl.style.height = 'auto';
     fotoEl.style.minHeight = '80px';
     fotoEl.style.maxHeight = '220px';
-    fotoEl.innerHTML = m.foto
-      ? `<img src="${m.foto}" style="width:100%;height:auto;max-height:220px;object-fit:contain;display:block;cursor:${m.url?'pointer':'default'}" ${m.url?`onclick="window.open('${m.url}','_blank')"`:''} onerror="this.parentElement.style.display='none'">`
-      : `<div style="font-size:50px;display:flex;align-items:center;justify-content:center;height:80px;">🏍️</div>`;
+    fotoEl.ontouchstart = null;
+    fotoEl.ontouchend = null;
+    const fotos = Array.isArray(m.fotos) && m.fotos.length ? m.fotos : (m.foto ? [m.foto] : []);
+    _fichaFotos = fotos;
+    _fichaFotoIdx = 0;
+    if(!fotos.length) {
+      fotoEl.style.position = '';
+      fotoEl.innerHTML = `<div style="font-size:50px;display:flex;align-items:center;justify-content:center;height:80px;">🏍️</div>`;
+    } else if(fotos.length === 1) {
+      fotoEl.style.position = '';
+      fotoEl.innerHTML = `<img src="${fotos[0]}" style="width:100%;height:auto;max-height:220px;object-fit:contain;display:block;cursor:${m.url?'pointer':'default'}" ${m.url?`onclick="window.open('${m.url}','_blank')"`:''} onerror="this.parentElement.style.display='none'">`;
+    } else {
+      fotoEl.style.position = 'relative';
+      fotoEl.innerHTML = `
+        <img id="ficha-foto-img" src="${fotos[0]}" style="width:100%;height:auto;max-height:220px;object-fit:contain;display:block;cursor:${m.url?'pointer':'default'}" ${m.url?`onclick="window.open('${m.url}','_blank')"`:''} onerror="this.style.display='none'">
+        <button onclick="event.stopPropagation();fichaFotoNav(-1)" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;line-height:1;">‹</button>
+        <button onclick="event.stopPropagation();fichaFotoNav(1)" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;line-height:1;">›</button>
+        <div id="ficha-foto-idx" style="position:absolute;bottom:4px;right:6px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;">1/${fotos.length}</div>
+      `;
+      fotoEl.ontouchstart = e => { _fichaTouchX = e.touches[0].clientX; };
+      fotoEl.ontouchend = e => {
+        if(_fichaTouchX === null) return;
+        const dx = e.changedTouches[0].clientX - _fichaTouchX;
+        _fichaTouchX = null;
+        if(Math.abs(dx) > 40) fichaFotoNav(dx > 0 ? -1 : 1);
+      };
+    }
   }
 
   // Título e badges

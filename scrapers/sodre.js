@@ -540,6 +540,7 @@ async function main() {
         fipe_csv:     null,
        url:           (lot.auction_id && lot.lot_id) ? `https://leilao.sodresantoro.com.br/leilao/${lot.auction_id}/lote/${lot.lot_id}/` : null,
       foto:          (lot.lot_pictures && lot.lot_pictures[0]) ? lot.lot_pictures[0] : null,
+      fotos:         (Array.isArray(lot.lot_pictures) && lot.lot_pictures.length) ? lot.lot_pictures : null,
       });
     }
 
