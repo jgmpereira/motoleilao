@@ -367,15 +367,12 @@ async function main() {
       return;
     }
 
-    // Debug — mostra primeiro lote
-    console.log('\n🔍 Primeiro lote (verificação de campos):');
-    console.log(JSON.stringify(allContent[0], null, 2));
-
     // ── 3. Filtra e processa os lotes ─────────────────────────────────────────
     const hoje = new Date().toISOString().slice(0, 10);
     const leiloesPorData  = {};
     const motosPorLeilao  = {};
     let skippedFutura = 0, skippedNaoMoto = 0, skippedSemData = 0;
+    let debugDumped = 0;
 
     for (const lot of allContent) {
       // "Aguardando Classificação" = venda futura sem data definida → ignora
@@ -410,6 +407,13 @@ async function main() {
         skippedNaoMoto++;
         if (marcaRaw) console.log(`  ⚠️  ignorado (não é moto): ${marcaRaw} ${modeloRaw}`);
         continue;
+      }
+
+      // 🐛 DEBUG TEMPORÁRIO — dump completo dos 2 primeiros lotes de moto para
+      // mapear códigos de campo (condição de funcionamento, chave, combustível, etc.)
+      if (debugDumped < 2) {
+        console.log(`\n🐛 DEBUG lote-moto[${debugDumped}] completo:\n` + JSON.stringify(lot, null, 2));
+        debugDumped++;
       }
 
       // Ano — lcy: 2022 → "22/22"
