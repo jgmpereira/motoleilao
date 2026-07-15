@@ -930,9 +930,6 @@ tbody tr:hover{background:var(--s2);}
         <input type="range" id="ig-pct-max" min="20" max="100" step="5" value="60" oninput="document.getElementById('ig-pct-label').textContent=this.value+'%';renderInstagram()" style="width:160px;">
       </label>
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;">
-        <input type="checkbox" id="ig-so-vendido" onchange="renderInstagram()"> Só vendido (excluir condicional)
-      </label>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px;">
         Cilindrada mínima:
         <select id="ig-cc-min" onchange="renderInstagram()" class="finput" style="width:auto;">
           <option value="0">Qualquer</option>
@@ -6078,16 +6075,16 @@ function renderInstagram() {
   const grid = document.getElementById('ig-grid');
   if (!grid) return;
 
-  const pctMax    = parseInt(document.getElementById('ig-pct-max').value, 10) || 60;
-  const soVendido = document.getElementById('ig-so-vendido').checked;
-  const ccMin     = parseInt(document.getElementById('ig-cc-min').value, 10) || 0;
+  const pctMax = parseInt(document.getElementById('ig-pct-max').value, 10) || 60;
+  const ccMin  = parseInt(document.getElementById('ig-cc-min').value, 10) || 0;
 
   let candidatas = MOTOS.filter(m => {
+    if (!Array.isArray(m.fotos) || !m.fotos.length) return false;
     const arr = ARREMATADOS[m.id];
     if (!arr) return false;
+    if (arr.status_arrematado !== 'vendido') return false;
     const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
     if (!fipe) return false;
-    if (soVendido && arr.status_arrematado === 'condicional') return false;
     const cc = m.cilindrada || extractCilindrada(m.marca, m.modelo) || 0;
     if (ccMin && cc < ccMin) return false;
     const pct = Math.round((arr.valor / fipe) * 100);
@@ -6122,7 +6119,7 @@ function renderInstagram() {
 
   grid.innerHTML = candidatas.length
     ? candidatas.map(({ m, pct }) => cardMotoIG(m, pct)).join('')
-    : '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--muted);">Nenhuma candidata encontrada com esses filtros.</div>';
+    : '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--muted);">Nenhuma moto vendida com fotos ainda — as candidatas aparecem conforme os leilões encerram e as fotos são coletadas.</div>';
 }
 
 function admStatCard(valor, label, cor) {
