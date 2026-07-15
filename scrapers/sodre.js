@@ -296,13 +296,58 @@ function extrairTipoSinistro(texto) {
   return null;
 }
 
+// Corta o lot_description antes das cláusulas jurídicas de IPVA/licenciamento
+// (mesmo texto tem trechos descritivos específicos + cláusulas genéricas no fim).
+// Evita rodar detectarAlertas sobre a parte de cláusula, que é boilerplate.
+const CLAUSULA_RE = /D[ÉE]BITOS\s+DE\s+IPVA|LICENCIAMENTO/i;
+
+function zonaSeguraAlertas(texto) {
+  const t = String(texto || '');
+  const idx = t.search(CLAUSULA_RE);
+  return idx > 0 ? t.slice(0, idx) : t;
+}
+
+const IPVA_PAGO_TXT_RE = /IPVA\s+\d{4}\s+PAGO/i;
+
+const MONTA_FLAG = { pequena: 'peq_monta', media: 'media_monta', grande: 'grande_monta' };
+
+// Componentes danificados detectados via ALERTAS_MAP (campo:valor específico do
+// lot_description) → texto legível para compor descricao_resumo
+const COMPONENTE_LABEL = {
+  motor_danificado:     'motor',
+  modulo_danificado:    'módulo de injeção',
+  arranque_danificado:  'motor de arranque',
+  cambio_danificado:    'câmbio',
+  suspensao_danificada: 'suspensão',
+};
+
+function capitalizar(s) {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
+function formatarLista(items) {
+  if (!items.length) return '';
+  if (items.length === 1) return items[0];
+  return `${items.slice(0, -1).join(', ')} e ${items[items.length - 1]}`;
+}
+
 // Monta descricao_resumo curto e derivado (nunca usa lot_note — boilerplate
 // jurídico igual em todo lote do leilão, geraria falso positivo em detectarAlertas)
-function montarDescricaoResumo(tipoSinistro, montaAPI) {
+function montarDescricaoResumo(tipoSinistro, montaAPI, componentesLabels, semChave, ipvaPago) {
   const montaLabel = montaAPI ? MONTA_LABEL[montaAPI] : null;
-  if (tipoSinistro && montaLabel) return `Sinistro: ${tipoSinistro} — ${montaLabel}`;
-  if (tipoSinistro) return `Sinistro: ${tipoSinistro}`;
-  return montaLabel || null;
+  const principal = [tipoSinistro ? capitalizar(tipoSinistro) : null, montaLabel].filter(Boolean).join(' — ');
+
+  const extras = [];
+  if (componentesLabels.length) {
+    const danificado = componentesLabels.length === 1 ? 'danificado' : 'danificados';
+    extras.push(`${formatarLista(componentesLabels)} ${danificado}`);
+  }
+  if (semChave) extras.push('sem chave');
+
+  let resumo = principal;
+  if (extras.length) resumo = resumo ? `${resumo} — ${extras.join('; ')}` : extras.join('; ');
+  if (ipvaPago)      resumo = resumo ? `${resumo} (IPVA pago)` : 'IPVA pago';
+  return resumo || null;
 }
 
 // ── Extrai dados estruturados de um objeto de lote cru ────────────────────────
@@ -551,14 +596,25 @@ async function main() {
       // Usa monta da API se disponível; senão deriva da cilindrada
       const monta = montaAPI ?? (cilindrada == null ? null : cilindrada <= 200 ? 'pequena' : cilindrada <= 500 ? 'media' : 'grande');
 
-      // descricao_resumo/alertas — derivados de lot_description (tipo de sinistro) e
-      // lot_sinister (montaAPI); NUNCA de lot_note (boilerplate jurídico idêntico
-      // em todo lote do leilão — geraria falso positivo em detectarAlertas)
-      const tipoSinistro     = extrairTipoSinistro(lot.lot_description);
-      const descricaoResumo  = montarDescricaoResumo(tipoSinistro, montaAPI);
-      const alertasList      = descricaoResumo ? detectarAlertas(descricaoResumo) : [];
-      const temChave         = Array.isArray(lot.lot_optionals) && lot.lot_optionals.includes('chave-ignicao');
-      if (!temChave) alertasList.push('sem_chave');
+      // descricao_resumo/alertas — derivados de lot_description (tipo de sinistro,
+      // componentes danificados, restrição administrativa, IPVA) e lot_sinister
+      // (montaAPI); NUNCA de lot_note (boilerplate jurídico idêntico em todo lote
+      // do leilão — geraria falso positivo em detectarAlertas)
+      const descFull   = String(lot.lot_description || '');
+      const zonaSegura = zonaSeguraAlertas(descFull);
+      const tipoSinistro = extrairTipoSinistro(descFull);
+      const temChave    = Array.isArray(lot.lot_optionals) && lot.lot_optionals.includes('chave-ignicao');
+      const ipvaPago    = IPVA_PAGO_TXT_RE.test(descFull);
+
+      const alertasSet = new Set(detectarAlertas(zonaSegura));
+      if (montaAPI && MONTA_FLAG[montaAPI]) alertasSet.add(MONTA_FLAG[montaAPI]);
+      if (!temChave) alertasSet.add('sem_chave');
+      const alertasList = Array.from(alertasSet);
+
+      const componentesLabels = alertasList
+        .filter(f => COMPONENTE_LABEL[f])
+        .map(f => COMPONENTE_LABEL[f]);
+      const descricaoResumo = montarDescricaoResumo(tipoSinistro, montaAPI, componentesLabels, !temChave, ipvaPago);
       const alertas = alertasList.length ? alertasList.join(',') : null;
 
       motosPorLeilao[lid].push({

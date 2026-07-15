@@ -31,6 +31,11 @@ const ALERTAS_MAP = [
   [/HOD[OÔ]METRO\s+DANIFICADO/i,                            'hodometro_danificado'],
   [/RECUPERAD[OA]\s+DE\s+ROUBO|ROUBO\/FURTO/i,              'recuperado_roubo'],
   [/RECALL/i,                                                           'recall'],
+  [/MOTOR:\s*DANIFICAD/i,                                    'motor_danificado'],
+  [/M[OÓ]DULO\s+DE\s+IGNI[ÇC][ÃA]O.*DANIFICAD|M[OÓ]DULO.*INJE[ÇC][ÃA]O.*DANIFICAD/i, 'modulo_danificado'],
+  [/MOTOR\s+DE\s+ARRANQUE:\s*DANIFICAD/i,                  'arranque_danificado'],
+  [/PEDAL\s+C[ÂA]MBIO:\s*DANIFICAD|C[ÂA]MBIO:\s*DANIFICAD/i, 'cambio_danificado'],
+  [/RESTRI[ÇC][ÃA]O\s+ADMINISTRATIVA/i,                    'restricao_administrativa'],
 ];
 
 function detectarAlertas(texto) {
