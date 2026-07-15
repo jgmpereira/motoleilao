@@ -16,7 +16,7 @@
  */
 
 const { chromium } = require('playwright');
-const { extrairUF } = require('./_utils');
+const { extrairUF, detectarAlertas } = require('./_utils');
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const SUPA_URL = 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
@@ -277,6 +277,34 @@ function mapCondicao(condicaoTexto, condicaoExtra) {
   return 'financiada';
 }
 
+// ── Tipo de sinistro (a partir de lot_description, texto livre) ──────────────
+const MONTA_LABEL = { pequena: 'Pequena monta', media: 'Média monta', grande: 'Grande monta' };
+const TIPO_SINISTRO_RE = [
+  [/colis(?:ã|a)o/i, 'colisão'],
+  [/roubo/i,         'roubo'],
+  [/furto/i,         'furto'],
+  [/inc[êe]ndio/i,   'incêndio'],
+  [/alagamento/i,    'alagamento'],
+  [/granizo/i,       'granizo'],
+];
+
+function extrairTipoSinistro(texto) {
+  const t = String(texto || '');
+  for (const [re, label] of TIPO_SINISTRO_RE) {
+    if (re.test(t)) return label;
+  }
+  return null;
+}
+
+// Monta descricao_resumo curto e derivado (nunca usa lot_note — boilerplate
+// jurídico igual em todo lote do leilão, geraria falso positivo em detectarAlertas)
+function montarDescricaoResumo(tipoSinistro, montaAPI) {
+  const montaLabel = montaAPI ? MONTA_LABEL[montaAPI] : null;
+  if (tipoSinistro && montaLabel) return `Sinistro: ${tipoSinistro} — ${montaLabel}`;
+  if (tipoSinistro) return `Sinistro: ${tipoSinistro}`;
+  return montaLabel || null;
+}
+
 // ── Extrai dados estruturados de um objeto de lote cru ────────────────────────
 // Campos confirmados pela API real do Sodré Santoro:
 //   lot_title, lot_brand, lot_model, lot_year_model, auction_date_init,
@@ -475,10 +503,6 @@ async function main() {
 
     console.log(`\n📊 Total lotes coletados: ${capturedLots.length} (API total: ${total})`);
 
-    // 🐛 DEBUG TEMPORÁRIO — dump completo dos 2 primeiros lotes para mapear campos de descrição/avarias
-    console.log('\n🐛 DEBUG lote[0] completo:\n' + JSON.stringify(capturedLots[0], null, 2));
-    if (capturedLots[1]) console.log('\n🐛 DEBUG lote[1] completo:\n' + JSON.stringify(capturedLots[1], null, 2));
-
     if (capturedLots.length === 0) {
       console.log('ℹ️  Nenhum lote encontrado. Encerrando sem salvar.');
       return;
@@ -527,6 +551,16 @@ async function main() {
       // Usa monta da API se disponível; senão deriva da cilindrada
       const monta = montaAPI ?? (cilindrada == null ? null : cilindrada <= 200 ? 'pequena' : cilindrada <= 500 ? 'media' : 'grande');
 
+      // descricao_resumo/alertas — derivados de lot_description (tipo de sinistro) e
+      // lot_sinister (montaAPI); NUNCA de lot_note (boilerplate jurídico idêntico
+      // em todo lote do leilão — geraria falso positivo em detectarAlertas)
+      const tipoSinistro     = extrairTipoSinistro(lot.lot_description);
+      const descricaoResumo  = montarDescricaoResumo(tipoSinistro, montaAPI);
+      const alertasList      = descricaoResumo ? detectarAlertas(descricaoResumo) : [];
+      const temChave         = Array.isArray(lot.lot_optionals) && lot.lot_optionals.includes('chave-ignicao');
+      if (!temChave) alertasList.push('sem_chave');
+      const alertas = alertasList.length ? alertasList.join(',') : null;
+
       motosPorLeilao[lid].push({
         leilao_id:    lid,
         lote:         loteNum,
@@ -541,6 +575,8 @@ async function main() {
         estado:       extrairUF(patio),
         cilindrada,
         monta,
+        descricao_resumo: descricaoResumo,
+        alertas,
         fipe_csv:     null,
        url:           (lot.auction_id && lot.lot_id) ? `https://leilao.sodresantoro.com.br/leilao/${lot.auction_id}/lote/${lot.lot_id}/` : null,
       foto:          (lot.lot_pictures && lot.lot_pictures[0]) ? lot.lot_pictures[0] : null,
