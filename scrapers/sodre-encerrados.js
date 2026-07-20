@@ -88,13 +88,41 @@ async function main() {
   // Reprocessa a janela para atualizar condicionais que resolvem dias após o leilão
   const hoje = new Date().toISOString().slice(0, 10);
   const hojeMenos3 = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const leiloes = await supaFetch(
+  const leiloesRecentes = await supaFetch(
     `leiloes?plataforma=eq.Sodré Santoro&data=gte.${hojeMenos3}&data=lte.${hoje}&select=id,link,data`,
     { prefer: 'return=representation' }
-  );
+  ) || [];
 
-  if (!leiloes || leiloes.length === 0) {
-    console.log('ℹ️ Nenhum leilão do Sodré na janela de 3 dias.');
+  // 1b. Alguns condicionais do Sodré só resolvem (viram vendido) bem depois dos 3 dias —
+  // busca leilões de QUALQUER data que ainda tenham arrematados pendurados em 'condicional'
+  const condicionaisPendentes = await supaFetch(
+    `arrematados?status_arrematado=eq.condicional&select=motos!inner(leilao_id)`,
+    { prefer: 'return=representation' }
+  ) || [];
+  const idsJaNaJanela = new Set(leiloesRecentes.map(l => l.id));
+  const idsCondicionaisFaltantes = [...new Set(
+    condicionaisPendentes
+      .map(a => a.motos?.leilao_id)
+      .filter(id => id && id.startsWith('sodre_') && !idsJaNaJanela.has(id))
+  )];
+
+  // A API do Sodré só mantém dados de lotes encerrados por ~1 semana (confirmado:
+  // auctionId de 10 dias atrás já retorna vazio) — reprocessar além disso é inútil,
+  // por isso limita a 21 dias (margem de segurança) pra não repetir chamada pra sempre.
+  const hojeMenos21 = new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  let leiloesAntigos = [];
+  if (idsCondicionaisFaltantes.length > 0) {
+    leiloesAntigos = await supaFetch(
+      `leiloes?id=in.(${idsCondicionaisFaltantes.join(',')})&data=gte.${hojeMenos21}&select=id,link,data`,
+      { prefer: 'return=representation' }
+    ) || [];
+    console.log(`\n🔁 ${leiloesAntigos.length} leilão(ões) antigo(s) com condicional pendente (últimos 21 dias), reprocessando também.`);
+  }
+
+  const leiloes = [...leiloesRecentes, ...leiloesAntigos];
+
+  if (leiloes.length === 0) {
+    console.log('ℹ️ Nenhum leilão do Sodré na janela de 3 dias nem condicional pendente.');
     return;
   }
 
