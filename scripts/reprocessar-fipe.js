@@ -13,15 +13,28 @@
  * cilindrada da moto.
  *
  * Uso:
- *   node scripts/reprocessar-fipe.js              # motos de leilões ativos, grava no banco
- *   DRY_RUN=1 node scripts/reprocessar-fipe.js     # só loga, não grava nada
- *   ESCOPO=all node scripts/reprocessar-fipe.js    # todas as motos (histórico incluso)
+ *   node scripts/reprocessar-fipe.js                    # motos de leilões ativos, grava no banco
+ *   DRY_RUN=1 node scripts/reprocessar-fipe.js           # só loga, não grava nada
+ *   ESCOPO=all node scripts/reprocessar-fipe.js          # todas as motos (histórico incluso)
+ *   ESCOPO=encerrados node scripts/reprocessar-fipe.js   # só motos de leilões encerrados sem fipe_csv
+ *   PULAR_LIMPEZA=1 node scripts/reprocessar-fipe.js     # pula a etapa 1 (limpeza de fipe_valores)
  */
 
 const SUPA_URL = process.env.SUPABASE_URL || 'https://ntlwhwmtsyniinbkwjgg.supabase.co';
 const SUPA_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
 const DRY_RUN = process.env.DRY_RUN === '1';
-const ESCOPO = (process.env.ESCOPO || 'ativos').toLowerCase(); // 'ativos' | 'all'
+const ESCOPO = (process.env.ESCOPO || 'ativos').toLowerCase(); // 'ativos' | 'all' | 'encerrados'
+const PULAR_LIMPEZA = process.env.PULAR_LIMPEZA === '1';
+
+// Trava de cota diária da API FIPE (conta requisições HTTP reais, não modelos
+// processados — um modelo pode custar 1 a vários requests dependendo de
+// cache de marca/modelo/ano). Ao aproximar da cota, para no fim do modelo em
+// andamento e grava tudo já processado.
+const REQ_LIMIT = parseInt(process.env.REQ_LIMIT || '900', 10);
+
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
 
 // A API v1 (sem token) tem cota baixa e rate-limita rápido em processamento em
 // lote. Com FIPE_TOKEN configurado, usa a v2 (autenticada, cota maior) — os
@@ -35,6 +48,46 @@ const FIPE_HEADERS = USE_V2 ? { 'X-Subscription-Token': FIPE_TOKEN } : {};
 if (!SUPA_KEY) { console.error('❌ SUPABASE_SERVICE_KEY (ou SUPABASE_KEY) não definido'); process.exit(1); }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ===================== COTA E LISTA DE FALHAS CONHECIDAS =====================
+
+let reqCount = 0;
+
+// Modelos (marca|modelo|ano) que já deram "não encontrado" ou foram
+// descartados pela trava de sanidade em rodadas anteriores. Persistido no
+// repo pra sobreviver a reset de Codespace e pra não gastar cota reprocessando
+// o que já se sabe que falha. Se o matching for melhorado depois, apagar ou
+// editar este arquivo manualmente pra forçar novas tentativas.
+const SKIP_LIST_PATH = path.join(__dirname, 'fipe-nao-encontrados.json');
+
+function loadSkipList() {
+  try {
+    const arr = JSON.parse(fs.readFileSync(SKIP_LIST_PATH, 'utf8'));
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveSkipList(set) {
+  if (DRY_RUN) return;
+  fs.writeFileSync(SKIP_LIST_PATH, JSON.stringify([...set].sort(), null, 2) + '\n');
+}
+
+function commitESendSkipList() {
+  if (DRY_RUN) return;
+  const cwd = path.join(__dirname, '..');
+  try {
+    const status = execSync('git status --porcelain -- scripts/fipe-nao-encontrados.json', { cwd }).toString().trim();
+    if (!status) { console.log('\n(lista de falhas sem mudanças — commit pulado)'); return; }
+    execSync('git add scripts/fipe-nao-encontrados.json', { cwd });
+    execSync(`git commit -m ${JSON.stringify('chore: atualiza lista de modelos FIPE não encontrados (reprocessamento encerrados)')}`, { cwd });
+    execSync('git push', { cwd });
+    console.log('\n✅ scripts/fipe-nao-encontrados.json commitado e enviado (git push).');
+  } catch (e) {
+    console.error('\n⚠️  falha ao commitar/enviar lista de falhas:', e.message.split('\n')[0]);
+  }
+}
 
 // ===================== SUPABASE =====================
 
@@ -76,6 +129,7 @@ async function supaFetchAll(pathComQuery) {
 
 async function fipeFetch(url) {
   for (let tentativa = 0; tentativa < 3; tentativa++) {
+    reqCount++;
     try {
       const r = await fetch(url, { headers: FIPE_HEADERS });
       if (r.status === 429) {
@@ -538,15 +592,25 @@ async function buscarModeloFipe(m) {
 
   const anoFab = (m.ano || '').split('/')[0].replace(/\D/g, '');
   const anoMod = (m.ano || '').split('/')[1]?.replace(/\D/g, '');
+  const anoFabCompleto = anoParaAnoCompleto(anoFab);
+  const anoModCompleto = anoMod ? anoParaAnoCompleto(anoMod) : null;
   let anos = await carregarAnos(marcaObj.codigo, modeloObj.codigo);
   if (!anos || !anos.length) return { erro: 'sem anos disponíveis' };
 
-  if (anoFab && altCandidatos.length) {
-    const temAno = anos.some(a => a.nome.startsWith(anoFab) || a.nome.includes(anoFab));
+  // IMPORTANTE: comparar sempre pelo ano completo de 4 dígitos, nunca por
+  // startsWith/includes do ano curto de 2 dígitos contra o nome de 4 dígitos
+  // da FIPE — "20".startsWith bate em "2000 Gasolina" antes de "2020
+  // Gasolina" quando o modelo tem anos antigos cadastrados, gravando o preço
+  // de uma moto 20 anos mais velha sob o ano errado (bug real: Kawasaki Ninja
+  // ZX-6R ano 20/20 gravou o valor do ano 2000 do modelo 600cc em vez do ano
+  // 2020 do modelo 636cc).
+  const anoDoNome = a => parseInt((a.nome.match(/^(\d{4})/) || [])[1] || 0);
+  if (anoFabCompleto && altCandidatos.length) {
+    const temAno = anos.some(a => anoDoNome(a) === anoFabCompleto);
     if (!temAno) {
       for (const alt of altCandidatos) {
         const anosAlt = await carregarAnos(marcaObj.codigo, alt.codigo);
-        if (anosAlt && anosAlt.some(a => a.nome.startsWith(anoFab) || a.nome.includes(anoFab))) {
+        if (anosAlt && anosAlt.some(a => anoDoNome(a) === anoFabCompleto)) {
           modeloObj = alt;
           anos = anosAlt;
           break;
@@ -555,14 +619,12 @@ async function buscarModeloFipe(m) {
     }
   }
 
-  let anoObj = anos.find(a => a.nome.startsWith(anoFab))
-    || anos.find(a => a.nome.includes(anoFab))
-    || (anoMod ? anos.find(a => a.nome.includes(anoMod)) : null);
-  if (!anoObj && anoFab) {
-    const target = anoParaAnoCompleto(anoFab);
-    const comAno = anos.map(a => ({ a, y: parseInt((a.nome.match(/^(\d{4})/) || [])[1] || 0) })).filter(x => x.y);
-    comAno.sort((a, b) => Math.abs(a.y - target) - Math.abs(b.y - target));
-    if (target && comAno.length && Math.abs(comAno[0].y - target) <= 3) anoObj = comAno[0].a;
+  let anoObj = (anoFabCompleto ? anos.find(a => anoDoNome(a) === anoFabCompleto) : null)
+    || (anoModCompleto ? anos.find(a => anoDoNome(a) === anoModCompleto) : null);
+  if (!anoObj && anoFabCompleto) {
+    const comAno = anos.map(a => ({ a, y: anoDoNome(a) })).filter(x => x.y);
+    comAno.sort((a, b) => Math.abs(a.y - anoFabCompleto) - Math.abs(b.y - anoFabCompleto));
+    if (comAno.length && Math.abs(comAno[0].y - anoFabCompleto) <= 3) anoObj = comAno[0].a;
   }
   if (!anoObj) anoObj = anos[0];
   if (!anoObj) return { erro: 'ano não resolvido' };
@@ -678,6 +740,10 @@ async function buscarMotosEscopo() {
     console.log('   Escopo: TODAS as motos (histórico incluso)');
     return supaFetchAll('motos?select=id,marca,modelo,ano,cilindrada,fipe_csv&marca=not.is.null&modelo=not.is.null&ano=not.is.null');
   }
+  if (ESCOPO === 'encerrados') {
+    console.log('   Escopo: motos de leilões ENCERRADOS sem fipe_csv (encerrado=true, fipe_csv=null)');
+    return supaFetchAll('motos?select=id,marca,modelo,ano,cilindrada,fipe_csv,leiloes!inner(encerrado)&leiloes.encerrado=eq.true&fipe_csv=is.null&marca=not.is.null&modelo=not.is.null&ano=not.is.null');
+  }
   console.log('   Escopo: motos de leilões ATIVOS (encerrado=false)');
   return supaFetchAll('motos?select=id,marca,modelo,ano,cilindrada,fipe_csv,leiloes!inner(encerrado)&leiloes.encerrado=eq.false&marca=not.is.null&modelo=not.is.null&ano=not.is.null');
 }
@@ -695,13 +761,30 @@ async function reprocessar() {
     g.ids.push(m.id);
     if (m.cilindrada) g.ccs.add(m.cilindrada);
   }
-  console.log(`   ${grupos.size} modelos únicos (marca|modelo|ano) a processar\n`);
+  console.log(`   ${grupos.size} modelos únicos (marca|modelo|ano) a processar`);
 
-  let corrigidos = 0, descartados = 0, naoEncontrados = 0, i = 0;
+  const skipSet = loadSkipList();
+  const skipSetInicial = new Set(skipSet);
+  console.log(`   ${skipSetInicial.size} já na lista de falhas conhecidas (serão pulados sem custo de cota)\n`);
+
+  let corrigidos = 0, descartados = 0, naoEncontrados = 0, pulados = 0, i = 0;
+  let cortadoPorCota = false;
   const total = grupos.size;
 
   for (const [key, g] of grupos) {
     i++;
+
+    if (skipSet.has(key)) {
+      pulados++;
+      continue;
+    }
+
+    if (reqCount >= REQ_LIMIT) {
+      console.log(`\n🛑 Trava de cota acionada (${reqCount}/${REQ_LIMIT} requisições) — parando em [${i}/${total}].`);
+      cortadoPorCota = true;
+      break;
+    }
+
     const { m, ids } = g;
     const cc = g.ccs.size ? [...g.ccs][0] : extrairCilindrada(m.modelo);
     process.stdout.write(`[${i}/${total}] ${key} (${ids.length} motos, ~${cc || '?'}cc) ... `);
@@ -716,6 +799,7 @@ async function reprocessar() {
     if (resultado.erro) {
       console.log(`❌ não encontrado (${resultado.erro})`);
       naoEncontrados++;
+      skipSet.add(key);
       await limparFipeCsvSeAcimaDoTeto(ids, cc);
       await sleep(350);
       continue;
@@ -728,10 +812,12 @@ async function reprocessar() {
     if (resultado.valor > teto) {
       console.log(`⚠️  descartado (valor suspeito: R$ ${resultado.valor.toLocaleString('pt-BR')} > teto R$ ${teto.toLocaleString('pt-BR')} para ~${cc}cc — match: "${resultado.modeloNomeFipe}")`);
       descartados++;
+      skipSet.add(key);
       await limparFipeCsvSeAcimaDoTeto(ids, cc);
     } else if (ccDivergente) {
       console.log(`⚠️  descartado (cilindrada do match muito diferente: query ~${cc}cc vs match "${resultado.modeloNomeFipe}" ~${ccMatch}cc)`);
       descartados++;
+      skipSet.add(key);
       await limparFipeCsvSeAcimaDoTeto(ids, cc);
     } else {
       console.log(`✅ match "${resultado.modeloNomeFipe}" R$ ${resultado.valor.toLocaleString('pt-BR')}`);
@@ -752,7 +838,21 @@ async function reprocessar() {
     await sleep(350);
   }
 
-  console.log(`\n✅ Reprocessamento concluído: ${corrigidos} corrigidos/preenchidos, ${descartados} descartados por sanidade, ${naoEncontrados} não encontrados — de ${total} modelos únicos.`);
+  saveSkipList(skipSet);
+  commitESendSkipList();
+
+  const tentadosNestaRodada = corrigidos + descartados + naoEncontrados;
+  const novosParaTentar = total - skipSetInicial.size;
+  const faltam = Math.max(0, novosParaTentar - tentadosNestaRodada);
+  const reqPorModelo = tentadosNestaRodada ? reqCount / tentadosNestaRodada : 0;
+  const rodadasRestantes = faltam === 0 ? 0 : (reqPorModelo > 0 ? Math.ceil((faltam * reqPorModelo) / REQ_LIMIT) : '?');
+
+  console.log(`\n✅ Reprocessamento ${cortadoPorCota ? 'interrompido pela trava de cota' : 'concluído'}: ${corrigidos} corrigidos/preenchidos, ${descartados} descartados por sanidade, ${naoEncontrados} não encontrados, ${pulados} pulados (falha conhecida) — de ${total} modelos únicos.`);
+  console.log(`\n📊 Resumo da rodada:`);
+  console.log(`   Gravados hoje: ${corrigidos}`);
+  console.log(`   Requisições usadas: ${reqCount}/${REQ_LIMIT}`);
+  console.log(`   Modelos ainda pendentes (nunca tentados): ${faltam}`);
+  console.log(`   Estimativa de rodadas restantes: ~${rodadasRestantes}`);
 }
 
 async function limparFipeCsvSeAcimaDoTeto(ids, cc) {
@@ -770,6 +870,11 @@ async function limparFipeCsvSeAcimaDoTeto(ids, cc) {
 
 async function main() {
   console.log(`🏍️  Reprocessamento FIPE${DRY_RUN ? ' — DRY RUN (nada será gravado)' : ''}`);
+  if (PULAR_LIMPEZA) {
+    console.log('\n⏭️  Etapa 1/2 pulada (PULAR_LIMPEZA=1)');
+    await reprocessar();
+    return;
+  }
   const limpeza = await limparFipeValoresRuins();
   await reprocessar();
   console.log(`\n📊 Resumo: ${limpeza.ruins}/${limpeza.total} registros de fipe_valores estavam com o bug antigo.`);

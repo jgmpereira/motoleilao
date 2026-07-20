@@ -269,8 +269,17 @@ async function buscarModeloFipe(m) {
 
   // Se o modelo top-score não tem o ano do veículo, tenta os candidatos
   // alternativos (score próximo) antes de desistir — ver comentário acima.
-  if (anoFab && altCandidatos.length) {
-    const temAno = anos.some(a => a.name.startsWith(anoFab) || a.name.includes(anoFab));
+  //
+  // IMPORTANTE: comparar sempre pelo ano completo de 4 dígitos (anoFabCompleto),
+  // nunca por startsWith/includes do ano curto de 2 dígitos (anoFab) contra o
+  // nome de 4 dígitos da FIPE — "20".startsWith bate em "2000 Gasolina" antes
+  // de "2020 Gasolina" quando o modelo tem anos antigos cadastrados, gravando
+  // o preço de uma moto 20 anos mais velha sob o ano errado (bug real: Kawasaki
+  // Ninja ZX-6R ano 20/20 gravou o valor do ano 2000 do modelo 600cc em vez do
+  // ano 2020 do modelo 636cc).
+  const anoDoNome = a => parseInt((a.name.match(/^(\d{4})/) || [])[1] || 0);
+  if (anoFabCompleto && altCandidatos.length) {
+    const temAno = anos.some(a => anoDoNome(a) === anoFabCompleto);
     if (!temAno) {
       for (const alt of altCandidatos) {
         const altKey = `${marcaObj.code}_${alt.code}`;
@@ -279,7 +288,7 @@ async function buscarModeloFipe(m) {
           _anosCache[altKey] = Array.isArray(r) ? r : [];
         }
         const anosAlt = _anosCache[altKey];
-        if (anosAlt.length && anosAlt.some(a => a.name.startsWith(anoFab) || a.name.includes(anoFab))) {
+        if (anosAlt.length && anosAlt.some(a => anoDoNome(a) === anoFabCompleto)) {
           modeloObj = alt;
           anos = anosAlt;
           break;
@@ -288,8 +297,7 @@ async function buscarModeloFipe(m) {
     }
   }
 
-  let anoObj = anos.find(a => a.name.startsWith(anoFab))
-    || anos.find(a => a.name.includes(anoFab));
+  let anoObj = anoFabCompleto ? anos.find(a => anoDoNome(a) === anoFabCompleto) : null;
 
   if (!anoObj && anoFabCompleto) {
     const comAno = anos.map(a => ({
