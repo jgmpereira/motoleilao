@@ -849,7 +849,31 @@ tbody tr:hover{background:var(--s2);}
       <button class="hf-chip" data-hmonta="pequena" onclick="setHistFiltro('monta','pequena',this)" style="color:#1a7bbf;">Peq.</button>
       <button class="hf-chip" data-hmonta="media" onclick="setHistFiltro('monta','media',this)" style="color:#b07a00;">Méd.</button>
       <button class="hf-chip" data-hmonta="grande" onclick="setHistFiltro('monta','grande',this)" style="color:var(--red);">Grande</button>
+      <div class="hf-divider"></div>
+      <span class="hf-label">Segmento:</span>
+      <button class="hf-chip active" data-hseg="" onclick="setHistFiltro('seg','',this)">Todos</button>
+      <button class="hf-chip" data-hseg="commuter" onclick="setHistFiltro('seg','commuter',this)">🏙 Urbana</button>
+      <button class="hf-chip" data-hseg="scooter" onclick="setHistFiltro('seg','scooter',this)">🛵 Scooter</button>
+      <button class="hf-chip" data-hseg="trail" onclick="setHistFiltro('seg','trail',this)">🌲 Trail</button>
+      <button class="hf-chip" data-hseg="naked" onclick="setHistFiltro('seg','naked',this)">⚡ Naked</button>
+      <button class="hf-chip" data-hseg="custom" onclick="setHistFiltro('seg','custom',this)">🤠 Custom</button>
+      <button class="hf-chip" data-hseg="adventure" onclick="setHistFiltro('seg','adventure',this)">🗺 Adventure</button>
+      <button class="hf-chip" data-hseg="esportiva" onclick="setHistFiltro('seg','esportiva',this)">🏁 Esportiva</button>
+      <div class="hf-divider"></div>
+      <span class="hf-label">% FIPE:</span>
+      <button class="hf-chip active" data-hfipe="" onclick="setHistFiltro('fipe','',this)">Todos</button>
+      <button class="hf-chip" data-hfipe="30" onclick="setHistFiltro('fipe','30',this)">🔥 &lt;30%</button>
+      <button class="hf-chip" data-hfipe="50" onclick="setHistFiltro('fipe','50',this)">✅ &lt;50%</button>
+      <button class="hf-chip" data-hfipe="70" onclick="setHistFiltro('fipe','70',this)">⚠️ &lt;70%</button>
+      <div class="hf-divider"></div>
+      <span class="hf-label">Período:</span>
+      <button class="hf-chip active" data-hperiodo="" onclick="setHistFiltro('periodo','',this)">Todos</button>
+      <button class="hf-chip" data-hperiodo="7" onclick="setHistFiltro('periodo','7',this)">Últ. 7 dias</button>
+      <button class="hf-chip" data-hperiodo="30" onclick="setHistFiltro('periodo','30',this)">Últ. 30 dias</button>
+      <div class="hf-divider"></div>
+      <button id="hist-marca-btn" class="hf-chip" onclick="toggleHistMarcas()">🏍 Marca ▾</button>
       <button onclick="limparHistFiltros()" style="margin-left:auto;background:rgba(255,77,0,.08);border:1px solid rgba(255,77,0,.25);color:var(--accent);font-size:11px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer;">✕ Limpar</button>
+      <div id="hist-marcas-panel" style="display:none;flex-basis:100%;flex-wrap:wrap;gap:4px 16px;padding-top:10px;margin-top:4px;border-top:1px solid var(--border);"></div>
     </div>
     <div id="hist-geral-table"></div>
     <div id="hist-pagination" style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);"></div>
@@ -1572,6 +1596,7 @@ let sortField = null, sortDir = 1;
 let motosSelecionadas = new Set(); // ids das motos marcadas para exclusão em lote
 let histSortField = 'data', histSortDir = -1;
 let histFiltCond = '', histFiltPorte = '', histFiltMonta = ''; // histórico: padrão data decrescente
+let histFiltSeg = '', histFiltFipe = '', histFiltPeriodo = '';
 let histPage = 1;
 const HIST_PAGE_SIZE = 50;
 
@@ -5399,21 +5424,76 @@ function renderAnalise() {
 
 // ===================== HISTÓRICO GERAL =====================
 function setHistFiltro(tipo, val, btn) {
-  if(tipo === 'cond')  { histFiltCond  = val; document.querySelectorAll('[data-hcond]').forEach(b => b.classList.toggle('active', b.dataset.hcond===val)); }
-  if(tipo === 'porte') { histFiltPorte = val; document.querySelectorAll('[data-hporte]').forEach(b => b.classList.toggle('active', b.dataset.hporte===val)); }
-  if(tipo === 'monta') { histFiltMonta = val; document.querySelectorAll('[data-hmonta]').forEach(b => b.classList.toggle('active', b.dataset.hmonta===val)); }
+  if(tipo === 'cond')    { histFiltCond    = val; document.querySelectorAll('[data-hcond]').forEach(b => b.classList.toggle('active', b.dataset.hcond===val)); }
+  if(tipo === 'porte')   { histFiltPorte   = val; document.querySelectorAll('[data-hporte]').forEach(b => b.classList.toggle('active', b.dataset.hporte===val)); }
+  if(tipo === 'monta')   { histFiltMonta   = val; document.querySelectorAll('[data-hmonta]').forEach(b => b.classList.toggle('active', b.dataset.hmonta===val)); }
+  if(tipo === 'seg')     { histFiltSeg     = val; document.querySelectorAll('[data-hseg]').forEach(b => b.classList.toggle('active', b.dataset.hseg===val)); }
+  if(tipo === 'fipe')    { histFiltFipe    = val; document.querySelectorAll('[data-hfipe]').forEach(b => b.classList.toggle('active', b.dataset.hfipe===val)); }
+  if(tipo === 'periodo') { histFiltPeriodo = val; document.querySelectorAll('[data-hperiodo]').forEach(b => b.classList.toggle('active', b.dataset.hperiodo===val)); }
   histPage = 1;
   renderHistoricoGeral();
 }
 
 function limparHistFiltros() {
-  histFiltCond = ''; histFiltPorte = ''; histFiltMonta = '';
+  histFiltCond = ''; histFiltPorte = ''; histFiltMonta = ''; histFiltSeg = ''; histFiltFipe = ''; histFiltPeriodo = '';
   document.getElementById('hist-search').value = '';
   document.querySelectorAll('[data-hcond]').forEach(b => b.classList.toggle('active', b.dataset.hcond===''));
   document.querySelectorAll('[data-hporte]').forEach(b => b.classList.toggle('active', b.dataset.hporte===''));
   document.querySelectorAll('[data-hmonta]').forEach(b => b.classList.toggle('active', b.dataset.hmonta===''));
+  document.querySelectorAll('[data-hseg]').forEach(b => b.classList.toggle('active', b.dataset.hseg===''));
+  document.querySelectorAll('[data-hfipe]').forEach(b => b.classList.toggle('active', b.dataset.hfipe===''));
+  document.querySelectorAll('[data-hperiodo]').forEach(b => b.classList.toggle('active', b.dataset.hperiodo===''));
+  document.getElementById('hist-marcas-panel')?.querySelectorAll('input').forEach(i => i.checked = false);
   histPage = 1;
   renderHistoricoGeral();
+}
+
+function toggleHistMarcas() {
+  const panel = document.getElementById('hist-marcas-panel');
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'flex';
+  document.getElementById('hist-marca-btn').classList.toggle('active', !open);
+}
+
+// Painel de marcas do histórico — mesmo agrupamento (principais + outras) usado na home
+function popularHistMarcas() {
+  const marcasEl = document.getElementById('hist-marcas-panel');
+  if(!marcasEl || marcasEl.dataset.populated) return;
+  marcasEl.dataset.populated = '1';
+  const MARCAS_PRINCIPAIS = [
+    { valor: 'BMW',             label: 'BMW Motorrad' },
+    { valor: 'Ducati',          label: 'Ducati' },
+    { valor: 'Harley-Davidson', label: 'Harley-Davidson' },
+    { valor: 'Honda',           label: 'Honda' },
+    { valor: 'Kawasaki',        label: 'Kawasaki' },
+    { valor: 'KTM',             label: 'KTM' },
+    { valor: 'Royal Enfield',   label: 'Royal Enfield' },
+    { valor: 'Suzuki',          label: 'Suzuki' },
+    { valor: 'Triumph',         label: 'Triumph' },
+    { valor: 'Yamaha',          label: 'Yamaha' },
+  ];
+  const valoresPrincipais = new Set(MARCAS_PRINCIPAIS.map(m => m.valor));
+  const MARCAS_INVALIDAS = new Set(['fiat', 'jta', 'jta-suzuki', 'jta suzuki', 'jta/suzuki']);
+  const outrasSet = new Set();
+  MOTOS.forEach(m => {
+    if(!ARREMATADOS[m.id]) return;
+    const nm = normalizarMarca(m.marca);
+    if(!nm || valoresPrincipais.has(nm) || MARCAS_INVALIDAS.has(nm.toLowerCase())) return;
+    outrasSet.add(nm);
+  });
+  const marcasOutras = [...outrasSet].sort();
+  const ls = 'display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:12px;';
+  const is = 'accent-color:var(--accent);';
+  marcasEl.dataset.outras = JSON.stringify(marcasOutras);
+  marcasEl.innerHTML = MARCAS_PRINCIPAIS.map(({ valor, label }) =>
+    `<label style="${ls}"><input type="checkbox" data-marca="${valor}" style="${is}" onchange="histPage=1;renderHistoricoGeral()"> ${label}</label>`
+  ).join('') + (marcasOutras.length ? `
+    <button onclick="(function(btn){const d=btn.nextElementSibling;const open=d.style.display!=='none';d.style.display=open?'none':'flex';btn.textContent=open?'▼ Outras marcas (${marcasOutras.length})':'▲ Ocultar'})(this)" style="background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:3px 6px;text-align:left;flex-basis:100%;">▼ Outras marcas (${marcasOutras.length})</button>
+    <div style="display:none;flex-wrap:wrap;gap:4px 16px;flex-basis:100%;">
+      ${marcasOutras.map(nm =>
+        `<label style="${ls}"><input type="checkbox" data-marca-outra="${nm}" style="${is}" onchange="histPage=1;renderHistoricoGeral()"> ${nm}</label>`
+      ).join('')}
+    </div>` : '');
 }
 
 function irParaHistPage(p) {
@@ -5429,6 +5509,8 @@ function sortHistorico(field) {
 }
 
 function renderHistoricoGeral() {
+  popularHistMarcas();
+
   // Só mostra motos que foram ARREMATADAS (têm valor registrado)
   let comValor = MOTOS.filter(m => ARREMATADOS[m.id]);
 
@@ -5450,6 +5532,38 @@ function renderHistoricoGeral() {
   if(histFiltCond)  comValor = comValor.filter(m => (m.condicao||'') === histFiltCond);
   if(histFiltPorte) comValor = comValor.filter(m => getPorte(m.cilindrada) === histFiltPorte);
   if(histFiltMonta) comValor = comValor.filter(m => m.monta === histFiltMonta);
+  if(histFiltSeg)   comValor = comValor.filter(m => getSegmento(m) === histFiltSeg);
+  if(histFiltFipe) {
+    comValor = comValor.filter(m => {
+      const arr = ARREMATADOS[m.id];
+      const fipe = m.fipe_csv || fipeCache[fipeKey(m)];
+      if(!fipe) return false;
+      return Math.round((arr.valor/fipe)*100) < parseInt(histFiltFipe);
+    });
+  }
+  if(histFiltPeriodo) {
+    const cutoff = new Date(Date.now() - parseInt(histFiltPeriodo)*24*60*60*1000).toISOString().slice(0,10);
+    comValor = comValor.filter(m => {
+      const leilao = LEILOES.find(l => l.id === m.leilao_id);
+      return !!leilao?.data && leilao.data >= cutoff;
+    });
+  }
+  // Filtro de marca — mesmo agrupamento (principais + outras) do painel
+  const marcasPanel = document.getElementById('hist-marcas-panel');
+  const marcasSel = marcasPanel ? [...marcasPanel.querySelectorAll('input[data-marca]:checked')].map(i => i.dataset.marca) : [];
+  const outrasSel = marcasPanel ? [...marcasPanel.querySelectorAll('input[data-marca-outra]:checked')].map(i => i.dataset.marcaOutra) : [];
+  if(marcasSel.length || outrasSel.length) {
+    const outrasSet = new Set(outrasSel);
+    comValor = comValor.filter(m => {
+      const nm = normalizarMarca(m.marca);
+      return marcasSel.includes(nm) || outrasSet.has(nm);
+    });
+  }
+  const marcaBtn = document.getElementById('hist-marca-btn');
+  if(marcaBtn) {
+    const totalMarcas = marcasSel.length + outrasSel.length;
+    marcaBtn.textContent = totalMarcas ? `🏍 Marca (${totalMarcas}) ▾` : '🏍 Marca ▾';
+  }
 
   const countEl = document.getElementById('hist-count');
   if(countEl) countEl.textContent = comValor.length ? `${comValor.length} arrematação(ões)` : '';
