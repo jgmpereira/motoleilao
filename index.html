@@ -830,7 +830,7 @@ tbody tr:hover{background:var(--s2);}
     <!-- Filtros do histórico -->
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);">
       <input type="text" id="hist-search" class="finput" placeholder="🔍 buscar marca, modelo..."
-        oninput="renderHistoricoGeral()" style="width:200px;">
+        oninput="histPage=1;renderHistoricoGeral()" style="width:200px;">
       <div class="hf-divider"></div>
       <span class="hf-label">Condição:</span>
       <button class="hf-chip active" data-hcond="" onclick="setHistFiltro('cond','',this)">Todas</button>
@@ -852,6 +852,7 @@ tbody tr:hover{background:var(--s2);}
       <button onclick="limparHistFiltros()" style="margin-left:auto;background:rgba(255,77,0,.08);border:1px solid rgba(255,77,0,.25);color:var(--accent);font-size:11px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer;">✕ Limpar</button>
     </div>
     <div id="hist-geral-table"></div>
+    <div id="hist-pagination" style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);"></div>
   </div>
 </div>
 
@@ -1571,6 +1572,8 @@ let sortField = null, sortDir = 1;
 let motosSelecionadas = new Set(); // ids das motos marcadas para exclusão em lote
 let histSortField = 'data', histSortDir = -1;
 let histFiltCond = '', histFiltPorte = '', histFiltMonta = ''; // histórico: padrão data decrescente
+let histPage = 1;
+const HIST_PAGE_SIZE = 50;
 
 // ===================== CARREGAR DADOS =====================
 async function carregarDados() {
@@ -5399,6 +5402,7 @@ function setHistFiltro(tipo, val, btn) {
   if(tipo === 'cond')  { histFiltCond  = val; document.querySelectorAll('[data-hcond]').forEach(b => b.classList.toggle('active', b.dataset.hcond===val)); }
   if(tipo === 'porte') { histFiltPorte = val; document.querySelectorAll('[data-hporte]').forEach(b => b.classList.toggle('active', b.dataset.hporte===val)); }
   if(tipo === 'monta') { histFiltMonta = val; document.querySelectorAll('[data-hmonta]').forEach(b => b.classList.toggle('active', b.dataset.hmonta===val)); }
+  histPage = 1;
   renderHistoricoGeral();
 }
 
@@ -5408,7 +5412,14 @@ function limparHistFiltros() {
   document.querySelectorAll('[data-hcond]').forEach(b => b.classList.toggle('active', b.dataset.hcond===''));
   document.querySelectorAll('[data-hporte]').forEach(b => b.classList.toggle('active', b.dataset.hporte===''));
   document.querySelectorAll('[data-hmonta]').forEach(b => b.classList.toggle('active', b.dataset.hmonta===''));
+  histPage = 1;
   renderHistoricoGeral();
+}
+
+function irParaHistPage(p) {
+  histPage = p;
+  renderHistoricoGeral();
+  document.getElementById('hist-geral-table')?.scrollIntoView({block:'start', behavior:'smooth'});
 }
 
 function sortHistorico(field) {
@@ -5444,10 +5455,12 @@ function renderHistoricoGeral() {
   if(countEl) countEl.textContent = comValor.length ? `${comValor.length} arrematação(ões)` : '';
 
   const el = document.getElementById('hist-geral-table');
+  const pagEl = document.getElementById('hist-pagination');
   if(!comValor.length) {
     el.innerHTML = search
       ? `<div style="text-align:center;padding:48px;color:var(--muted);">Nenhuma arrematação encontrada para "<strong>${search}</strong>".</div>`
       : '<div style="text-align:center;padding:48px;color:var(--muted);">Nenhuma arrematação registrada ainda.</div>';
+    if(pagEl) pagEl.innerHTML = '';
     return;
   }
 
@@ -5477,6 +5490,13 @@ function renderHistoricoGeral() {
     return (va - vb) * histSortDir;
   });
 
+  // Paginação — filtro/busca/ordenação sempre atuam sobre comValor (todos os registros),
+  // a página só recorta o que é exibido
+  const totalPaginas = Math.max(1, Math.ceil(comValor.length / HIST_PAGE_SIZE));
+  if(histPage > totalPaginas) histPage = totalPaginas;
+  if(histPage < 1) histPage = 1;
+  const pageItems = comValor.slice((histPage-1)*HIST_PAGE_SIZE, histPage*HIST_PAGE_SIZE);
+
   // Função para gerar cabeçalho clicável com seta
   const th = (field, label, extra='') => {
     const ativo = histSortField === field;
@@ -5501,7 +5521,7 @@ function renderHistoricoGeral() {
       ${th('pct','% FIPE')}
       <th>Indicador</th><th></th>
     </tr></thead>
-    <tbody>${comValor.map(m=>{
+    <tbody>${pageItems.map(m=>{
       const arr=ARREMATADOS[m.id];
       const fipe=m.fipe_csv||fipeCache[fipeKey(m)];
       const pct=arr&&fipe?Math.round((arr.valor/fipe)*100):null;
@@ -5529,6 +5549,20 @@ function renderHistoricoGeral() {
       </tr>`;
     }).join('')}</tbody>
   </table>`;
+
+  if(pagEl) {
+    if(totalPaginas <= 1) {
+      pagEl.innerHTML = '';
+    } else {
+      const btn = (label, page, disabled=false) =>
+        `<button onclick="irParaHistPage(${page})" ${disabled?'disabled':''} style="background:none;border:1px solid var(--border);color:${disabled?'var(--muted)':'var(--text)'};font-size:12px;padding:5px 11px;border-radius:6px;cursor:${disabled?'default':'pointer'};opacity:${disabled?'.5':'1'};">${label}</button>`;
+      pagEl.innerHTML = `
+        ${btn('‹ Anterior', histPage-1, histPage<=1)}
+        <span style="font-size:12px;color:var(--muted);">Página ${histPage} de ${totalPaginas}</span>
+        ${btn('Próxima ›', histPage+1, histPage>=totalPaginas)}
+      `;
+    }
+  }
 }
 
 async function deletarArrematado(motoId, btn) {
