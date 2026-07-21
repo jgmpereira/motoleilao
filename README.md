@@ -87,7 +87,7 @@ Dashboard de monitoramento de leilões de moto.
 - **Workflow:** `.github/workflows/scraper-sodre.yml`
 
 ### `scrapers/sodre-encerrados.js` — Leilões encerrados
-- **O que faz:** Para cada leilão com `encerrado=false` e `data < hoje`, chama a API de lotes encerrados e salva valores em `arrematados`
+- **O que faz:** Para leilões dos últimos 7 dias (+ qualquer leilão mais antigo com `condicional` pendente, até 21 dias), chama a API de lotes encerrados por auction_id (um `leilao_id` pode conter mais de um auction_id real do Sodré no mesmo dia) e salva valores em `arrematados`
 - **API Sodré:** `https://prd-api.sodresantoro.com.br/api/v1/lots-finished?auctionId={id}&page={n}`
 - **Filtra:** Só salva lotes com `lot_status = vendido` ou `condicional` e `bid_actual > 0`
 - **Salva:** `valor` + `status_arrematado` em `arrematados`; marca leilão como `encerrado=true`

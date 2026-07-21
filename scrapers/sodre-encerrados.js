@@ -84,16 +84,21 @@ async function fetchLotesEncerrados(auctionId) {
 async function main() {
   console.log('🏁 Sodré Santoro — scraper de encerrados iniciando');
 
-  // 1. Busca leilões do Sodré na janela dos últimos 3 dias (encerrado ou não)
-  // Reprocessa a janela para atualizar condicionais que resolvem dias após o leilão
+  // 1. Busca leilões do Sodré na janela dos últimos 7 dias (encerrado ou não)
+  // Reprocessa a janela pra atualizar condicionais que resolvem dias após o leilão E
+  // pra reconferir valores já marcados 'vendido' — a API do Sodré pode corrigir o
+  // bid_actual de um lote mesmo depois do status já ter virado definitivo (confirmado:
+  // BMW F750 GS do leilão 2026-07-14 foi gravada 'vendido' R$18.000 e a API passou
+  // a retornar R$40.000 pro mesmo lote dias depois, sem nunca ter voltado a 'condicional').
+  // 7 dias = janela confirmada em que a API lots-finished ainda responde pro leilão.
   const hoje = new Date().toISOString().slice(0, 10);
-  const hojeMenos3 = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const hojeMenos7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const leiloesRecentes = await supaFetch(
-    `leiloes?plataforma=eq.Sodré Santoro&data=gte.${hojeMenos3}&data=lte.${hoje}&select=id,link,data`,
+    `leiloes?plataforma=eq.Sodré Santoro&data=gte.${hojeMenos7}&data=lte.${hoje}&select=id,link,data`,
     { prefer: 'return=representation' }
   ) || [];
 
-  // 1b. Alguns condicionais do Sodré só resolvem (viram vendido) bem depois dos 3 dias —
+  // 1b. Alguns condicionais do Sodré só resolvem (viram vendido) bem depois dos 7 dias —
   // busca leilões de QUALQUER data que ainda tenham arrematados pendurados em 'condicional'
   const condicionaisPendentes = await supaFetch(
     `arrematados?status_arrematado=eq.condicional&select=motos!inner(leilao_id)`,
@@ -122,7 +127,7 @@ async function main() {
   const leiloes = [...leiloesRecentes, ...leiloesAntigos];
 
   if (leiloes.length === 0) {
-    console.log('ℹ️ Nenhum leilão do Sodré na janela de 3 dias nem condicional pendente.');
+    console.log('ℹ️ Nenhum leilão do Sodré na janela de 7 dias nem condicional pendente.');
     return;
   }
 
@@ -138,41 +143,20 @@ async function main() {
       body: JSON.stringify({ encerrado: true }),
     });
 
-    // 2. Extrai auction_id do link do leilão ou das motos
-    let auctionId = null;
-    const matchLink = (leilao.link || '').match(/\/leilao\/(\d+)/);
-    if (matchLink) {
-      auctionId = matchLink[1];
-    } else {
-      // Tenta extrair auction_id da URL de uma moto desse leilão
-      const motosUrl = await supaFetch(
-        `motos?leilao_id=eq.${leilao.id}&url=not.is.null&select=url&limit=1`,
-        { prefer: 'return=representation' }
-      );
-      if (motosUrl && motosUrl[0]?.url) {
-        const matchMoto = motosUrl[0].url.match(/\/leilao\/(\d+)/);
-        if (matchMoto) auctionId = matchMoto[1];
-      }
-    }
-    if (!auctionId) {
-      console.log(`  ⚠️ Sem auction_id — marcando como encerrado: ${leilao.id}`);
-      await supaFetch(`leiloes?id=eq.${leilao.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ encerrado: true }),
-      });
-      continue;
-    }
-    console.log(`  auction_id: ${auctionId}`);
-
-    // 3. Busca lotes encerrados da API
-    const lotes = await fetchLotesEncerrados(auctionId);
-    console.log(`  Total lotes encerrados: ${lotes.length}`);
-
-    if (lotes.length === 0) continue;
-
-    // 4. Busca motos desse leilão no Supabase
+    // 2. Busca motos desse leilão no Supabase
+    // IMPORTANTE: um leilao_id nosso pode conter motos de MAIS DE UM auction_id
+    // real do Sodré — gerarLeilaoId() (sodre.js) gera o id só pela data, então se
+    // a Sodré roda dois leilões distintos no mesmo dia, ambos caem no mesmo
+    // leilao_id aqui, mas leiloes.link só guarda um dos auction_ids. Extrair um
+    // único auction_id do link (como antes) faz as motos do outro auction_id
+    // ficarem sem cobertura E colidirem por número de lote com as do auction_id
+    // errado — bug real: BMW F750 GS (auction 28787, lote 32) recebeu o valor do
+    // Fiat Uno (auction 28765, lote 32 também) porque o código casava só pelo
+    // número de lote, ignorando de qual auction_id real ele veio.
+    // Correção: extrai o auction_id de CADA moto (via url) e casa lote↔moto só
+    // dentro do mesmo auction_id.
     const motos = await supaFetch(
-      `motos?leilao_id=eq.${leilao.id}&select=id,lote`,
+      `motos?leilao_id=eq.${leilao.id}&select=id,lote,url`,
       { prefer: 'return=representation' }
     );
 
@@ -181,37 +165,69 @@ async function main() {
       continue;
     }
 
-    // Cria mapa lote → moto_id
-    const motoMap = {};
+    const motosPorAuction = {};
+    const motosSemAuction = [];
     for (const m of motos) {
-      motoMap[String(m.lote).padStart(4, '0')] = m.id;
-      motoMap[String(m.lote)] = m.id; // também sem padding
+      const matchMoto = (m.url || '').match(/\/leilao\/(\d+)/);
+      if (matchMoto) {
+        (motosPorAuction[matchMoto[1]] ||= []).push(m);
+      } else {
+        motosSemAuction.push(m);
+      }
+    }
+    // Fallback: motos sem url própria (raro) usam o auction_id do link do leilão
+    if (motosSemAuction.length > 0) {
+      const matchLink = (leilao.link || '').match(/\/leilao\/(\d+)/);
+      if (matchLink) (motosPorAuction[matchLink[1]] ||= []).push(...motosSemAuction);
     }
 
-    // 5. Insere arrematados
+    const auctionIds = Object.keys(motosPorAuction);
+    if (auctionIds.length === 0) {
+      console.log(`  ⚠️ Sem auction_id — marcando como encerrado: ${leilao.id}`);
+      continue;
+    }
+    if (auctionIds.length > 1) {
+      console.log(`  ℹ️ Leilão contém ${auctionIds.length} auction_ids reais do Sodré: ${auctionIds.join(', ')}`);
+    }
+
+    // 3. Insere arrematados — busca e casa lote↔moto por auction_id, um de cada vez
     let inseridos = 0;
     let ignorados = 0;
     const inserts = [];
 
-    for (const lote of lotes) {
-      if (!lote.bid_actual || parseFloat(lote.bid_actual) === 0) { ignorados++; continue; }
-      if (lote.lot_status !== 'vendido' && lote.lot_status !== 'condicional') { ignorados++; continue; }
+    for (const auctionId of auctionIds) {
+      console.log(`  auction_id: ${auctionId}`);
+      const lotes = await fetchLotesEncerrados(auctionId);
+      console.log(`  Total lotes encerrados (auction ${auctionId}): ${lotes.length}`);
+      if (lotes.length === 0) continue;
 
-      const lotNum = String(lote.lot_number);
-      const motoId = motoMap[lotNum] || motoMap[lotNum.padStart(4, '0')];
-
-      if (!motoId) {
-        // Moto não é do segmento motos ou não foi cadastrada
-        ignorados++;
-        continue;
+      // Mapa lote → moto_id, restrito às motos desse auction_id
+      const motoMap = {};
+      for (const m of motosPorAuction[auctionId]) {
+        motoMap[String(m.lote).padStart(4, '0')] = m.id;
+        motoMap[String(m.lote)] = m.id; // também sem padding
       }
 
-      inserts.push({
-        moto_id: motoId,
-        valor:   parseFloat(lote.bid_actual),
-        status_arrematado: lote.lot_status,
-      });
-      inseridos++;
+      for (const lote of lotes) {
+        if (!lote.bid_actual || parseFloat(lote.bid_actual) === 0) { ignorados++; continue; }
+        if (lote.lot_status !== 'vendido' && lote.lot_status !== 'condicional') { ignorados++; continue; }
+
+        const lotNum = String(lote.lot_number);
+        const motoId = motoMap[lotNum] || motoMap[lotNum.padStart(4, '0')];
+
+        if (!motoId) {
+          // Moto não é do segmento motos ou não foi cadastrada
+          ignorados++;
+          continue;
+        }
+
+        inserts.push({
+          moto_id: motoId,
+          valor:   parseFloat(lote.bid_actual),
+          status_arrematado: lote.lot_status,
+        });
+        inseridos++;
+      }
     }
 
     if (inserts.length > 0) {
