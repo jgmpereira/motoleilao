@@ -194,6 +194,10 @@ async function main() {
     let inseridos = 0;
     let ignorados = 0;
     const inserts = [];
+    // Lotes que a API reverteu (condicional caiu, voltou a não vendido/cancelado etc.) —
+    // se já existe um arrematado 'condicional' pra essa moto, o registro ficou obsoleto
+    // e precisa ser removido, senão fica pendurado como venda pra sempre.
+    const motoIdsRevertidos = [];
 
     for (const auctionId of auctionIds) {
       console.log(`  auction_id: ${auctionId}`);
@@ -209,11 +213,15 @@ async function main() {
       }
 
       for (const lote of lotes) {
-        if (!lote.bid_actual || parseFloat(lote.bid_actual) === 0) { ignorados++; continue; }
-        if (lote.lot_status !== 'vendido' && lote.lot_status !== 'condicional') { ignorados++; continue; }
-
         const lotNum = String(lote.lot_number);
         const motoId = motoMap[lotNum] || motoMap[lotNum.padStart(4, '0')];
+
+        if (lote.lot_status !== 'vendido' && lote.lot_status !== 'condicional') {
+          if (motoId) motoIdsRevertidos.push(motoId);
+          ignorados++;
+          continue;
+        }
+        if (!lote.bid_actual || parseFloat(lote.bid_actual) === 0) { ignorados++; continue; }
 
         if (!motoId) {
           // Moto não é do segmento motos ou não foi cadastrada
@@ -227,6 +235,18 @@ async function main() {
           status_arrematado: lote.lot_status,
         });
         inseridos++;
+      }
+    }
+
+    if (motoIdsRevertidos.length > 0) {
+      // Só apaga se o registro existente era 'condicional' — nunca mexe em 'vendido' aqui
+      const revertidos = await supaFetch(
+        `arrematados?moto_id=in.(${motoIdsRevertidos.join(',')})&status_arrematado=eq.condicional&select=id,moto_id`,
+        { prefer: 'return=representation' }
+      ) || [];
+      for (const r of revertidos) {
+        console.log(`  ↩️ condicional revertido (moto_id ${r.moto_id}) — API não retorna mais 'vendido'/'condicional', removendo arrematado`);
+        await supaFetch(`arrematados?id=eq.${r.id}`, { method: 'DELETE' });
       }
     }
 
