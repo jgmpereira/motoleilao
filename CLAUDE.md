@@ -136,6 +136,7 @@ Ficam em `.env` na raiz (recriar se Codespaces resetar) e nos Secrets do reposit
 | `scrapers/superbid.js` | Superbid | REST JSON paginado, 3 estratégias de parsing | 7h diário |
 | `scrapers/superbid-encerrados.js` | Superbid (encerrados) | Página SSR `/oferta/{id}` (`__NEXT_DATA__`); sinal `hasBids`, valor = `currentMaxBid` | 21h diário |
 | `scrapers/copart.js` | Copart | **Playwright obrigatório** — WAF Imperva bloqueia fetch direto | 6h50 diário |
+| `scrapers/copart-encerrados.js` | Copart (encerrados) | Playwright + `/public/data/lotdetails/solr/{lote}` por moto; sinal `lss` (Sold/ON_APPROVAL/NOT_ON_SALE/UNKNOWN) | 22h diário |
 | `scripts/fipe-diario.js` | FIPE | Orquestra `popular-fipe.js` (motos novas, prioridade) + `atualizar-fipe-mensal.js` (preços velhos), cota compartilhada — roda no workflow `fipe-diario.yml` | 9h diário |
 | `scripts/backup-supabase.js` | Backup | Exporta tabelas críticas → `backups/YYYY-MM-DD/` | 3h diário |
 
@@ -146,6 +147,8 @@ Ficam em `.env` na raiz (recriar se Codespaces resetar) e nos Secrets do reposit
 ### Atenções por scraper
 
 **Copart:** usa `page.evaluate(fetch(...))` para paginar com a sessão/cookies do Playwright (bypassa WAF). Se o Angular mudar o endpoint ou formato DataTables, precisa recapturar o body template manualmente.
+
+**Copart encerrados (Jul/2026):** ao contrário do Sodré, o `lote` da Copart já É o número usado na URL (`/lot/{lote}`) — não tem o problema de colisão entre auction_ids do mesmo dia. Estratégia: Playwright abre uma página de lote (estabelece cookies do WAF) e daí em diante chama `page.evaluate(fetch('/public/data/lotdetails/solr/{lote}'))` por moto — mesmo bypass de WAF do `copart.js`, mas por lote em vez de paginado. Campo `lss` da resposta: `Sold` → vendido, `ON_APPROVAL` → condicional (venda pendente de aprovação do comitente/financeira, equivalente ao condicional do Sodré), `NOT_ON_SALE` → reverte condicional antigo se existir. Confirmado testando ~50 lotes reais: **`UNKNOWN` aparece em ~20% dos lotes encerrados** e não correlaciona com `docType`/comitente/valor — parece um estado transitório do lado da Copart; o scraper ignora e tenta de novo no dia seguinte, dentro da janela de 21 dias. `currBid=0` (mesmo com `lss=Sold`) também é tratado como "ainda não sincronizado" e ignorado, mesmo padrão do `hasBids` do Superbid e do `bid_actual` do Sodré. Diferente da API do Sodré, o endpoint de detalhe da Copart respondeu normalmente pra lotes de até 14 dias atrás nos testes — sem sinal de expiração de dado, mas a janela de 21 dias foi mantida por precaução/custo.
 
 **Sodré encerrados:** processa leilões dos últimos 7 dias (janela fixa, não depende mais da flag `encerrado`) **+** qualquer leilão de até 21 dias atrás que ainda tenha arrematados com `status_arrematado=condicional` pendente — reprocessa pra pegar quando o condicional resolve pra "vendido" (corrigido Jul/2026: antes só reprocessava os 3 dias e condicionais que resolviam depois disso ficavam congelados pra sempre). Passado ~1 semana a API do Sodré (`lots-finished`) já não retorna mais dados do leilão (confirmado testando direto) — condicionais mais antigos que isso não têm mais como ser corrigidos automaticamente, o dado já não existe mais do lado do Sodré.
 
@@ -255,7 +258,7 @@ Motos com `arrematado` registrado **não são deletadas** ao reimportar ou delet
 ## Pendências ativas
 
 - [ ] **Google Search Console** — verificação DNS pendente para `motoleiloes.com.br`
-- [ ] **Arrematados outros leilões** — implementar scraper de encerrados para VIP, Copart, Freitas, Milan (Superbid ✅ feito)
+- [ ] **Arrematados outros leilões** — implementar scraper de encerrados para Milan (Superbid ✅, Sodré ✅, VIP ✅, Freitas ✅, Copart ✅ feitos)
 
 > **Resolvido:** duplicação de motos no `superbid.js` — a paginação por `start` do endpoint `seo/offers` é furada (retorna páginas sobrepostas/repetidas, ex. `start=30` == `start=90`), o que acumulava a mesma oferta várias vezes. Corrigido: busca única com `pageSize=total` + dedupe por `offer.id`. Leilões encerrados antigos (com motos duplicadas já gravadas antes do fix) não são autocorrigidos.
 
